@@ -24,6 +24,11 @@ export class HyperliquidWebSocket {
     // Por ahora dejamos preparado para cuando implementemos polling
   }
 
+subscribeToTrades(coin: string, callback: (data: any) => void) {
+  const key = `trades-${coin}`;
+  this.subscriptions.set(key, callback);
+}
+
   unsubscribe(key: string) {
     this.subscriptions.delete(key);
   }

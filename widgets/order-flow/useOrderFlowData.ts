@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Trade, OrderFlowMetrics, TimeframeDelta, Timeframe, Coin } from './types';
 
 const TIMEFRAME_MS = {
@@ -18,6 +18,8 @@ export function useOrderFlowData(coin: Coin, timeframe: Timeframe) {
   const [deltaTimeline, setDeltaTimeline] = useState<TimeframeDelta[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+  const tradesBufferRef = useRef<Trade[]>([]);
+  const wsRef = useRef<WebSocket | null>(null);
 
   const calculateMetrics = useCallback((tradesList: Trade[]): OrderFlowMetrics => {
     let cvd = 0;
@@ -60,7 +62,7 @@ export function useOrderFlowData(coin: Coin, timeframe: Timeframe) {
 
   const calculateDeltaTimeline = useCallback((tradesList: Trade[]): TimeframeDelta[] => {
     const buckets = new Map<number, { buyVol: number; sellVol: number }>();
-    const bucketSize = 60 * 1000; // 1 minute buckets
+    const bucketSize = 60 * 1000;
 
     tradesList.forEach(trade => {
       const bucket = Math.floor(trade.time / bucketSize) * bucketSize;
@@ -89,55 +91,65 @@ export function useOrderFlowData(coin: Coin, timeframe: Timeframe) {
   }, []);
 
   useEffect(() => {
-    const fetchTrades = async () => {
-      setIsLoading(true);
+    setIsLoading(true);
+    tradesBufferRef.current = [];
+
+    // Create WebSocket connection
+    const ws = new WebSocket('wss://api.hyperliquid.xyz/ws');
+    wsRef.current = ws;
+
+    ws.onopen = () => {
+      console.log('WebSocket connected');
+      // Subscribe to trades
+      ws.send(JSON.stringify({
+        method: 'subscribe',
+        subscription: { type: 'trades', coin }
+      }));
+    };
+
+    ws.onmessage = (event) => {
       try {
-        // TODO: Replace with real WebSocket connection
-        // For now, using REST endpoint for historical data
-        const now = Date.now();
-        const startTime = now - TIMEFRAME_MS[timeframe];
+        const message = JSON.parse(event.data);
+        
+        if (message.channel === 'trades' && Array.isArray(message.data)) {
+          const now = Date.now();
+          const cutoff = now - TIMEFRAME_MS[timeframe];
 
-        const response = await fetch('https://api.hyperliquid.xyz/info', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            type: 'candleSnapshot',
-            req: {
-              coin,
-              interval: '1m',
-              startTime,
-              endTime: now,
-            },
-          }),
-        });
+          const newTrades: Trade[] = message.data.map((trade: any) => ({
+            coin: trade.coin,
+            side: trade.side,
+            px: trade.px,
+            sz: trade.sz,
+            time: trade.time,
+            hash: trade.hash,
+            tid: trade.tid,
+          }));
 
-        // Simulated trades from candle data (will be replaced with WebSocket)
-        const candles = await response.json();
-        const simulatedTrades: Trade[] = candles.map((candle: any, i: number) => ({
-          coin,
-          side: i % 2 === 0 ? 'B' : 'A',
-          px: candle.c,
-          sz: (candle.v / 2).toString(),
-          time: candle.t,
-          hash: `sim_${i}`,
-          tid: i,
-        }));
+          tradesBufferRef.current = [...tradesBufferRef.current, ...newTrades]
+            .filter(t => t.time >= cutoff)
+            .slice(-1000);
 
-        setTrades(simulatedTrades);
-        setMetrics(calculateMetrics(simulatedTrades));
-        setDeltaTimeline(calculateDeltaTimeline(simulatedTrades));
-        setLastUpdate(new Date());
+          setTrades(tradesBufferRef.current);
+          setMetrics(calculateMetrics(tradesBufferRef.current));
+          setDeltaTimeline(calculateDeltaTimeline(tradesBufferRef.current));
+          setLastUpdate(new Date());
+          setIsLoading(false);
+        }
       } catch (error) {
-        console.error('Error fetching trades:', error);
-      } finally {
-        setIsLoading(false);
+        console.error('WebSocket message error:', error);
       }
     };
 
-    fetchTrades();
-    const interval = setInterval(fetchTrades, 30000); // Refresh every 30s
+    ws.onerror = (error) => {
+      console.error('WebSocket error:', error);
+      setIsLoading(false);
+    };
 
-    return () => clearInterval(interval);
+    return () => {
+      if (wsRef.current) {
+        wsRef.current.close();
+      }
+    };
   }, [coin, timeframe, calculateMetrics, calculateDeltaTimeline]);
 
   return { trades, metrics, deltaTimeline, isLoading, lastUpdate };

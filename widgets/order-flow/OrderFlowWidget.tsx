@@ -77,7 +77,7 @@ export default function OrderFlowWidget() {
 
       {/* Footer */}
       <div className="flex justify-between items-center text-xs text-gray-500">
-        <span>⚠️ Simulated data - WebSocket integration pending</span>
+        <span>🟢 Real-time WebSocket data</span>
         {lastUpdate && (
           <span>Last update: {lastUpdate.toLocaleTimeString()}</span>
         )}
