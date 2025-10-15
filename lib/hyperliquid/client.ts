@@ -21,10 +21,10 @@ export async function getCandleSnapshot(
   interval: string,
   startTime: number,
   endTime: number
-) {
+): Promise<any> {
   return await infoClient.candleSnapshot({
     coin,
-    interval,
+    interval: interval as any,
     startTime,
     endTime,
   });
