@@ -10,17 +10,20 @@ export interface WidgetConfig {
   };
 }
 
-export const widgetsConfig: WidgetConfig[] = [
+export const widgetsConfig = [
   {
-    id: 'oi-price-correlation',
-    title: 'OI vs Price Correlation',
+    id: 'price-funding-correlation',
+    title: 'Price vs Funding Rate Correlation',
     enabled: true,
-    gridSize: {
-      cols: 2,
-      rows: 1,
-    },
+    gridSize: { cols: 2, rows: 1 }
   },
-  // Aquí añadirás más widgets en el futuro
+  // Añade esto:
+  {
+    id: 'order-flow',
+    title: 'Order Flow Analysis',
+    enabled: true,
+    gridSize: { cols: 2, rows: 1 }
+  }
 ];
 
 export const enabledWidgets = widgetsConfig.filter((w) => w.enabled);
