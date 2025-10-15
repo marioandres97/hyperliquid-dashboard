@@ -13,16 +13,21 @@ export interface WidgetConfig {
 export const widgetsConfig = [
   {
     id: 'price-funding-correlation',
-    title: 'Price vs Funding Rate Correlation',
+    title: 'Price vs Funding Correlation',
     enabled: true,
     gridSize: { cols: 2, rows: 1 }
   },
-  // Añade esto:
   {
     id: 'order-flow',
     title: 'Order Flow Analysis',
     enabled: true,
     gridSize: { cols: 2, rows: 1 }
+  },
+  {
+    id: 'order-flow-signals',
+    title: 'Order Flow Signals',
+    enabled: true,
+    gridSize: { cols: 1, rows: 1 }
   }
 ];
 
