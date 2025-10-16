@@ -58,3 +58,30 @@ export interface SignalWithMetadata extends Signal {
   isNew: boolean;
   isDismissed: boolean;
 }
+
+export interface TrackedSignal extends Signal {
+  status: 'active' | 'hit_target' | 'hit_stop' | 'expired' | 'dismissed';
+  exitPrice?: number;
+  exitTimestamp?: number;
+  pnl?: number;
+  duration?: number;
+}
+
+export interface SignalStats {
+  totalSignals: number;
+  winRate: number;
+  avgPnL: number;
+  byStatus: {
+    hit_target: number;
+    hit_stop: number;
+    expired: number;
+    dismissed: number;
+  };
+  byCoin: {
+    [coin: string]: {
+      total: number;
+      wins: number;
+      winRate: number;
+    };
+  };
+}

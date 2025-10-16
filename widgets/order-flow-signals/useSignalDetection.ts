@@ -1,13 +1,29 @@
 import { useState, useEffect, useRef } from 'react';
 import { Signal, Trade, SignalConfig } from './types';
 import { SignalEngine } from './signalEngine';
+import { useSignalTracking } from './useSignalTracking';
+
+async function saveSignal(signal: Signal) {
+  try {
+    await fetch('/api/signals', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ...signal,
+        status: 'active'
+      })
+    });
+  } catch (error) {
+    console.error('Failed to save signal:', error);
+  }
+}
 
 const DEFAULT_CONFIG: SignalConfig = {
-  minConfirmations: 3,
-  minConfidence: 75,
-  largeOrderThreshold: 200000, // $200k
+  minConfirmations: 4,           // Era 3, ahora 4
+  minConfidence: 80,              // Era 75, ahora 80
+  largeOrderThreshold: 200000,    // $200k
   aggressiveImbalanceThreshold: 75, // 75%
-  cooldownMs: 2 * 60 * 1000, // 2 minutos
+  cooldownMs: 2 * 60 * 1000,     // 2 minutos
 };
 
 const COINS = ['BTC', 'ETH', 'HYPE'];
@@ -121,6 +137,9 @@ export function useSignalDetection(config: SignalConfig = DEFAULT_CONFIG) {
                 // Reproducir sonido
                 playSignalSound();
 
+                // Guardar señal en DB
+                saveSignal(detectedSignal);
+
                 // Auto-clear señal después de 10 minutos
                 setTimeout(() => {
                   setCoinStates(prev => ({
@@ -181,6 +200,16 @@ export function useSignalDetection(config: SignalConfig = DEFAULT_CONFIG) {
       }
     }));
   };
+
+  // Track signals automáticamente
+  useSignalTracking({
+    signals: Object.fromEntries(
+      Object.entries(coinStates).map(([coin, state]) => [coin, state.signal])
+    ),
+    currentPrices: Object.fromEntries(
+      Object.entries(coinStates).map(([coin, state]) => [coin, state.currentPrice])
+    )
+  });
 
   return {
     coinStates,

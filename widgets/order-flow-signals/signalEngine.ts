@@ -1,25 +1,39 @@
 import { Trade, CVDData, Signal, SignalConfirmation, SignalConfig } from './types';
+import { VolumeProfileCalculator, VolumeProfileData } from './volumeProfile';
 
 export class SignalEngine {
   private trades: Trade[] = [];
   private cvdHistory: CVDData[] = [];
   private lastSignalTime: number = 0;
   private config: SignalConfig;
+  private vpCalculator: VolumeProfileCalculator;
+  private vpData: VolumeProfileData | null = null;
 
   constructor(config: SignalConfig) {
     this.config = config;
+    this.vpCalculator = new VolumeProfileCalculator(100);
   }
 
+  
+
   addTrade(trade: Trade) {
-    this.trades.push(trade);
-    
-    // Mantener solo últimos 5 minutos
-    const fiveMinutesAgo = Date.now() - 5 * 60 * 1000;
-    this.trades = this.trades.filter(t => t.timestamp > fiveMinutesAgo);
-    
-    // Actualizar CVD
-    this.updateCVD(trade);
+  this.trades.push(trade);
+  
+  // Mantener solo últimos 5 minutos
+  const fiveMinutesAgo = Date.now() - 5 * 60 * 1000;
+  this.trades = this.trades.filter(t => t.timestamp > fiveMinutesAgo);
+  
+  // Actualizar CVD
+  this.updateCVD(trade);
+  
+  // Recalcular Volume Profile cada 10 trades
+  if (this.trades.length % 10 === 0) {
+    // Usar últimas 4 horas de trades para VP
+    const fourHoursAgo = Date.now() - 4 * 60 * 60 * 1000;
+    const vpTrades = this.trades.filter(t => t.timestamp > fourHoursAgo);
+    this.vpData = this.vpCalculator.calculate(vpTrades);
   }
+}
 
   private updateCVD(trade: Trade) {
     const lastCVD = this.cvdHistory[this.cvdHistory.length - 1];
@@ -97,13 +111,24 @@ export class SignalEngine {
   }
 
   private checkConfirmations(currentPrice: number): SignalConfirmation[] {
-    return [
-      this.checkCVDDivergence(currentPrice),
-      this.checkAggressiveImbalance(),
-      this.checkLargeOrders(),
-      this.checkNoLiquidations(),
-    ];
+  const confirmations = [
+    this.checkCVDDivergence(currentPrice),
+    this.checkAggressiveImbalance(),
+    this.checkLargeOrders(),
+    this.checkNoLiquidations(),
+  ];
+
+  // Añadir confirmaciones de Volume Profile si hay datos
+  if (this.vpData) {
+    confirmations.push(
+      this.checkVolumeProfilePosition(currentPrice),
+      this.checkVABoundary(currentPrice),
+      this.checkHVNLVN(currentPrice)
+    );
   }
+
+  return confirmations;
+}
 
   private checkCVDDivergence(currentPrice: number): SignalConfirmation {
     if (this.cvdHistory.length < 20) {
@@ -230,4 +255,112 @@ export class SignalEngine {
     this.trades = [];
     this.cvdHistory = [];
   }
+
+  private checkVolumeProfilePosition(currentPrice: number): SignalConfirmation {
+  if (!this.vpData) {
+    return {
+      type: 'hvn_lvn',
+      met: false,
+      description: 'No VP data available'
+    };
+  }
+
+  const position = this.vpCalculator.analyzePricePosition(currentPrice, this.vpData);
+
+  if (position.nearPOC) {
+    return {
+      type: 'hvn_lvn',
+      met: true,
+      value: `POC ${position.distance.fromPOC.toFixed(2)}%`,
+      description: 'Price near POC (high probability zone)'
+    };
+  }
+
+  return {
+    type: 'hvn_lvn',
+    met: false,
+    description: 'Price not near POC'
+  };
+}
+
+private checkVABoundary(currentPrice: number): SignalConfirmation {
+  if (!this.vpData) {
+    return {
+      type: 'hvn_lvn',
+      met: false,
+      description: 'No VP data'
+    };
+  }
+
+  const position = this.vpCalculator.analyzePricePosition(currentPrice, this.vpData);
+
+  if (position.atVAH) {
+    return {
+      type: 'hvn_lvn',
+      met: true,
+      value: 'At VAH',
+      description: 'Price at Value Area High (resistance)'
+    };
+  }
+
+  if (position.atVAL) {
+    return {
+      type: 'hvn_lvn',
+      met: true,
+      value: 'At VAL',
+      description: 'Price at Value Area Low (support)'
+    };
+  }
+
+  if (!position.insideVA) {
+    return {
+      type: 'hvn_lvn',
+      met: true,
+      value: 'Outside VA',
+      description: 'Price outside Value Area (imbalance)'
+    };
+  }
+
+  return {
+    type: 'hvn_lvn',
+    met: false,
+    description: 'Price inside Value Area (balanced)'
+  };
+}
+
+private checkHVNLVN(currentPrice: number): SignalConfirmation {
+  if (!this.vpData) {
+    return {
+      type: 'hvn_lvn',
+      met: false,
+      description: 'No VP data'
+    };
+  }
+
+  const position = this.vpCalculator.analyzePricePosition(currentPrice, this.vpData);
+
+  if (position.nearHVN) {
+    return {
+      type: 'hvn_lvn',
+      met: true,
+      value: 'At HVN',
+      description: 'Price at High Volume Node (strong support/resistance)'
+    };
+  }
+
+  if (position.nearLVN) {
+    return {
+      type: 'hvn_lvn',
+      met: true,
+      value: 'At LVN',
+      description: 'Price at Low Volume Node (potential breakout zone)'
+    };
+  }
+
+  return {
+    type: 'hvn_lvn',
+    met: false,
+    description: 'Price not at HVN/LVN'
+  };
+}
 }
