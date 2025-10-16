@@ -6,13 +6,17 @@ export async function GET() {
   try {
     const signalIds = (await redis.smembers('signals:active')) || [];
     
+    // Obtener todas las señales en paralelo usando pipeline
+    const pipeline = redis.pipeline();
+    signalIds.forEach(id => pipeline.get(`signal:${id}`));
+    const results = await pipeline.exec();
+
     const signals: TrackedSignal[] = [];
-    for (const id of signalIds) {
-      const signalData = await redis.get(`signal:${id}`);
-      if (signalData) {
-        signals.push(JSON.parse(signalData as string));
-      }
-    }
+    results?.forEach(([err, data]) => {
+    if (!err && data) {
+    signals.push(JSON.parse(data as string));
+  }
+ });
     
     const stats = calculateStats(signals);
     
