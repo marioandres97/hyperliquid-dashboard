@@ -7,30 +7,28 @@ export async function PATCH(
 ) {
   try {
     const { id } = await params;
-    const { status, exitPrice, exitTimestamp } = await request.json();
+    const body = await request.json();
     
+    // Intentar obtener señal existente
     const signalData = await redis.get(`signal:${id}`);
     
-    if (!signalData) {
-      return NextResponse.json(
-        { error: 'Signal not found' },
-        { status: 404 }
-      );
+    let updatedSignal;
+    
+    if (signalData) {
+      // Actualizar señal existente
+      const signal = JSON.parse(signalData as string);
+      updatedSignal = { ...signal, ...body };
+    } else {
+      // Crear nueva señal si no existe (viene de tracking)
+      updatedSignal = { id, ...body, status: body.status || 'active' };
     }
-    
-    const signal = JSON.parse(signalData as string);
-    
-    const updatedSignal = {
-      ...signal,
-      status,
-      exitPrice,
-      exitTimestamp
-    };
     
     await redis.set(`signal:${id}`, JSON.stringify(updatedSignal));
     
-    if (status !== 'active') {
+    if (updatedSignal.status !== 'active') {
       await redis.srem('signals:active', id);
+    } else {
+      await redis.sadd('signals:active', id);
     }
     
     return NextResponse.json({ success: true, signal: updatedSignal });

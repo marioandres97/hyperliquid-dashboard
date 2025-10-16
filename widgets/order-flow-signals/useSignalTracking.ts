@@ -4,7 +4,7 @@ import { Signal } from './types';
 interface SignalTrackingProps {
   signals: Record<string, Signal | null>;
   currentPrices: Record<string, number>;
-  onSignalResolved: (coin: string) => void; // Nueva prop
+  onSignalResolved: (coin: string) => void;
 }
 
 export function useSignalTracking({ signals, currentPrices, onSignalResolved }: SignalTrackingProps) {
@@ -24,7 +24,7 @@ export function useSignalTracking({ signals, currentPrices, onSignalResolved }: 
         (signal.type === 'LONG' && currentPrice >= signal.target) ||
         (signal.type === 'SHORT' && currentPrice <= signal.target)
       ) {
-        updateSignalStatus(signal.id, 'hit_target', currentPrice, () => {
+        updateSignalStatus(signal, 'hit_target', currentPrice, () => {
           onSignalResolved(coin);
         });
         trackedSignals.current.add(signal.id);
@@ -36,7 +36,7 @@ export function useSignalTracking({ signals, currentPrices, onSignalResolved }: 
         (signal.type === 'LONG' && currentPrice <= signal.stop) ||
         (signal.type === 'SHORT' && currentPrice >= signal.stop)
       ) {
-        updateSignalStatus(signal.id, 'hit_stop', currentPrice, () => {
+        updateSignalStatus(signal, 'hit_stop', currentPrice, () => {
           onSignalResolved(coin);
         });
         trackedSignals.current.add(signal.id);
@@ -47,16 +47,17 @@ export function useSignalTracking({ signals, currentPrices, onSignalResolved }: 
 }
 
 async function updateSignalStatus(
-  id: string,
+  signal: Signal,
   status: 'hit_target' | 'hit_stop',
   exitPrice: number,
   onComplete: () => void
 ) {
   try {
-    const response = await fetch(`/api/signals/${id}`, {
+    const response = await fetch(`/api/signals/${signal.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        ...signal,
         status,
         exitPrice,
         exitTimestamp: Date.now()
@@ -64,7 +65,7 @@ async function updateSignalStatus(
     });
     
     if (response.ok) {
-      console.log(`Signal ${id} updated: ${status} at ${exitPrice}`);
+      console.log(`Signal ${signal.id} updated: ${status} at ${exitPrice}`);
       // Solo limpiar UI si se guardó exitosamente
       onComplete();
     }

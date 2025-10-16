@@ -142,8 +142,7 @@ export function useSignalDetection(config: SignalConfig = DEFAULT_CONFIG) {
                 // Reproducir sonido
                 playSignalSound();
 
-                // Guardar señal en DB
-                saveSignal(detectedSignal);
+                
 
                 
               }
