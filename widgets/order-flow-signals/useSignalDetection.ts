@@ -23,7 +23,6 @@ const DEFAULT_CONFIG: SignalConfig = {
   minConfidence: 80,              // Era 75, ahora 80
   largeOrderThreshold: 200000,    // $200k
   aggressiveImbalanceThreshold: 75, // 75%
-  cooldownMs: 2 * 60 * 1000,     // 2 minutos
 };
 
 const COINS = ['BTC', 'ETH', 'HYPE'];
@@ -124,7 +123,13 @@ export function useSignalDetection(config: SignalConfig = DEFAULT_CONFIG) {
               }));
 
               // Detectar señal
-              const detectedSignal = engineRefs.current[coin]?.detectSignal(trade.price, coin);
+              // Detectar señal solo si no hay una activa
+                  const hasActiveSignal = coinStates[coin]?.signal !== null;
+                  const detectedSignal = engineRefs.current[coin]?.detectSignal(
+                  trade.price, 
+                  coin,
+                  hasActiveSignal
+                  );
               if (detectedSignal) {
                 setCoinStates(prev => ({
                   ...prev,

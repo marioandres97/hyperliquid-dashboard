@@ -51,7 +51,6 @@ export interface SignalConfig {
   minConfidence: number;
   largeOrderThreshold: number;
   aggressiveImbalanceThreshold: number;
-  cooldownMs: number;
 }
 
 export interface SignalWithMetadata extends Signal {

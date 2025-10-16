@@ -4,14 +4,13 @@ import { VolumeProfileCalculator, VolumeProfileData } from './volumeProfile';
 export class SignalEngine {
   private trades: Trade[] = [];
   private cvdHistory: CVDData[] = [];
-  private lastSignalTime: number = 0;
   private config: SignalConfig;
   private vpCalculator: VolumeProfileCalculator;
   private vpData: VolumeProfileData | null = null;
 
   constructor(config: SignalConfig) {
     this.config = config;
-    this.vpCalculator = new VolumeProfileCalculator(100);
+    this.vpCalculator = new VolumeProfileCalculator();
   }
 
   
@@ -55,11 +54,12 @@ export class SignalEngine {
     this.cvdHistory = this.cvdHistory.filter(c => c.timestamp > fifteenMinutesAgo);
   }
 
-  detectSignal(currentPrice: number, coin: string): Signal | null {
-    // Cooldown check
-    if (Date.now() - this.lastSignalTime < this.config.cooldownMs) {
-      return null;
-    }
+  detectSignal(currentPrice: number, coin: string, hasActiveSignal: boolean): Signal | null {
+  // No generar señal si ya hay una activa para esta moneda
+  if (hasActiveSignal) {
+    return null;
+  }
+  
 
     // Necesitamos suficientes datos
     if (this.trades.length < 50 || this.cvdHistory.length < 20) {
@@ -106,7 +106,7 @@ export class SignalEngine {
       reasoning: this.generateReasoning(metConfirmations)
     };
 
-    this.lastSignalTime = Date.now();
+    
     return signal;
   }
 
@@ -271,7 +271,7 @@ export class SignalEngine {
     return {
       type: 'hvn_lvn',
       met: true,
-      value: `POC ${position.distance.fromPOC.toFixed(2)}%`,
+      value: `POC`,
       description: 'Price near POC (high probability zone)'
     };
   }
@@ -294,7 +294,7 @@ private checkVABoundary(currentPrice: number): SignalConfirmation {
 
   const position = this.vpCalculator.analyzePricePosition(currentPrice, this.vpData);
 
-  if (position.atVAH) {
+  if (position.atVABoundary) {
     return {
       type: 'hvn_lvn',
       met: true,
@@ -303,7 +303,7 @@ private checkVABoundary(currentPrice: number): SignalConfirmation {
     };
   }
 
-  if (position.atVAL) {
+  if (position.atVABoundary) {
     return {
       type: 'hvn_lvn',
       met: true,
@@ -312,7 +312,7 @@ private checkVABoundary(currentPrice: number): SignalConfirmation {
     };
   }
 
-  if (!position.insideVA) {
+  if (position.atVABoundary) {
     return {
       type: 'hvn_lvn',
       met: true,
@@ -339,7 +339,7 @@ private checkHVNLVN(currentPrice: number): SignalConfirmation {
 
   const position = this.vpCalculator.analyzePricePosition(currentPrice, this.vpData);
 
-  if (position.nearHVN) {
+  if (position.atHVN) {
     return {
       type: 'hvn_lvn',
       met: true,
@@ -348,7 +348,7 @@ private checkHVNLVN(currentPrice: number): SignalConfirmation {
     };
   }
 
-  if (position.nearLVN) {
+  if (position.atLVN) {
     return {
       type: 'hvn_lvn',
       met: true,
