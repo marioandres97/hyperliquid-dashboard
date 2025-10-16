@@ -123,29 +123,45 @@ export function useSignalDetection(config: SignalConfig = DEFAULT_CONFIG) {
               }));
 
               // Detectar señal
+              // Actualizar estado
+              setCoinStates(prev => ({
+                ...prev,
+                [coin]: {
+                  ...prev[coin],
+                  currentPrice: trade.price,
+                  tradeCount: prev[coin].tradeCount + 1
+                }
+              }));
+
               // Detectar señal solo si no hay una activa
-                  const hasActiveSignal = coinStates[coin]?.signal !== null;
-                  const detectedSignal = engineRefs.current[coin]?.detectSignal(
+              setCoinStates(prev => {
+                const hasActiveSignal = prev[coin].signal !== null;
+                
+                if (hasActiveSignal) {
+                  // Ya hay señal activa, no detectar nueva
+                  return prev;
+                }
+                
+                const detectedSignal = engineRefs.current[coin]?.detectSignal(
                   trade.price, 
                   coin,
-                  hasActiveSignal
-                  );
-              if (detectedSignal) {
-                setCoinStates(prev => ({
-                  ...prev,
-                  [coin]: {
-                    ...prev[coin],
-                    signal: detectedSignal
-                  }
-                }));
-
-                // Reproducir sonido
-                playSignalSound();
-
+                  false // No hay señal activa
+                );
                 
-
+                if (detectedSignal) {
+                  playSignalSound();
+                  
+                  return {
+                    ...prev,
+                    [coin]: {
+                      ...prev[coin],
+                      signal: detectedSignal
+                    }
+                  };
+                }
                 
-              }
+                return prev;
+              });
             });
           }
         } catch (error) {
