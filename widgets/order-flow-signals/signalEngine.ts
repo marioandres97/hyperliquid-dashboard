@@ -75,7 +75,7 @@ export class SignalEngine {
 
     // Calcular entry, target, stop
     const riskRewardRatio = 2;
-    const stopDistance = currentPrice * 0.0015; // 0.15%
+    const stopDistance = currentPrice * 0.01; // 1%
     const targetDistance = stopDistance * riskRewardRatio;
 
     const signal: Signal = {

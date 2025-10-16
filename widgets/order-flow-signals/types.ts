@@ -53,3 +53,8 @@ export interface SignalConfig {
   aggressiveImbalanceThreshold: number;
   cooldownMs: number;
 }
+
+export interface SignalWithMetadata extends Signal {
+  isNew: boolean;
+  isDismissed: boolean;
+}
