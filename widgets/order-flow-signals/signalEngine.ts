@@ -24,6 +24,7 @@ export class SignalEngine {
   private config: SignalConfig;
   private vpCalculator: VolumeProfileCalculator;
   private vpData: VolumeProfileData | null = null;
+  private orderBook: any = null;
 
   constructor(config: SignalConfig) {
     this.config = config;
@@ -32,6 +33,8 @@ export class SignalEngine {
 
   addTrade(trade: Trade) {
     this.trades.push(trade);
+
+    
     
     // Mantener solo últimos 5 minutos
     const fiveMinutesAgo = Date.now() - 5 * 60 * 1000;
@@ -49,6 +52,10 @@ export class SignalEngine {
       const vpTrades = this.trades.filter(t => t.timestamp > fourHoursAgo);
       this.vpData = this.vpCalculator.calculate(vpTrades);
     }
+  }
+
+  updateOrderBook(orderBook: any) {
+    this.orderBook = orderBook;
   }
 
   private updateCVD(trade: Trade) {
@@ -92,7 +99,7 @@ export class SignalEngine {
     const confirmations = this.checkConfirmations(currentPrice, coin);
     const metConfirmations = confirmations.filter(c => c.met);
     
-    // ⭐ DEBE TENER 7/7 CONFIRMACIONES
+    // ⭐ DEBE TENER 8/8 CONFIRMACIONES
     if (metConfirmations.length !== eliteConfig.minConfirmations) {
       return null;
     }
@@ -157,38 +164,54 @@ export class SignalEngine {
   }
 
   // ⭐ FILTROS NEGATIVOS
-  private passNegativeFilters(coin: string): boolean {
-    const config = ELITE_ORDER_FLOW_CONFIG.negativeFilters;
-    const now = Date.now();
-    
-    // 1. Máximo de señales por hora
-    if (!signalHistory[coin]) signalHistory[coin] = [];
-    signalHistory[coin] = signalHistory[coin].filter(t => now - t < 3600000);
-    
-    if (signalHistory[coin].length >= config.maxSignalsPerHour) {
-      return false; // Ya hay 3 señales en la última hora
-    }
-    
-    // 2. Volumen mínimo
-    const recentTrades = this.trades.slice(-20);
-    if (recentTrades.length < 20) return false;
-    
-    const avgVolume1h = this.trades.slice(-60).reduce((sum, t) => sum + (t.price * t.size), 0) / 60;
-    const currentVolume = recentTrades.reduce((sum, t) => sum + (t.price * t.size), 0) / recentTrades.length;
-    
-    if (avgVolume1h > 0 && currentVolume < avgVolume1h * config.minVolumeRatio) {
-      return false; // Volumen muy bajo
-    }
-    
-    // 3. Trade size promedio
-    const avgTradeSize = recentTrades.reduce((sum, t) => sum + (t.price * t.size), 0) / recentTrades.length;
-    
-    if (avgTradeSize < config.minAvgTradeSize) {
-      return false; // Dominado por retail
-    }
-    
-    return true;
+private passNegativeFilters(coin: string): boolean {
+  const config = ELITE_ORDER_FLOW_CONFIG.negativeFilters;
+  const now = Date.now();
+  
+  // ⭐ NUEVO: SESSION FILTER (Versión Moderada)
+  const hour = new Date().getUTCHours();
+  
+  // Bloquear horarios de baja calidad:
+  if (hour >= 0 && hour < 6) {
+    return false; // Asia dead zone (00:00-06:00 UTC)
   }
+  
+  if (hour >= 12 && hour < 14) {
+    return false; // Europe lunch / Pre-NY (12:00-14:00 UTC)
+  }
+  
+  if (hour >= 22) {
+    return false; // Pre-Asia transition (22:00-24:00 UTC)
+  }
+  
+  // 1. Máximo de señales por hora
+  if (!signalHistory[coin]) signalHistory[coin] = [];
+  signalHistory[coin] = signalHistory[coin].filter(t => now - t < 3600000);
+  
+  if (signalHistory[coin].length >= config.maxSignalsPerHour) {
+    return false; // Ya hay 3 señales en la última hora
+  }
+  
+  // 2. Volumen mínimo
+  const recentTrades = this.trades.slice(-20);
+  if (recentTrades.length < 20) return false;
+  
+  const avgVolume1h = this.trades.slice(-60).reduce((sum, t) => sum + (t.price * t.size), 0) / 60;
+  const currentVolume = recentTrades.reduce((sum, t) => sum + (t.price * t.size), 0) / recentTrades.length;
+  
+  if (avgVolume1h > 0 && currentVolume < avgVolume1h * config.minVolumeRatio) {
+    return false; // Volumen muy bajo
+  }
+  
+  // 3. Trade size promedio
+  const avgTradeSize = recentTrades.reduce((sum, t) => sum + (t.price * t.size), 0) / recentTrades.length;
+  
+  if (avgTradeSize < config.minAvgTradeSize) {
+    return false; // Dominado por retail
+  }
+  
+  return true;
+}
 
   // ⭐ VERIFICACIÓN DE CALIDAD ULTRA-ESTRICTA
   private verifyUltraQuality(confirmations: SignalConfirmation[], coin: string): boolean {
@@ -333,6 +356,14 @@ export class SignalEngine {
         this.checkVolumeProfilePosition(currentPrice),
         this.checkVABoundary(currentPrice),
         this.checkHVNLVN(currentPrice)
+      );
+    }
+    
+    // ⭐ NUEVO: Determinar tipo potencial de señal para order book
+    const potentialType = this.determineSignalType(confirmations);
+    if (potentialType && this.orderBook) {
+      confirmations.push(
+        this.checkOrderBookImbalance(potentialType)
       );
     }
 
@@ -556,6 +587,50 @@ export class SignalEngine {
       type: 'hvn_lvn',
       met: false,
       description: 'Price not at HVN/LVN'
+    };
+  }
+
+  private checkOrderBookImbalance(signalType: 'LONG' | 'SHORT'): SignalConfirmation {
+    const config = ELITE_ORDER_FLOW_CONFIG.thresholds;
+    
+    if (!this.orderBook || !this.orderBook.bids || !this.orderBook.asks) {
+      return {
+        type: 'orderbook_imbalance',
+        met: false,
+        description: 'No order book data'
+      };
+    }
+    
+    // Calcular depth primeros 10 niveles
+    const bidDepth = this.orderBook.bids.slice(0, 10)
+      .reduce((sum: number, level: any) => sum + (level.size * level.price), 0);
+    
+    const askDepth = this.orderBook.asks.slice(0, 10)
+      .reduce((sum: number, level: any) => sum + (level.size * level.price), 0);
+    
+    if (bidDepth === 0 || askDepth === 0) {
+      return {
+        type: 'orderbook_imbalance',
+        met: false,
+        description: 'Invalid order book data'
+      };
+    }
+    
+    const ratio = bidDepth / askDepth;
+    
+    // Para LONG: necesitamos más bids (soporte fuerte)
+    // Para SHORT: necesitamos más asks (resistencia fuerte)
+    const isValid = signalType === 'LONG' 
+      ? ratio >= config.orderbookImbalanceRatio
+      : ratio <= (1 / config.orderbookImbalanceRatio);
+    
+    return {
+      type: 'orderbook_imbalance',
+      met: isValid,
+      value: `${ratio.toFixed(2)}:1`,
+      description: isValid 
+        ? `Order book ${signalType === 'LONG' ? 'bid' : 'ask'} pressure (${ratio.toFixed(2)}:1)`
+        : `No order book imbalance (${ratio.toFixed(2)}:1)`
     };
   }
 }

@@ -26,7 +26,9 @@ export interface OrderBookSnapshot {
 }
 
 export interface SignalConfirmation {
-  type: 'cvd_divergence' | 'aggressive_imbalance' | 'large_order' | 'hvn_lvn' | 'wall_broken' | 'no_liquidations';
+  type: 'cvd_divergence' | 'aggressive_imbalance' | 'large_order' | 
+        'hvn_lvn' | 'wall_broken' | 'no_liquidations' | 
+        'orderbook_imbalance'; // ⭐ NUEVO
   met: boolean;
   value?: string | number;
   description: string;
@@ -88,7 +90,7 @@ export interface SignalStats {
 // ⭐ NUEVA CONFIGURACIÓN - WIN RATE 80%+
 export const ELITE_ORDER_FLOW_CONFIG = {
   // Todas las confirmaciones obligatorias
-  minConfirmations: 7,
+  minConfirmations: 8,
   minConfidence: 0.95,
   
   // Targets y stops optimizados para fees reales (0.0288%)
@@ -141,6 +143,10 @@ export const ELITE_ORDER_FLOW_CONFIG = {
     hvnMinRatio: 3.0,
     lvnMaxRatio: 0.3,
     hvnLvnConfirmCandles: 3,
+
+    // ⭐ NUEVO: Order Book Imbalance
+    orderbookImbalanceRatio: 2.0, // 2:1 ratio mínimo
+    
   },
   
   // Filtros negativos
