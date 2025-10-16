@@ -3,12 +3,13 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const { status, exitPrice, exitTimestamp } = await request.json();
     
-    const signalData = await redis.get(`signal:${params.id}`);
+    const signalData = await redis.get(`signal:${id}`);
     
     if (!signalData) {
       return NextResponse.json(
@@ -17,7 +18,7 @@ export async function PATCH(
       );
     }
     
-    const signal = JSON.parse(signalData);
+    const signal = JSON.parse(signalData as string);
     
     const updatedSignal = {
       ...signal,
@@ -26,10 +27,10 @@ export async function PATCH(
       exitTimestamp
     };
     
-    await redis.set(`signal:${params.id}`, JSON.stringify(updatedSignal));
+    await redis.set(`signal:${id}`, JSON.stringify(updatedSignal));
     
     if (status !== 'active') {
-      await redis.srem('signals:active', params.id);
+      await redis.srem('signals:active', id);
     }
     
     return NextResponse.json({ success: true, signal: updatedSignal });
