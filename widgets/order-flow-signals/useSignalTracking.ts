@@ -4,9 +4,10 @@ import { Signal } from './types';
 interface SignalTrackingProps {
   signals: Record<string, Signal | null>;
   currentPrices: Record<string, number>;
+  onSignalResolved: (coin: string) => void; // Nueva prop
 }
 
-export function useSignalTracking({ signals, currentPrices }: SignalTrackingProps) {
+export function useSignalTracking({ signals, currentPrices, onSignalResolved }: SignalTrackingProps) {
   const trackedSignals = useRef<Set<string>>(new Set());
 
   useEffect(() => {
@@ -16,7 +17,6 @@ export function useSignalTracking({ signals, currentPrices }: SignalTrackingProp
       const currentPrice = currentPrices[coin];
       if (!currentPrice) return;
 
-      // Evitar tracking duplicado
       if (trackedSignals.current.has(signal.id)) return;
 
       // Verificar si tocó target
@@ -24,7 +24,9 @@ export function useSignalTracking({ signals, currentPrices }: SignalTrackingProp
         (signal.type === 'LONG' && currentPrice >= signal.target) ||
         (signal.type === 'SHORT' && currentPrice <= signal.target)
       ) {
-        updateSignalStatus(signal.id, 'hit_target', currentPrice);
+        updateSignalStatus(signal.id, 'hit_target', currentPrice, () => {
+          onSignalResolved(coin);
+        });
         trackedSignals.current.add(signal.id);
         return;
       }
@@ -34,21 +36,24 @@ export function useSignalTracking({ signals, currentPrices }: SignalTrackingProp
         (signal.type === 'LONG' && currentPrice <= signal.stop) ||
         (signal.type === 'SHORT' && currentPrice >= signal.stop)
       ) {
-        updateSignalStatus(signal.id, 'hit_stop', currentPrice);
+        updateSignalStatus(signal.id, 'hit_stop', currentPrice, () => {
+          onSignalResolved(coin);
+        });
         trackedSignals.current.add(signal.id);
         return;
       }
     });
-  }, [signals, currentPrices]);
+  }, [signals, currentPrices, onSignalResolved]);
 }
 
 async function updateSignalStatus(
   id: string,
   status: 'hit_target' | 'hit_stop',
-  exitPrice: number
+  exitPrice: number,
+  onComplete: () => void
 ) {
   try {
-    await fetch(`/api/signals/${id}`, {
+    const response = await fetch(`/api/signals/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -57,7 +62,12 @@ async function updateSignalStatus(
         exitTimestamp: Date.now()
       })
     });
-    console.log(`Signal ${id} updated: ${status} at ${exitPrice}`);
+    
+    if (response.ok) {
+      console.log(`Signal ${id} updated: ${status} at ${exitPrice}`);
+      // Solo limpiar UI si se guardó exitosamente
+      onComplete();
+    }
   } catch (error) {
     console.error('Failed to update signal:', error);
   }

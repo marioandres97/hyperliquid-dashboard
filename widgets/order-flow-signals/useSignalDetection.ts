@@ -140,16 +140,7 @@ export function useSignalDetection(config: SignalConfig = DEFAULT_CONFIG) {
                 // Guardar señal en DB
                 saveSignal(detectedSignal);
 
-                // Auto-clear señal después de 10 minutos
-                setTimeout(() => {
-                  setCoinStates(prev => ({
-                    ...prev,
-                    [coin]: {
-                      ...prev[coin],
-                      signal: null
-                    }
-                  }));
-                }, 10 * 60 * 1000);
+                
               }
             });
           }
@@ -202,14 +193,24 @@ export function useSignalDetection(config: SignalConfig = DEFAULT_CONFIG) {
   };
 
   // Track signals automáticamente
-  useSignalTracking({
-    signals: Object.fromEntries(
-      Object.entries(coinStates).map(([coin, state]) => [coin, state.signal])
-    ),
-    currentPrices: Object.fromEntries(
-      Object.entries(coinStates).map(([coin, state]) => [coin, state.currentPrice])
-    )
-  });
+useSignalTracking({
+  signals: Object.fromEntries(
+    Object.entries(coinStates).map(([coin, state]) => [coin, state.signal])
+  ),
+  currentPrices: Object.fromEntries(
+    Object.entries(coinStates).map(([coin, state]) => [coin, state.currentPrice])
+  ),
+  onSignalResolved: (coin: string) => {
+    // Limpiar señal de UI después de ser registrada
+    setCoinStates(prev => ({
+      ...prev,
+      [coin]: {
+        ...prev[coin],
+        signal: null
+      }
+    }));
+  }
+});
 
   return {
     coinStates,
