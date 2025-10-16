@@ -25,11 +25,8 @@ export async function PATCH(
     
     await redis.set(`signal:${id}`, JSON.stringify(updatedSignal));
     
-    if (updatedSignal.status !== 'active') {
-      await redis.srem('signals:active', id);
-    } else {
-      await redis.sadd('signals:active', id);
-    }
+    // Siempre mantener en el set para poder calcular stats
+    await redis.sadd('signals:active', id);
     
     return NextResponse.json({ success: true, signal: updatedSignal });
   } catch (error) {
