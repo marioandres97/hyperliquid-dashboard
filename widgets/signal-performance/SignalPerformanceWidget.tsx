@@ -4,12 +4,23 @@ import { useSignalStats } from '@/widgets/signal-performance/useSignalStats';
 import { TrendingUp, TrendingDown, Target } from 'lucide-react';
 
 export function SignalPerformanceWidget() {
-  const { stats, isLoading } = useSignalStats();
+  const { stats, isLoading, error } = useSignalStats();
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <p className="text-white/60">Loading stats...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <p className="text-red-400 mb-2">Failed to load statistics</p>
+          <p className="text-white/40 text-sm">{error}</p>
+        </div>
       </div>
     );
   }
