@@ -22,7 +22,8 @@ export function LiquidityLevelIndicator({ metrics }: LiquidityLevelIndicatorProp
       name: 'Whale',
       count: metrics.whaleTradeCount,
       percent: whalePercent,
-      color: 'bg-purple-500',
+      bgColor: 'bg-purple-500',
+      textColor: 'text-purple-500',
       icon: '🐋',
       description: 'High volume trades',
     },
@@ -30,7 +31,8 @@ export function LiquidityLevelIndicator({ metrics }: LiquidityLevelIndicatorProp
       name: 'Regular',
       count: totalTrades - metrics.whaleTradeCount,
       percent: 100 - whalePercent,
-      color: 'bg-blue-500',
+      bgColor: 'bg-blue-500',
+      textColor: 'text-blue-500',
       icon: '🐟',
       description: 'Standard trades',
     },
@@ -38,7 +40,8 @@ export function LiquidityLevelIndicator({ metrics }: LiquidityLevelIndicatorProp
       name: 'Buy',
       count: metrics.buyTradeCount,
       percent: buyPercent,
-      color: 'bg-green-500',
+      bgColor: 'bg-green-500',
+      textColor: 'text-green-500',
       icon: '⬆️',
       description: 'Buy side trades',
     },
@@ -46,7 +49,8 @@ export function LiquidityLevelIndicator({ metrics }: LiquidityLevelIndicatorProp
       name: 'Sell',
       count: metrics.sellTradeCount,
       percent: sellPercent,
-      color: 'bg-red-500',
+      bgColor: 'bg-red-500',
+      textColor: 'text-red-500',
       icon: '⬇️',
       description: 'Sell side trades',
     },
@@ -63,7 +67,7 @@ export function LiquidityLevelIndicator({ metrics }: LiquidityLevelIndicatorProp
             level.percent > 0 && (
               <div
                 key={index}
-                className={`${level.color} flex items-center justify-center text-white text-xs font-bold transition-all hover:opacity-80`}
+                className={`${level.bgColor} flex items-center justify-center text-white text-xs font-bold transition-all hover:opacity-80`}
                 style={{ width: `${level.percent}%` }}
                 title={`${level.name}: ${level.percent.toFixed(1)}%`}
               >
@@ -93,7 +97,7 @@ export function LiquidityLevelIndicator({ metrics }: LiquidityLevelIndicatorProp
                 <div className="text-2xl font-bold text-white">{level.count}</div>
                 <div className="text-xs text-white/60">trades</div>
               </div>
-              <div className={`text-xl font-bold ${level.color.replace('bg-', 'text-')}`}>
+              <div className={`text-xl font-bold ${level.textColor}`}>
                 {level.percent.toFixed(1)}%
               </div>
             </div>
