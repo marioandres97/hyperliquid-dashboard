@@ -9,7 +9,6 @@ const COINS = ['BTC', 'ETH', 'HYPE'];
 export default function OrderFlowSignalsWidget() {
   const { coinStates, isConnected, dismissSignal } = useSignalDetection();
 
-  // Obtener todas las señales activas ordenadas por timestamp (más reciente primero)
   const activeSignals = COINS
     .map(coin => coinStates[coin]?.signal ? { ...coinStates[coin].signal, coin } : null)
     .filter((s): s is Signal & { coin: string } => s !== null)
@@ -21,14 +20,14 @@ export default function OrderFlowSignalsWidget() {
   return (
     <div className="h-full flex flex-col space-y-3">
       {/* Header */}
-      <div className="flex items-center justify-between pb-2 border-b border-gray-200">
+      <div className="flex items-center justify-between pb-3 border-b border-white/20">
         <div className="flex items-center gap-2">
           {anyConnected ? (
-            <Wifi className="w-4 h-4 text-green-500" />
+            <Wifi className="w-4 h-4 text-green-400" />
           ) : (
-            <WifiOff className="w-4 h-4 text-red-500" />
+            <WifiOff className="w-4 h-4 text-red-400" />
           )}
-          <span className="text-sm font-medium text-gray-700">
+          <span className="text-sm font-medium text-white">
             {activeCount > 0 ? (
               <>
                 {activeCount} Active {activeCount === 1 ? 'Signal' : 'Signals'} 🔔
@@ -57,26 +56,25 @@ export default function OrderFlowSignalsWidget() {
             );
           }
 
-          // Scanning state
           return (
             <div
               key={coin}
-              className="p-3 border border-gray-200 rounded-lg bg-gray-50"
+              className="p-4 border border-white/10 rounded-xl bg-white/5 backdrop-blur-sm"
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="font-medium text-gray-700">{coin}</div>
-                  <div className="text-sm text-gray-500">
+                  <div className="font-semibold text-white">{coin}</div>
+                  <div className="text-sm text-white/60">
                     {state?.currentPrice > 0
                       ? `$${state.currentPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                       : 'Connecting...'}
                   </div>
                 </div>
-                <div className="text-xs text-gray-400">
+                <div className="text-xs text-white/40">
                   {state?.tradeCount || 0} trades
                 </div>
               </div>
-              <div className="mt-2 text-xs text-gray-500">Scanning...</div>
+              <div className="mt-2 text-xs text-white/50">Scanning...</div>
             </div>
           );
         })}
@@ -99,7 +97,6 @@ function SignalCard({
   const stopPct = ((Math.abs(signal.entry - signal.stop)) / signal.entry) * 100;
   const riskReward = profitPct / stopPct;
 
-  // Calcular tiempo desde la señal
   const timeSince = Date.now() - signal.timestamp;
   const secondsAgo = Math.floor(timeSince / 1000);
   const minutesAgo = Math.floor(secondsAgo / 60);
@@ -118,59 +115,60 @@ function SignalCard({
     timeText = `${hoursAgo}h ago`;
   }
 
-  // Confidence badge
   let confidenceBadge = '';
   let confidenceColor = '';
   if (signal.confidence >= 90) {
     confidenceBadge = '🔥';
-    confidenceColor = 'text-orange-600';
+    confidenceColor = 'text-orange-400';
   } else if (signal.confidence >= 75) {
     confidenceBadge = '⚠️';
-    confidenceColor = 'text-yellow-600';
+    confidenceColor = 'text-yellow-400';
   }
 
   const metCount = signal.confirmations.filter(c => c.met).length;
   const totalCount = signal.confirmations.length;
 
   return (
-    <div className={`border-2 rounded-lg p-4 ${
-      isLong ? 'border-green-500 bg-green-50' : 'border-red-500 bg-red-50'
+    <div className={`border-2 rounded-xl p-4 backdrop-blur-sm ${
+      isLong 
+        ? 'border-green-400 bg-green-500/10' 
+        : 'border-red-400 bg-red-500/10'
     }`}>
       {/* Header */}
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2">
           {isLong ? (
-            <TrendingUp className="w-5 h-5 text-green-600" />
+            <TrendingUp className="w-5 h-5 text-green-400" />
           ) : (
-            <TrendingDown className="w-5 h-5 text-red-600" />
+            <TrendingDown className="w-5 h-5 text-red-400" />
           )}
           <div>
             <div className="flex items-center gap-2">
-              <span className={`text-lg font-bold ${isLong ? 'text-green-700' : 'text-red-700'}`}>
+              <span className={`text-lg font-bold ${isLong ? 'text-green-300' : 'text-red-300'}`}>
                 {signal.type} - {coin}
               </span>
               {isNew && (
-                <span className="px-2 py-0.5 text-xs font-bold bg-blue-500 text-white rounded">
+                <span className="px-2 py-0.5 text-xs font-bold bg-orange-500 text-white rounded-full">
                   NEW
                 </span>
               )}
             </div>
-            <div className="text-xs text-gray-600">
+            <div className="text-xs text-white/60">
               {timeText}
             </div>
           </div>
         </div>
         <button
           onClick={onDismiss}
-          className="text-gray-400 hover:text-gray-600 transition-colors"
+          className="text-white/40 hover:text-white/80 transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
       </div>
 
       {/* Price & Confidence */}
-      <div className="mb-3 pb-3 border-b border-gray-200">
-        <div className="text-2xl font-bold text-gray-900">
+      <div className="mb-3 pb-3 border-b border-white/20">
+        <div className="text-2xl font-bold text-white">
           ${signal.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
         </div>
         <div className={`text-sm font-semibold ${confidenceColor}`}>
@@ -186,11 +184,11 @@ function SignalCard({
             className="flex items-start gap-2 text-xs"
           >
             {conf.met ? (
-              <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
+              <CheckCircle2 className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
             ) : (
-              <XCircle className="w-4 h-4 text-gray-300 flex-shrink-0 mt-0.5" />
+              <XCircle className="w-4 h-4 text-white/30 flex-shrink-0 mt-0.5" />
             )}
-            <div className={conf.met ? 'text-gray-700' : 'text-gray-400'}>
+            <div className={conf.met ? 'text-white/90' : 'text-white/40'}>
               <span className="font-medium">{conf.description}</span>
               {conf.value && (
                 <span className="ml-1">({conf.value})</span>
@@ -201,17 +199,17 @@ function SignalCard({
       </div>
 
       {/* Trade Details */}
-      <div className="grid grid-cols-2 gap-2 p-2 bg-white rounded-lg text-sm">
+      <div className="grid grid-cols-2 gap-2 p-3 bg-white/5 rounded-lg text-sm backdrop-blur-sm">
         <div>
-          <div className="text-xs text-gray-500">Entry → Target</div>
-          <div className="font-bold text-green-600">
+          <div className="text-xs text-white/50">Entry → Target</div>
+          <div className="font-bold text-green-400">
             ${signal.target.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             <span className="text-xs ml-1">(+{profitPct.toFixed(2)}%)</span>
           </div>
         </div>
         <div>
-          <div className="text-xs text-gray-500">Stop Loss</div>
-          <div className="font-bold text-red-600">
+          <div className="text-xs text-white/50">Stop Loss</div>
+          <div className="font-bold text-red-400">
             ${signal.stop.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             <span className="text-xs ml-1">(-{stopPct.toFixed(2)}%)</span>
           </div>
@@ -219,8 +217,8 @@ function SignalCard({
       </div>
 
       {/* R:R */}
-      <div className="mt-2 text-center text-xs text-gray-600">
-        Risk:Reward = <span className="font-bold">1:{riskReward.toFixed(1)}</span>
+      <div className="mt-2 text-center text-xs text-white/60">
+        Risk:Reward = <span className="font-bold text-white">1:{riskReward.toFixed(1)}</span>
       </div>
     </div>
   );

@@ -9,9 +9,9 @@ interface WidgetContainerProps {
 
 export default function WidgetContainer({ title, children }: WidgetContainerProps) {
   return (
-    <div className="bg-slate-900 rounded-lg border border-slate-800 p-6 shadow-xl">
-      <h2 className="text-xl font-semibold text-white mb-4">{title}</h2>
-      <div className="text-slate-300">
+    <div className="glass rounded-2xl p-6 shadow-2xl hover:shadow-purple-500/20 transition-all duration-300">
+      <h2 className="text-2xl font-semibold text-white mb-4">{title}</h2>
+      <div className="text-white/90">
         {children}
       </div>
     </div>
