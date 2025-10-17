@@ -1,0 +1,145 @@
+'use client';
+
+import { usePnLTracking } from './usePnLTracking';
+import { TrendingUp, TrendingDown, DollarSign, Target, Award } from 'lucide-react';
+
+export default function PnLTrackerWidget() {
+  const { stats, isLoading } = usePnLTracking();
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <p className="text-white/60">Loading PnL...</p>
+      </div>
+    );
+  }
+
+  if (!stats) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <p className="text-white/60">No trading data yet</p>
+      </div>
+    );
+  }
+
+  const isProfitable = stats.totalPnL >= 0;
+
+  return (
+    <div className="space-y-4">
+      {/* Total PnL */}
+      <div className={`p-4 rounded-xl border-2 ${
+        isProfitable 
+          ? 'bg-green-500/10 border-green-400' 
+          : 'bg-red-500/10 border-red-400'
+      }`}>
+        <div className="flex items-center gap-2 mb-2">
+          <DollarSign className="w-5 h-5 text-white/60" />
+          <span className="text-sm text-white/60">Total PnL</span>
+        </div>
+        <div className={`text-3xl font-bold ${
+          isProfitable ? 'text-green-400' : 'text-red-400'
+        }`}>
+          {isProfitable ? '+' : ''}${stats.totalPnL.toFixed(2)}
+        </div>
+      </div>
+
+      {/* Timeframe PnL */}
+      <div className="grid grid-cols-3 gap-2">
+        <div className="bg-white/5 backdrop-blur-sm rounded-xl p-3 border border-white/10">
+          <div className="text-xs text-white/50 mb-1">Today</div>
+          <div className={`text-lg font-bold ${
+            stats.byTimeframe.today >= 0 ? 'text-green-400' : 'text-red-400'
+          }`}>
+            {stats.byTimeframe.today >= 0 ? '+' : ''}${stats.byTimeframe.today.toFixed(2)}
+          </div>
+        </div>
+        <div className="bg-white/5 backdrop-blur-sm rounded-xl p-3 border border-white/10">
+          <div className="text-xs text-white/50 mb-1">Week</div>
+          <div className={`text-lg font-bold ${
+            stats.byTimeframe.week >= 0 ? 'text-green-400' : 'text-red-400'
+          }`}>
+            {stats.byTimeframe.week >= 0 ? '+' : ''}${stats.byTimeframe.week.toFixed(2)}
+          </div>
+        </div>
+        <div className="bg-white/5 backdrop-blur-sm rounded-xl p-3 border border-white/10">
+          <div className="text-xs text-white/50 mb-1">Month</div>
+          <div className={`text-lg font-bold ${
+            stats.byTimeframe.month >= 0 ? 'text-green-400' : 'text-red-400'
+          }`}>
+            {stats.byTimeframe.month >= 0 ? '+' : ''}${stats.byTimeframe.month.toFixed(2)}
+          </div>
+        </div>
+      </div>
+
+      {/* Win Rate & Stats */}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="bg-white/5 backdrop-blur-sm rounded-xl p-3 border border-white/10">
+          <div className="flex items-center gap-2 mb-1">
+            <Target className="w-4 h-4 text-white/60" />
+            <span className="text-xs text-white/50">Win Rate</span>
+          </div>
+          <div className="text-2xl font-bold text-white">
+            {stats.winRate.toFixed(1)}%
+          </div>
+          <div className="text-xs text-white/50 mt-1">
+            {stats.winningTrades}W / {stats.losingTrades}L
+          </div>
+        </div>
+
+        <div className="bg-white/5 backdrop-blur-sm rounded-xl p-3 border border-white/10">
+          <div className="flex items-center gap-2 mb-1">
+            <Award className="w-4 h-4 text-white/60" />
+            <span className="text-xs text-white/50">Profit Factor</span>
+          </div>
+          <div className="text-2xl font-bold text-white">
+            {stats.profitFactor > 100 ? '∞' : stats.profitFactor.toFixed(2)}
+          </div>
+          <div className="text-xs text-white/50 mt-1">
+            {stats.totalTrades} trades
+          </div>
+        </div>
+      </div>
+
+      {/* Avg Win/Loss */}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="bg-green-500/10 border border-green-400/30 rounded-xl p-3 backdrop-blur-sm">
+          <div className="flex items-center gap-2 mb-1">
+            <TrendingUp className="w-4 h-4 text-green-400" />
+            <span className="text-xs text-white/60">Avg Win</span>
+          </div>
+          <div className="text-xl font-bold text-green-400">
+            +${stats.avgWin.toFixed(2)}
+          </div>
+        </div>
+
+        <div className="bg-red-500/10 border border-red-400/30 rounded-xl p-3 backdrop-blur-sm">
+          <div className="flex items-center gap-2 mb-1">
+            <TrendingDown className="w-4 h-4 text-red-400" />
+            <span className="text-xs text-white/60">Avg Loss</span>
+          </div>
+          <div className="text-xl font-bold text-red-400">
+            -${stats.avgLoss.toFixed(2)}
+          </div>
+        </div>
+      </div>
+
+      {/* Largest Win/Loss */}
+      <div className="bg-white/5 backdrop-blur-sm rounded-xl p-3 border border-white/10">
+        <div className="flex justify-between items-center">
+          <div>
+            <div className="text-xs text-white/50 mb-1">Largest Win</div>
+            <div className="text-lg font-bold text-green-400">
+              +${stats.largestWin.toFixed(2)}
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="text-xs text-white/50 mb-1">Largest Loss</div>
+            <div className="text-lg font-bold text-red-400">
+              ${stats.largestLoss.toFixed(2)}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

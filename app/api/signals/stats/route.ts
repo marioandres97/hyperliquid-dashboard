@@ -4,29 +4,52 @@ import { TrackedSignal, SignalStats } from '@/widgets/order-flow-signals/types';
 
 export async function GET() {
   try {
+    // Get signals from Redis
     const signalIds = (await redis.smembers('signals:active')) || [];
     
-    // Obtener todas las señales en paralelo usando pipeline
+    // If no signals exist, return zeros
+    if (signalIds.length === 0) {
+      return NextResponse.json(getEmptyStats());
+    }
+    
+    // Get all signals in parallel using pipeline
     const pipeline = redis.pipeline();
     signalIds.forEach(id => pipeline.get(`signal:${id}`));
     const results = await pipeline.exec();
 
     const signals: TrackedSignal[] = [];
     results?.forEach(([err, data]) => {
-    if (!err && data) {
-    signals.push(JSON.parse(data as string));
-  }
- });
+      if (!err && data) {
+        signals.push(JSON.parse(data as string));
+      }
+    });
     
     const stats = calculateStats(signals);
     
     return NextResponse.json(stats);
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Failed to get stats' },
-      { status: 500 }
-    );
+    console.error('Error fetching stats:', error);
+    return NextResponse.json(getEmptyStats());
   }
+}
+
+function getEmptyStats(): SignalStats {
+  return {
+    totalSignals: 0,
+    winRate: 0,
+    avgPnL: 0,
+    byStatus: {
+      hit_target: 0,
+      hit_stop: 0,
+      expired: 0,
+      dismissed: 0
+    },
+    byCoin: {
+      BTC: { total: 0, wins: 0, winRate: 0 },
+      ETH: { total: 0, wins: 0, winRate: 0 },
+      HYPE: { total: 0, wins: 0, winRate: 0 }
+    }
+  };
 }
 
 function calculateStats(signals: TrackedSignal[]): SignalStats {
@@ -37,7 +60,11 @@ function calculateStats(signals: TrackedSignal[]): SignalStats {
     dismissed: 0
   };
   
-  const byCoin: Record<string, { total: number; wins: number; winRate: number }> = {};
+  const byCoin: Record<string, { total: number; wins: number; winRate: number }> = {
+    BTC: { total: 0, wins: 0, winRate: 0 },
+    ETH: { total: 0, wins: 0, winRate: 0 },
+    HYPE: { total: 0, wins: 0, winRate: 0 }
+  };
   
   signals.forEach(s => {
     byStatus[s.status as keyof typeof byStatus]++;
@@ -50,7 +77,9 @@ function calculateStats(signals: TrackedSignal[]): SignalStats {
   });
   
   Object.keys(byCoin).forEach(coin => {
-    byCoin[coin].winRate = (byCoin[coin].wins / byCoin[coin].total) * 100;
+    byCoin[coin].winRate = byCoin[coin].total > 0 
+      ? (byCoin[coin].wins / byCoin[coin].total) * 100 
+      : 0;
   });
   
   const totalTraded = byStatus.hit_target + byStatus.hit_stop;
