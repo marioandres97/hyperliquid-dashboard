@@ -4,6 +4,7 @@ import OrderFlowSignalsWidget from '@/widgets/order-flow-signals/OrderFlowSignal
 import { SignalPerformanceWidget } from '@/widgets/signal-performance/SignalPerformanceWidget';
 import RealTimePricesWidget from '@/widgets/real-time-prices/RealTimePricesWidget';
 import PnLTrackerWidget from '@/widgets/pnl-tracker/PnLTrackerWidget';
+import BacktestingWidget from '@/widgets/backtesting/BacktestingWidget';
 
 export default function Home() {
   return (
@@ -22,6 +23,10 @@ export default function Home() {
 
       <WidgetContainer title="PnL Tracker">
         <PnLTrackerWidget />
+      </WidgetContainer>
+
+      <WidgetContainer title="Backtesting - Day Trading">
+        <BacktestingWidget />
       </WidgetContainer>
     </DashboardGrid>
   );
