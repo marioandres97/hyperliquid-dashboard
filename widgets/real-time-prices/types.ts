@@ -1,5 +1,7 @@
 export type Coin = 'BTC' | 'ETH' | 'HYPE';
 
+export const COINS: readonly Coin[] = ['BTC', 'ETH', 'HYPE'];
+
 export interface PriceData {
   coin: Coin;
   price: number;

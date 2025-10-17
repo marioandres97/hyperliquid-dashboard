@@ -1,9 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Coin, PriceData } from './types';
-
-const COINS: Coin[] = ['BTC', 'ETH', 'HYPE'];
+import { Coin, PriceData, COINS } from './types';
 
 export function useRealTimePrices() {
   const [prices, setPrices] = useState<Record<Coin, PriceData>>({

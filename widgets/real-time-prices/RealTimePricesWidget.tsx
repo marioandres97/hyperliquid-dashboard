@@ -2,7 +2,7 @@
 
 import { useRealTimePrices } from './useRealTimePrices';
 import { TrendingUp, TrendingDown, Activity } from 'lucide-react';
-import { Coin } from './types';
+import { COINS } from './types';
 
 export default function RealTimePricesWidget() {
   const { prices, isLoading, isConnected } = useRealTimePrices();
@@ -14,8 +14,6 @@ export default function RealTimePricesWidget() {
       </div>
     );
   }
-
-  const coins: Coin[] = ['BTC', 'ETH', 'HYPE'];
 
   return (
     <div className="space-y-4">
@@ -29,7 +27,7 @@ export default function RealTimePricesWidget() {
 
       {/* Price Cards - Vertical Layout */}
       <div className="flex-1 grid grid-cols-1 gap-3">
-        {coins.map((coin) => {
+        {COINS.map((coin) => {
           const priceData = prices[coin];
           const isPositive = priceData.change24h >= 0;
           
