@@ -66,6 +66,9 @@ export interface TrackedSignal extends Signal {
   exitTimestamp?: number;
   pnl?: number;
   duration?: number;
+  movedToBreakEven?: boolean;
+  trailingStopPrice?: number;
+  partialsClosed?: Record<number, boolean>;
 }
 
 export interface SignalStats {
@@ -87,23 +90,50 @@ export interface SignalStats {
   };
 }
 
-// ⭐ NUEVA CONFIGURACIÓN - WIN RATE 80%+
-export const ELITE_ORDER_FLOW_CONFIG = {
-  // Todas las confirmaciones obligatorias
+// ⭐ SCALPING CONFIGURATION - Optimized for quick trades
+export const SCALPING_CONFIG = {
+  // All confirmations required
   minConfirmations: 8,
   minConfidence: 0.95,
   
-  // Targets y stops optimizados para fees reales (0.0288%)
+  // Targets adjusted for SCALPING (tighter than swing)
   targets: {
-    BTC: 0.25,
-    ETH: 0.25,
-    HYPE: 0.35
+    BTC: 0.08,   // 0.08% (~$85 on BTC at $106k)
+    ETH: 0.10,   // 0.10% (~$3.70 on ETH at $3700)
+    HYPE: 0.12   // 0.12% (~$0.04 on HYPE at $35)
   },
   
   stops: {
-    BTC: 0.12,
-    ETH: 0.12,
-    HYPE: 0.15
+    BTC: 0.04,   // 0.04% stop
+    ETH: 0.05,   // 0.05% stop
+    HYPE: 0.06   // 0.06% stop
+  },
+  
+  // NEW: Break-even automatic
+  breakEven: {
+    BTC: 0.03,   // Move stop to BE after +0.03%
+    ETH: 0.04,
+    HYPE: 0.05
+  },
+  
+  // NEW: Trailing stop
+  trailingStop: {
+    enabled: true,
+    distance: {
+      BTC: 0.02,  // 0.02% trailing
+      ETH: 0.03,
+      HYPE: 0.04
+    }
+  },
+  
+  // NEW: Partial take profits
+  partialTakeProfit: {
+    enabled: true,
+    levels: [
+      { percent: 50, atProfit: 0.05 },  // 50% at +0.05%
+      { percent: 30, atProfit: 0.07 },  // 30% at +0.07%
+      { percent: 20, atProfit: 0.08 }   // 20% at target
+    ]
   },
   
   // Thresholds ultra-agresivos
@@ -149,20 +179,23 @@ export const ELITE_ORDER_FLOW_CONFIG = {
     
   },
   
-  // Filtros negativos
+  // Keep existing optimized filters
   negativeFilters: {
     maxSpread: 0.0002,
     minOrderBookDepth: 1_000_000,
-    maxSignalsPerHour: 3,
-    minVolumeRatio: 0.5,
-    minAvgTradeSize: 10_000,
-    oppositeSignalCooldown: 20,
+    maxSignalsPerHour: 5,  // Increased from 3 for scalping
+    minVolumeRatio: 0.6,   // Slightly more permissive
+    minAvgTradeSize: 5000, // Lower for scalping
+    oppositeSignalCooldown: 3,  // Reduced from 20 for scalping
   }
 };
 
-// Función para calcular TP/SL dinámicamente
+// Keep old config for backward compatibility
+export const ELITE_ORDER_FLOW_CONFIG = SCALPING_CONFIG;
+
+// Function to calculate TP/SL dynamically
 export function calculateTPSL(coin: string, entry: number, type: 'LONG' | 'SHORT') {
-  const config = ELITE_ORDER_FLOW_CONFIG;
+  const config = SCALPING_CONFIG;
   const targetPct = config.targets[coin as keyof typeof config.targets] || config.targets.BTC;
   const stopPct = config.stops[coin as keyof typeof config.stops] || config.stops.BTC;
   
