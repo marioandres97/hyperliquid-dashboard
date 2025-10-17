@@ -2,10 +2,15 @@ import DashboardGrid from '@/components/layout/DashboardGrid';
 import WidgetContainer from '@/components/layout/WidgetContainer';
 import OrderFlowSignalsWidget from '@/widgets/order-flow-signals/OrderFlowSignalsWidget';
 import { SignalPerformanceWidget } from '@/widgets/signal-performance/SignalPerformanceWidget';
+import RealTimePricesWidget from '@/widgets/real-time-prices/RealTimePricesWidget';
 
 export default function Home() {
   return (
     <DashboardGrid>
+      <WidgetContainer title="Real-Time Prices">
+        <RealTimePricesWidget />
+      </WidgetContainer>
+
       <WidgetContainer title="Order Flow Signals">
         <OrderFlowSignalsWidget />
       </WidgetContainer>
