@@ -1,14 +1,20 @@
 'use client';
 
 import React from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import type { FlowTimePoint } from '../types';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
+import type { FlowTimePoint, SupportResistanceLevel } from '../types';
 
 export interface TimeSeriesChartProps {
   timeSeries: FlowTimePoint[];
+  supportResistanceLevels?: SupportResistanceLevel[];
+  showSRLevels?: boolean;
 }
 
-export function TimeSeriesChart({ timeSeries }: TimeSeriesChartProps) {
+export function TimeSeriesChart({ 
+  timeSeries,
+  supportResistanceLevels = [],
+  showSRLevels = true,
+}: TimeSeriesChartProps) {
   if (!timeSeries || timeSeries.length === 0) {
     return (
       <div className="glass rounded-xl p-6">
@@ -21,6 +27,8 @@ export function TimeSeriesChart({ timeSeries }: TimeSeriesChartProps) {
   // Format data for recharts
   const chartData = timeSeries.map((point) => ({
     time: new Date(point.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    timestamp: point.timestamp,
+    price: point.price,
     'Net Flow': point.netFlow,
     'Buy Volume': point.buyVolume,
     'Sell Volume': -point.sellVolume, // Negative for visual distinction
@@ -28,9 +36,27 @@ export function TimeSeriesChart({ timeSeries }: TimeSeriesChartProps) {
     'Liquidations': point.liquidationVolume,
   }));
 
+  // Get visible S/R levels (those within the price range of time series)
+  const priceRange = timeSeries.map(p => p.price);
+  const minPrice = Math.min(...priceRange);
+  const maxPrice = Math.max(...priceRange);
+  
+  const visibleSRLevels = showSRLevels 
+    ? supportResistanceLevels.filter(
+        l => !l.isBreached && l.price >= minPrice && l.price <= maxPrice
+      )
+    : [];
+
   return (
     <div className="glass rounded-xl p-6">
-      <h3 className="text-xl font-semibold text-white mb-4">Flow Timeline</h3>
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-xl font-semibold text-white">Flow Timeline</h3>
+        {showSRLevels && visibleSRLevels.length > 0 && (
+          <div className="text-xs text-white/60">
+            {visibleSRLevels.length} S/R level{visibleSRLevels.length !== 1 ? 's' : ''} visible
+          </div>
+        )}
+      </div>
       
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={chartData}>
@@ -55,6 +81,24 @@ export function TimeSeriesChart({ timeSeries }: TimeSeriesChartProps) {
           <Legend 
             wrapperStyle={{ color: '#fff' }}
           />
+          
+          {/* S/R Level markers */}
+          {visibleSRLevels.map((level) => (
+            <ReferenceLine
+              key={level.id}
+              y={level.price}
+              stroke={level.type === 'support' ? '#10b981' : '#ef4444'}
+              strokeDasharray="5 5"
+              strokeWidth={2}
+              label={{
+                value: `${level.type === 'support' ? '🛡️' : '🚧'} $${level.price.toFixed(2)}`,
+                position: 'right',
+                fill: level.type === 'support' ? '#10b981' : '#ef4444',
+                fontSize: 12,
+              }}
+            />
+          ))}
+          
           <Line 
             type="monotone" 
             dataKey="Net Flow" 

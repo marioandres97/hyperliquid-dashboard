@@ -2,19 +2,46 @@
 
 import React, { useMemo } from 'react';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
-import type { LiquidityNode } from '../types';
+import type { LiquidityNode, AbsorptionZone, SupportResistanceLevel } from '../types';
 
 export interface LiquidityHeatmapProps {
   nodes: Map<number, LiquidityNode>;
   currentPrice?: number;
+  absorptionZones?: AbsorptionZone[];
+  supportResistanceLevels?: SupportResistanceLevel[];
+  showPatterns?: boolean;
 }
 
-export function LiquidityHeatmap({ nodes, currentPrice }: LiquidityHeatmapProps) {
+export function LiquidityHeatmap({ 
+  nodes, 
+  currentPrice,
+  absorptionZones = [],
+  supportResistanceLevels = [],
+  showPatterns = true,
+}: LiquidityHeatmapProps) {
   // Convert nodes to sorted array for visualization
   const sortedNodes = useMemo(() => {
     const nodeArray = Array.from(nodes.values());
     return nodeArray.sort((a, b) => b.price - a.price);
   }, [nodes]);
+
+  // Helper to check if price is in an absorption zone
+  const getAbsorptionZone = (price: number): AbsorptionZone | null => {
+    if (!showPatterns) return null;
+    return absorptionZones.find(z => {
+      const [min, max] = z.priceRange;
+      return price >= min && price <= max && z.status === 'active';
+    }) || null;
+  };
+
+  // Helper to check if price is near a S/R level
+  const getSRLevel = (price: number): SupportResistanceLevel | null => {
+    if (!showPatterns) return null;
+    return supportResistanceLevels.find(l => {
+      const range = l.price * 0.002; // 0.2% range
+      return Math.abs(price - l.price) <= range && !l.isBreached;
+    }) || null;
+  };
 
   if (sortedNodes.length === 0) {
     return (
@@ -30,10 +57,30 @@ export function LiquidityHeatmap({ nodes, currentPrice }: LiquidityHeatmapProps)
   const maxSellVolume = Math.max(...sortedNodes.map(n => n.sellVolume), 1);
   const maxNetFlow = Math.max(...sortedNodes.map(n => Math.abs(n.netFlow)), 1);
 
-  // Helper to get color intensity based on volume
+  // Helper to get node color intensity based on volume
   const getNodeColor = (node: LiquidityNode) => {
     const netFlow = node.netFlow;
     const intensity = Math.abs(netFlow) / maxNetFlow;
+    
+    // Check for pattern overlays
+    const absorptionZone = getAbsorptionZone(node.price);
+    const srLevel = getSRLevel(node.price);
+    
+    // Absorption zone overlay
+    if (absorptionZone) {
+      const alpha = Math.min(intensity * 0.9, 0.9);
+      return absorptionZone.side === 'buy'
+        ? `rgba(59, 130, 246, ${alpha})` // Blue for buy absorption
+        : `rgba(168, 85, 247, ${alpha})`; // Purple for sell absorption
+    }
+    
+    // Support/Resistance level overlay
+    if (srLevel) {
+      const alpha = Math.min(intensity * 0.85, 0.85);
+      return srLevel.type === 'support'
+        ? `rgba(34, 197, 94, ${alpha})` // Green for support
+        : `rgba(239, 68, 68, ${alpha})`; // Red for resistance
+    }
     
     if (netFlow > 0) {
       // Buying pressure - green
@@ -82,6 +129,18 @@ export function LiquidityHeatmap({ nodes, currentPrice }: LiquidityHeatmapProps)
             <div className="w-4 h-4 bg-red-500/60 rounded"></div>
             <span>Selling</span>
           </div>
+          {showPatterns && (
+            <>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 bg-blue-500/60 rounded"></div>
+                <span>Absorption</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 bg-emerald-500/60 rounded"></div>
+                <span>S/R Level</span>
+              </div>
+            </>
+          )}
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 bg-gray-500/30 rounded"></div>
             <span>Neutral</span>
@@ -144,23 +203,44 @@ export function LiquidityHeatmap({ nodes, currentPrice }: LiquidityHeatmapProps)
                   {sortedNodes.map((node, index) => {
                     const isCurrentPrice = currentPrice && Math.abs(node.price - currentPrice) < 1;
                     const height = getNodeHeight(node);
+                    const absorptionZone = getAbsorptionZone(node.price);
+                    const srLevel = getSRLevel(node.price);
+                    
+                    // Pattern indicators
+                    const patternIndicators: string[] = [];
+                    if (absorptionZone) {
+                      patternIndicators.push(`🌊 ${absorptionZone.side === 'buy' ? 'Buy' : 'Sell'} Absorption (${absorptionZone.strength.toFixed(0)}%)`);
+                    }
+                    if (srLevel) {
+                      patternIndicators.push(`${srLevel.type === 'support' ? '🛡️' : '🚧'} ${srLevel.type.toUpperCase()} (${srLevel.touchCount} touches)`);
+                    }
+                    if (node.whaleActivity) {
+                      patternIndicators.push('🐋 Whale Activity');
+                    }
                     
                     return (
                       <div
                         key={node.price}
                         className={`flex items-center gap-4 mb-2 p-2 rounded-lg transition-all hover:scale-105 ${
                           isCurrentPrice ? 'ring-2 ring-yellow-400' : ''
-                        }`}
+                        } ${absorptionZone ? 'ring-1 ring-blue-400' : ''} ${srLevel ? 'ring-1 ring-emerald-400' : ''}`}
                         style={{
                           backgroundColor: getNodeColor(node),
                           minHeight: `${height}px`,
                         }}
-                        title={`Price: $${formatPrice(node.price)}\nBuy: ${formatVolume(node.buyVolume)}\nSell: ${formatVolume(node.sellVolume)}\nNet: ${formatVolume(node.netFlow)}\nTrades: ${node.buyCount + node.sellCount}`}
+                        title={`Price: $${formatPrice(node.price)}\nBuy: ${formatVolume(node.buyVolume)}\nSell: ${formatVolume(node.sellVolume)}\nNet: ${formatVolume(node.netFlow)}\nTrades: ${node.buyCount + node.sellCount}${patternIndicators.length > 0 ? '\n\n' + patternIndicators.join('\n') : ''}`}
                       >
                         {/* Price Label */}
                         <div className="min-w-[100px] text-white font-mono text-sm font-bold">
                           ${formatPrice(node.price)}
                           {isCurrentPrice && <span className="ml-2 text-yellow-400">●</span>}
+                          {showPatterns && patternIndicators.length > 0 && (
+                            <div className="text-xs mt-1 space-x-1">
+                              {absorptionZone && <span>🌊</span>}
+                              {srLevel && <span>{srLevel.type === 'support' ? '🛡️' : '🚧'}</span>}
+                              {node.whaleActivity && <span>🐋</span>}
+                            </div>
+                          )}
                         </div>
 
                         {/* Volume Bars */}

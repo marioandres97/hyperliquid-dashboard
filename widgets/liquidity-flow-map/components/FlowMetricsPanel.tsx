@@ -1,14 +1,21 @@
 'use client';
 
 import React from 'react';
-import type { FlowMetrics } from '../types';
+import type { FlowMetrics, DetectedPattern } from '../types';
 
 export interface FlowMetricsPanelProps {
   metrics: FlowMetrics | null;
   lastUpdate?: Date;
+  patterns?: DetectedPattern[];
+  showPatterns?: boolean;
 }
 
-export function FlowMetricsPanel({ metrics, lastUpdate }: FlowMetricsPanelProps) {
+export function FlowMetricsPanel({ 
+  metrics, 
+  lastUpdate,
+  patterns = [],
+  showPatterns = true,
+}: FlowMetricsPanelProps) {
   if (!metrics) {
     return (
       <div className="glass rounded-xl p-6">
@@ -37,6 +44,13 @@ export function FlowMetricsPanel({ metrics, lastUpdate }: FlowMetricsPanelProps)
         return 'text-yellow-400';
     }
   };
+
+  // Get top patterns by confidence
+  const topPatterns = showPatterns && patterns.length > 0
+    ? patterns
+        .sort((a, b) => (b.confidence * b.strength) - (a.confidence * a.strength))
+        .slice(0, 3)
+    : [];
 
   const metrics_data = [
     {
@@ -140,6 +154,47 @@ export function FlowMetricsPanel({ metrics, lastUpdate }: FlowMetricsPanelProps)
           </div>
         ))}
       </div>
+
+      {/* Pattern Insights Section */}
+      {showPatterns && topPatterns.length > 0 && (
+        <div className="mt-6 pt-6 border-t border-white/10">
+          <h4 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+            <span>🔍</span>
+            <span>Active Patterns</span>
+          </h4>
+          <div className="space-y-2">
+            {topPatterns.map((pattern) => (
+              <div
+                key={pattern.id}
+                className="bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-lg p-3 border border-purple-500/20 hover:border-purple-500/40 transition-all"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex-1">
+                    <p className="text-sm text-white/90 font-medium">
+                      {pattern.description}
+                    </p>
+                    <div className="flex items-center gap-3 mt-1">
+                      <span className="text-xs text-white/50">
+                        Confidence: {(pattern.confidence * 100).toFixed(0)}%
+                      </span>
+                      <span className="text-xs text-white/50">
+                        Strength: {pattern.strength.toFixed(0)}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex-shrink-0">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500/20 to-blue-500/20 flex items-center justify-center border border-purple-500/30">
+                      <span className="text-lg font-bold text-purple-300">
+                        {(pattern.confidence * pattern.strength).toFixed(0)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
