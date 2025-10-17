@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react';
-import { HyperliquidAPI } from '@nktkas/hyperliquid';
 
 const COINS = ['BTC', 'ETH', 'HYPE'];
 
@@ -13,59 +12,96 @@ interface PriceData {
 export function usePrices() {
   const [prices, setPrices] = useState<Record<string, PriceData>>({});
   const [isConnected, setIsConnected] = useState<Record<string, boolean>>({});
-  const wsConnections = useRef<Map<string, any>>(new Map());
+  const wsRef = useRef<WebSocket | null>(null);
+  const priceHistory = useRef<Record<string, number[]>>({});
 
   useEffect(() => {
-    COINS.forEach(coin => {
-      connectToCoin(coin);
-    });
+    connectToWebSocket();
 
     return () => {
-      wsConnections.current.forEach((ws) => {
-        if (ws && ws.destroy) {
-          ws.destroy();
-        }
-      });
-      wsConnections.current.clear();
+      if (wsRef.current) {
+        wsRef.current.close();
+      }
     };
   }, []);
 
-  const connectToCoin = async (coin: string) => {
-    try {
-      const ws = await HyperliquidAPI.ws.allMids({
-        callback: (data) => {
-          const mids = data.data?.mids;
-          if (!mids) return;
+  const connectToWebSocket = () => {
+    const ws = new WebSocket('wss://api.hyperliquid.xyz/ws');
+    wsRef.current = ws;
 
-          const coinData = mids[coin];
-          if (coinData) {
-            const price = parseFloat(coinData);
-            
-            setPrices(prev => {
-              const oldPrice = prev[coin]?.price || price;
+    ws.onopen = () => {
+      console.log('Prices WebSocket connected');
+      
+      // Subscribe to all mids for all coins
+      ws.send(JSON.stringify({
+        method: 'subscribe',
+        subscription: { type: 'allMids' }
+      }));
+
+      COINS.forEach(coin => {
+        setIsConnected(prev => ({ ...prev, [coin]: true }));
+      });
+    };
+
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        
+        if (data.channel === 'allMids' && data.data?.mids) {
+          const mids = data.data.mids;
+          
+          COINS.forEach(coin => {
+            if (mids[coin]) {
+              const price = parseFloat(mids[coin]);
+              
+              // Track price history for 24h change calculation
+              if (!priceHistory.current[coin]) {
+                priceHistory.current[coin] = [];
+              }
+              priceHistory.current[coin].push(price);
+              
+              // Keep last 100 prices
+              if (priceHistory.current[coin].length > 100) {
+                priceHistory.current[coin].shift();
+              }
+              
+              const history = priceHistory.current[coin];
+              const oldPrice = history[0] || price;
               const change24h = ((price - oldPrice) / oldPrice) * 100;
               
-              return {
+              setPrices(prev => ({
                 ...prev,
                 [coin]: {
                   price,
-                  change24h: prev[coin]?.change24h || 0,
+                  change24h,
                   volume24h: prev[coin]?.volume24h || 0,
                   lastUpdate: Date.now()
                 }
-              };
-            });
-
-            setIsConnected(prev => ({ ...prev, [coin]: true }));
-          }
+              }));
+            }
+          });
         }
-      });
+      } catch (error) {
+        console.error('Error processing price data:', error);
+      }
+    };
 
-      wsConnections.current.set(coin, ws);
-    } catch (error) {
-      console.error(`Failed to connect to ${coin}:`, error);
-      setIsConnected(prev => ({ ...prev, [coin]: false }));
-    }
+    ws.onerror = (error) => {
+      console.error('Prices WebSocket error:', error);
+      COINS.forEach(coin => {
+        setIsConnected(prev => ({ ...prev, [coin]: false }));
+      });
+    };
+
+    ws.onclose = () => {
+      console.log('Prices WebSocket closed, reconnecting...');
+      COINS.forEach(coin => {
+        setIsConnected(prev => ({ ...prev, [coin]: false }));
+      });
+      
+      // Reconnect after 5 seconds
+      setTimeout(connectToWebSocket, 5000);
+    };
   };
 
   return { prices, isConnected };
