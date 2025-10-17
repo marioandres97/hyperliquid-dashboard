@@ -32,4 +32,25 @@ export interface PnLStats {
     week: number;
     month: number;
   };
+  bySignalType: {
+    LONG: {
+      totalTrades: number;
+      winningTrades: number;
+      losingTrades: number;
+      winRate: number;
+      totalPnL: number;
+    };
+    SHORT: {
+      totalTrades: number;
+      winningTrades: number;
+      losingTrades: number;
+      winRate: number;
+      totalPnL: number;
+    };
+  };
+  equityCurve: Array<{
+    timestamp: number;
+    equity: number;
+    pnl: number;
+  }>;
 }
