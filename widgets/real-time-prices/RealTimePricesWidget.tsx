@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { TrendingUp, TrendingDown, Wifi, WifiOff } from 'lucide-react';
 
 interface PriceData {
@@ -18,7 +18,7 @@ export default function RealTimePricesWidget() {
 
   useEffect(() => {
     let ws: WebSocket | null = null;
-    let reconnectTimeout: NodeJS.Timeout;
+    let reconnectTimeout: NodeJS.Timeout | null = null;
     let priceHistory: Record<string, number[]> = {};
 
     const connect = () => {
@@ -60,12 +60,13 @@ export default function RealTimePricesWidget() {
                   // Add current price to history
                   priceHistory[coin].push(currentPrice);
                   
-                  // Keep only last 100 prices for 24h change calculation
-                  if (priceHistory[coin].length > 100) {
+                  // Keep only last 50 prices for recent change tracking
+                  if (priceHistory[coin].length > 50) {
                     priceHistory[coin].shift();
                   }
                   
-                  // Calculate 24h change (using first price in history as baseline)
+                  // Calculate recent change percentage (using first price in history as baseline)
+                  // Note: This represents change since connection, not actual 24h change
                   let change24h = 0;
                   if (priceHistory[coin].length > 1) {
                     const oldPrice = priceHistory[coin][0];
