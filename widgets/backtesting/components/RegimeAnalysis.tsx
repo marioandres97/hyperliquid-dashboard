@@ -18,16 +18,16 @@ export function RegimeAnalysis({
     title: string,
     stats: RegimeStats,
     icon: React.ReactNode,
-    color: string
+    colorClasses: { bg: string; border: string; text: string }
   ) => {
     const hasData = stats.totalTrades > 0;
     const isProfitable = stats.totalPnL >= 0;
 
     return (
-      <div className={`bg-${color}-500/10 border border-${color}-400/30 rounded-xl p-4`}>
+      <div className={`${colorClasses.bg} ${colorClasses.border} rounded-xl p-4`}>
         <div className="flex items-center gap-2 mb-3">
           {icon}
-          <h4 className={`text-sm font-bold text-${color}-400`}>{title}</h4>
+          <h4 className={`text-sm font-bold ${colorClasses.text}`}>{title}</h4>
         </div>
 
         {hasData ? (
@@ -100,21 +100,33 @@ export function RegimeAnalysis({
           'Bull Market',
           bullPerformance,
           <TrendingUp className="w-5 h-5 text-green-400" />,
-          'green'
+          {
+            bg: 'bg-green-500/10',
+            border: 'border border-green-400/30',
+            text: 'text-green-400'
+          }
         )}
 
         {renderRegimeCard(
           'Bear Market',
           bearPerformance,
           <TrendingDown className="w-5 h-5 text-red-400" />,
-          'red'
+          {
+            bg: 'bg-red-500/10',
+            border: 'border border-red-400/30',
+            text: 'text-red-400'
+          }
         )}
 
         {renderRegimeCard(
           'Sideways Market',
           sidewaysPerformance,
           <Minus className="w-5 h-5 text-blue-400" />,
-          'blue'
+          {
+            bg: 'bg-blue-500/10',
+            border: 'border border-blue-400/30',
+            text: 'text-blue-400'
+          }
         )}
       </div>
 
