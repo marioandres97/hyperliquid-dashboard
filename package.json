@@ -10,13 +10,10 @@
   "dependencies": {
     "@nktkas/hyperliquid": "^0.25.2",
     "@tanstack/react-query": "^5.90.3",
-    "@types/papaparse": "^5.3.16",
     "@vercel/kv": "^3.0.0",
-    "date-fns": "^4.1.0",
     "ioredis": "^5.8.1",
     "lucide-react": "^0.545.0",
     "next": "15.5.5",
-    "papaparse": "^5.5.3",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "recharts": "^3.2.1"
