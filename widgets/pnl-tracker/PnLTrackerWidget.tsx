@@ -26,7 +26,7 @@ export default function PnLTrackerWidget() {
   const isProfitable = stats.totalPnL >= 0;
 
   // Format equity curve data for chart
-  const chartData = stats.equityCurve.map(point => ({
+  const chartData = (stats.equityCurve || []).map(point => ({
     time: new Date(point.timestamp).toLocaleDateString('en-US', { 
       month: 'short', 
       day: 'numeric',
@@ -105,15 +105,15 @@ export default function PnLTrackerWidget() {
             <span className="text-xs text-white/60">LONG Win Rate</span>
           </div>
           <div className="text-2xl font-bold text-green-400">
-            {stats.bySignalType.LONG.winRate.toFixed(1)}%
+            {stats.bySignalType?.LONG?.winRate?.toFixed(1) ?? '0.0'}%
           </div>
           <div className="text-xs text-white/50 mt-1">
-            {stats.bySignalType.LONG.winningTrades}W / {stats.bySignalType.LONG.losingTrades}L
+            {stats.bySignalType?.LONG?.winningTrades ?? 0}W / {stats.bySignalType?.LONG?.losingTrades ?? 0}L
           </div>
           <div className={`text-xs font-medium mt-1 ${
-            stats.bySignalType.LONG.totalPnL >= 0 ? 'text-green-400' : 'text-red-400'
+            (stats.bySignalType?.LONG?.totalPnL ?? 0) >= 0 ? 'text-green-400' : 'text-red-400'
           }`}>
-            PnL: {stats.bySignalType.LONG.totalPnL >= 0 ? '+' : ''}${stats.bySignalType.LONG.totalPnL.toFixed(2)}
+            PnL: {(stats.bySignalType?.LONG?.totalPnL ?? 0) >= 0 ? '+' : ''}${(stats.bySignalType?.LONG?.totalPnL ?? 0).toFixed(2)}
           </div>
         </div>
 
@@ -123,15 +123,15 @@ export default function PnLTrackerWidget() {
             <span className="text-xs text-white/60">SHORT Win Rate</span>
           </div>
           <div className="text-2xl font-bold text-red-400">
-            {stats.bySignalType.SHORT.winRate.toFixed(1)}%
+            {stats.bySignalType?.SHORT?.winRate?.toFixed(1) ?? '0.0'}%
           </div>
           <div className="text-xs text-white/50 mt-1">
-            {stats.bySignalType.SHORT.winningTrades}W / {stats.bySignalType.SHORT.losingTrades}L
+            {stats.bySignalType?.SHORT?.winningTrades ?? 0}W / {stats.bySignalType?.SHORT?.losingTrades ?? 0}L
           </div>
           <div className={`text-xs font-medium mt-1 ${
-            stats.bySignalType.SHORT.totalPnL >= 0 ? 'text-green-400' : 'text-red-400'
+            (stats.bySignalType?.SHORT?.totalPnL ?? 0) >= 0 ? 'text-green-400' : 'text-red-400'
           }`}>
-            PnL: {stats.bySignalType.SHORT.totalPnL >= 0 ? '+' : ''}${stats.bySignalType.SHORT.totalPnL.toFixed(2)}
+            PnL: {(stats.bySignalType?.SHORT?.totalPnL ?? 0) >= 0 ? '+' : ''}${(stats.bySignalType?.SHORT?.totalPnL ?? 0).toFixed(2)}
           </div>
         </div>
       </div>
