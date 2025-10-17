@@ -218,3 +218,115 @@ export interface CollectorError {
   message: string;
   details?: any;
 }
+
+/**
+ * Phase 3: Enhanced Features Types
+ */
+
+/**
+ * Absorption zone - area where large orders absorb market flow
+ */
+export interface AbsorptionZone {
+  id: string;
+  price: number;
+  priceRange: [number, number]; // min, max
+  volume: number;
+  side: 'buy' | 'sell';
+  strength: number; // 0-100
+  timestamp: number;
+  tradeCount: number;
+  whaleActivity: boolean;
+  status: 'active' | 'breached' | 'absorbed';
+}
+
+/**
+ * Liquidation cascade risk assessment
+ */
+export interface LiquidationCascade {
+  id: string;
+  priceLevel: number;
+  risk: 'high' | 'medium' | 'low';
+  estimatedVolume: number;
+  liquidationCount: number;
+  side: 'long' | 'short';
+  timestamp: number;
+  triggerPrice?: number;
+  affectedLevels: number[]; // prices that could cascade
+}
+
+/**
+ * Support/Resistance level
+ */
+export interface SupportResistanceLevel {
+  id: string;
+  price: number;
+  type: 'support' | 'resistance';
+  strength: number; // 0-100, based on touch count and volume
+  touchCount: number;
+  volume: number;
+  firstTouch: number; // timestamp
+  lastTouch: number;  // timestamp
+  isBreached: boolean;
+  breachTimestamp?: number;
+}
+
+/**
+ * Pattern types for detection
+ */
+export type PatternType = 
+  | 'absorption_zone'
+  | 'liquidation_cascade'
+  | 'support_level'
+  | 'resistance_level'
+  | 'whale_accumulation'
+  | 'whale_distribution'
+  | 'breakout'
+  | 'breakdown';
+
+/**
+ * Detected pattern
+ */
+export interface DetectedPattern {
+  id: string;
+  type: PatternType;
+  timestamp: number;
+  price: number;
+  strength: number;
+  confidence: number;
+  description: string;
+  metadata: Record<string, any>;
+}
+
+/**
+ * Alert severity levels
+ */
+export type AlertSeverity = 'critical' | 'high' | 'medium' | 'low' | 'info';
+
+/**
+ * Alert for significant market events
+ */
+export interface Alert {
+  id: string;
+  coin: Coin;
+  type: PatternType;
+  severity: AlertSeverity;
+  title: string;
+  message: string;
+  timestamp: number;
+  price: number;
+  metadata: Record<string, any>;
+  acknowledged: boolean;
+  expiresAt?: number;
+}
+
+/**
+ * Alert configuration
+ */
+export interface AlertConfig {
+  enabled: boolean;
+  minSeverity: AlertSeverity;
+  patterns: PatternType[];
+  notificationSound: boolean;
+  autoAcknowledge: boolean;
+  autoAcknowledgeDelay?: number; // ms
+}
