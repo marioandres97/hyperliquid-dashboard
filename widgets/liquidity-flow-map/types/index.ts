@@ -330,3 +330,151 @@ export interface AlertConfig {
   autoAcknowledge: boolean;
   autoAcknowledgeDelay?: number; // ms
 }
+
+/**
+ * Phase 4: Advanced Analytics Types
+ */
+
+/**
+ * Playback state for historical data
+ */
+export interface PlaybackState {
+  isPlaying: boolean;
+  currentTime: number;
+  startTime: number;
+  endTime: number;
+  speed: number; // 0.5, 1, 2, 4
+  direction: 'forward' | 'backward';
+}
+
+/**
+ * Historical snapshot for time travel
+ */
+export interface HistoricalSnapshot {
+  timestamp: number;
+  flowData: FlowData;
+  patterns: DetectedPattern[];
+  alerts: Alert[];
+  price: number;
+}
+
+/**
+ * Volume Profile data
+ */
+export interface VolumeProfile {
+  coin: Coin;
+  timestamp: number;
+  priceLevel: number;
+  volume: number;
+  buyVolume: number;
+  sellVolume: number;
+  trades: number;
+  deltaVolume: number; // buy - sell
+}
+
+/**
+ * Volume Profile markers (POC, VAH, VAL)
+ */
+export interface VolumeProfileMarkers {
+  poc: number; // Point of Control - price with highest volume
+  vah: number; // Value Area High - top 70% volume
+  val: number; // Value Area Low - bottom 70% volume
+  totalVolume: number;
+  valueAreaVolume: number; // 70% of total
+  profiles: VolumeProfile[];
+}
+
+/**
+ * Mean reversion setup
+ */
+export interface MeanReversionSetup {
+  id: string;
+  coin: Coin;
+  timestamp: number;
+  type: 'overbought' | 'oversold';
+  currentPrice: number;
+  meanPrice: number;
+  deviation: number; // standard deviations from mean
+  reversionProbability: number; // 0-1
+  targetPrice: number;
+  strength: number; // 0-100
+  metadata: {
+    volumeConfirmation: boolean;
+    patternConfirmation: boolean;
+    timeframe: TimeWindow;
+  };
+}
+
+/**
+ * Trade setup combining all analytics
+ */
+export interface TradeSetup {
+  id: string;
+  coin: Coin;
+  timestamp: number;
+  type: 'long' | 'short';
+  quality: number; // 0-100 overall score
+  confidence: number; // 0-1
+  
+  // Entry/Exit/Stop levels
+  entry: number;
+  target1: number;
+  target2: number;
+  stopLoss: number;
+  riskRewardRatio: number;
+  
+  // Supporting analytics
+  patterns: DetectedPattern[];
+  volumeProfile?: VolumeProfileMarkers;
+  meanReversion?: MeanReversionSetup;
+  absorptionZones?: AbsorptionZone[];
+  supportResistance?: SupportResistanceLevel[];
+  
+  // Metadata
+  description: string;
+  reasoning: string[];
+  risks: string[];
+  timeframe: TimeWindow;
+  status: 'active' | 'triggered' | 'completed' | 'stopped' | 'expired';
+}
+
+/**
+ * Setup performance tracking
+ */
+export interface SetupPerformance {
+  setupId: string;
+  entryTime?: number;
+  entryPrice?: number;
+  exitTime?: number;
+  exitPrice?: number;
+  highPrice: number;
+  lowPrice: number;
+  pnl: number; // percentage
+  status: 'open' | 'win' | 'loss' | 'breakeven';
+  maxDrawdown: number;
+  maxProfit: number;
+}
+
+/**
+ * Export configuration
+ */
+export interface ExportConfig {
+  format: 'screenshot' | 'video' | 'csv' | 'json' | 'pdf';
+  includePatterns: boolean;
+  includeMetrics: boolean;
+  includeSetups: boolean;
+  timeRange?: {
+    start: number;
+    end: number;
+  };
+}
+
+/**
+ * Export result
+ */
+export interface ExportResult {
+  format: ExportConfig['format'];
+  data: Blob | string;
+  filename: string;
+  timestamp: number;
+}

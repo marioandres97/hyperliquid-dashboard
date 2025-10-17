@@ -8,3 +8,6 @@ export * from './components';
 
 // Phase 3 example
 export { Phase3Example } from './Phase3Example';
+
+// Phase 4 example
+export { Phase4Example } from './Phase4Example';
