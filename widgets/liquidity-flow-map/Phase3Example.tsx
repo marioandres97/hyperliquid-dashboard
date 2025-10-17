@@ -22,6 +22,10 @@ import type { Coin, TimeWindow, DetectedPattern } from './types';
 /**
  * Comprehensive example demonstrating all Phase 3 enhanced features
  */
+
+// Display constants
+const MAX_DISPLAYED_ITEMS = 3; // Max items to show in analytics sections
+
 export function Phase3Example() {
   const [coin, setCoin] = useState<Coin>('BTC');
   const [timeWindow, setTimeWindow] = useState<TimeWindow>('5m');
@@ -34,8 +38,10 @@ export function Phase3Example() {
     updateInterval: 2000,
   });
 
-  // Current price (estimated from recent trades)
-  const currentPrice = flowData?.trades[flowData.trades.length - 1]?.price || 0;
+  // Current price (estimated from recent trades with validation)
+  const currentPrice = flowData?.trades && flowData.trades.length > 0
+    ? flowData.trades[flowData.trades.length - 1].price
+    : 0;
 
   // Phase 3: Pattern detection hooks
   const { zones: absorptionZones, activeZones } = useAbsorptionZones({
@@ -86,6 +92,11 @@ export function Phase3Example() {
       notificationSound: true,
     },
   });
+
+  // Helper to format strength values consistently
+  const formatStrength = (strength: number): string => {
+    return strength.toFixed(0);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 p-8">
@@ -257,13 +268,13 @@ export function Phase3Example() {
               <h4 className="text-sm font-semibold text-blue-300 mb-3">Absorption Zones</h4>
               {activeZones.length > 0 ? (
                 <div className="space-y-2">
-                  {activeZones.slice(0, 3).map((zone) => (
+                  {activeZones.slice(0, MAX_DISPLAYED_ITEMS).map((zone) => (
                     <div key={zone.id} className="bg-blue-500/10 rounded-lg p-3 border border-blue-500/20">
                       <div className="flex justify-between items-start mb-1">
                         <span className="text-white/80 font-medium">
                           {zone.side === 'buy' ? '📈' : '📉'} ${zone.price.toFixed(2)}
                         </span>
-                        <span className="text-xs text-white/50">{zone.strength.toFixed(0)}%</span>
+                        <span className="text-xs text-white/50">{formatStrength(zone.strength)}%</span>
                       </div>
                       <div className="text-xs text-white/60">
                         {zone.whaleActivity && '🐋 '}{zone.tradeCount} trades
@@ -281,7 +292,7 @@ export function Phase3Example() {
               <h4 className="text-sm font-semibold text-orange-300 mb-3">Cascade Risks</h4>
               {cascades.length > 0 ? (
                 <div className="space-y-2">
-                  {cascades.slice(0, 3).map((cascade) => (
+                  {cascades.slice(0, MAX_DISPLAYED_ITEMS).map((cascade) => (
                     <div key={cascade.id} className="bg-orange-500/10 rounded-lg p-3 border border-orange-500/20">
                       <div className="flex justify-between items-start mb-1">
                         <span className="text-white/80 font-medium">
@@ -311,7 +322,7 @@ export function Phase3Example() {
               <h4 className="text-sm font-semibold text-green-300 mb-3">Key Levels</h4>
               {srLevels.length > 0 ? (
                 <div className="space-y-2">
-                  {srLevels.slice(0, 3).map((level) => (
+                  {srLevels.slice(0, MAX_DISPLAYED_ITEMS).map((level) => (
                     <div key={level.id} className="bg-green-500/10 rounded-lg p-3 border border-green-500/20">
                       <div className="flex justify-between items-start mb-1">
                         <span className="text-white/80 font-medium">
