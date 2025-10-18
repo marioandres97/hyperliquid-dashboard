@@ -478,3 +478,32 @@ export interface ExportResult {
   filename: string;
   timestamp: number;
 }
+
+/**
+ * Candlestick data for price chart
+ */
+export interface CandleData {
+  timestamp: number;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume: number;
+  side: 'buy' | 'sell' | 'neutral'; // dominant side for this candle
+}
+
+/**
+ * Trade bubble for large trades visualization
+ */
+export interface TradeBubble {
+  id: string;
+  timestamp: number;
+  price: number;
+  size: number;
+  notional: number; // USD value
+  side: 'buy' | 'sell';
+  radius: number; // calculated based on size
+  opacity: number; // for fade in/out animation
+  createdAt: number; // when bubble was created
+  expiresAt: number; // when bubble should fade out
+}
