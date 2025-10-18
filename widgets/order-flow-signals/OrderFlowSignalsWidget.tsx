@@ -40,7 +40,7 @@ export default function OrderFlowSignalsWidget() {
       </div>
 
       {/* Signals List */}
-      <div className="flex-1 overflow-y-auto space-y-2">
+      <div className="flex-1 overflow-y-auto space-y-2 min-h-0">
         {COINS.map(coin => {
           const state = coinStates[coin];
           const signal = state?.signal;
@@ -59,11 +59,11 @@ export default function OrderFlowSignalsWidget() {
           return (
             <div
               key={coin}
-              className="p-3 border border-white/10 rounded-xl bg-white/5 backdrop-blur-sm"
+              className="p-4 border border-white/10 rounded-xl bg-white/5 backdrop-blur-sm"
             >
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between mb-2">
                 <div>
-                  <div className="font-semibold text-white">{coin}</div>
+                  <div className="font-semibold text-white text-lg">{coin}</div>
                   <div className="text-sm text-white/60">
                     {state?.currentPrice > 0
                       ? `$${state.currentPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
@@ -74,7 +74,33 @@ export default function OrderFlowSignalsWidget() {
                   {state?.tradeCount || 0} trades
                 </div>
               </div>
-              <div className="mt-1.5 text-xs text-white/50">Scanning...</div>
+              
+              {/* Volume indicator */}
+              <div className="mt-3 space-y-1.5">
+                <div className="text-xs text-white/50">Volume Activity</div>
+                <div className="flex gap-1">
+                  {[...Array(10)].map((_, i) => (
+                    <div 
+                      key={i}
+                      className={`flex-1 h-8 rounded-sm ${
+                        i < (state?.tradeCount || 0) % 10 
+                          ? 'bg-purple-400/40' 
+                          : 'bg-white/10'
+                      }`}
+                      style={{ 
+                        height: `${Math.min(32, 8 + (i * 2.5))}px`,
+                        transition: 'all 0.3s ease'
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* Trend indicator */}
+              <div className="mt-3 flex items-center justify-between text-xs">
+                <span className="text-white/50">Market Status</span>
+                <span className="text-white/70">Scanning for signals...</span>
+              </div>
             </div>
           );
         })}
