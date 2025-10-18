@@ -98,3 +98,23 @@ export async function getAssetContext(coin: string) {
     return null;
   }
 }
+
+// Función helper para obtener velas de 1H para las últimas 24 horas
+export async function get1HCandlesLast24Hours(coin: string) {
+  try {
+    const now = Date.now();
+    const twentyFourHoursAgo = now - (24 * 60 * 60 * 1000);
+    
+    const candles = await getCandleSnapshot(
+      coin,
+      '1h',
+      twentyFourHoursAgo,
+      now
+    );
+    
+    return candles;
+  } catch (error) {
+    console.error(`Error fetching 1H candles for ${coin}:`, error);
+    return [];
+  }
+}

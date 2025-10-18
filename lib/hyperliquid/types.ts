@@ -23,6 +23,15 @@ export interface CandleData {
   n: number; // number of trades
 }
 
+export interface OHLCCandle {
+  time: number;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume: number;
+}
+
 export interface OIPriceData {
   timestamp: number;
   price: number;
