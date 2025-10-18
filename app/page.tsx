@@ -8,26 +8,31 @@ import InstitutionalAnalysisPortalWidget from '@/widgets/institutional-analysis-
 
 export default function Home() {
   return (
-    <DashboardGrid>
-      <WidgetContainer title="Order Flow Signals">
-        <OrderFlowSignalsWidget />
-      </WidgetContainer>
+    <div style={{
+      background: 'linear-gradient(135deg, #0a0e17 0%, #1a1f2e 50%, #0f1419 100%)',
+      minHeight: '100vh',
+    }}>
+      <DashboardGrid>
+        <WidgetContainer title="Order Flow Signals">
+          <OrderFlowSignalsWidget />
+        </WidgetContainer>
 
-      <WidgetContainer title="Signal Performance">
-        <SignalPerformanceWidget />
-      </WidgetContainer>
+        <WidgetContainer title="Signal Performance">
+          <SignalPerformanceWidget />
+        </WidgetContainer>
 
-      <WidgetContainer title="Real-Time Prices">
-        <RealTimePricesWidget />
-      </WidgetContainer>
+        <WidgetContainer title="Real-Time Prices">
+          <RealTimePricesWidget />
+        </WidgetContainer>
 
-      <WidgetContainer title="PnL Tracker">
-        <PnLTrackerWidget />
-      </WidgetContainer>
+        <WidgetContainer title="PnL Tracker">
+          <PnLTrackerWidget />
+        </WidgetContainer>
 
-      <WidgetContainer title="">
-        <InstitutionalAnalysisPortalWidget />
-      </WidgetContainer>
-    </DashboardGrid>
+        <WidgetContainer title="">
+          <InstitutionalAnalysisPortalWidget />
+        </WidgetContainer>
+      </DashboardGrid>
+    </div>
   );
 }

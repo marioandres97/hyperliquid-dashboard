@@ -1,7 +1,17 @@
 @import "tailwindcss";
 
+:root {
+  --color-primary-purple: #8B5CF6;
+  --color-primary-blue: #3B82F6;
+  --color-accent-green: #10B981;
+  --color-bg-dark-start: #0a0e17;
+  --color-bg-dark-mid: #1a1f2e;
+  --color-bg-dark-end: #0f1419;
+}
+
 body {
-  background: #0A0E17;
+  background: linear-gradient(135deg, var(--color-bg-dark-start) 0%, var(--color-bg-dark-mid) 50%, var(--color-bg-dark-end) 100%);
+  background-attachment: fixed;
   min-height: 100vh;
   color: #ffffff;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -11,15 +21,38 @@ body {
   background: rgba(15, 20, 25, 0.7);
   backdrop-filter: blur(12px) saturate(180%);
   -webkit-backdrop-filter: blur(12px) saturate(180%);
-  border: 1px solid rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.15);
+  transition: all 0.3s ease;
+}
+
+.glass:hover {
+  border-color: rgba(139, 92, 246, 0.3);
+  box-shadow: 0 8px 32px rgba(139, 92, 246, 0.1);
 }
 
 .premium-glass {
   background: rgba(15, 20, 25, 0.8);
   backdrop-filter: blur(16px) saturate(180%);
   -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(139, 92, 246, 0.2);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  transition: all 0.3s ease;
+}
+
+.premium-glass:hover {
+  border-color: rgba(59, 130, 246, 0.3);
+  box-shadow: 0 12px 48px rgba(139, 92, 246, 0.15);
+}
+
+.gradient-purple-blue {
+  background: linear-gradient(135deg, var(--color-primary-purple) 0%, var(--color-primary-blue) 100%);
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #10B981 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 @keyframes shimmer {
@@ -29,4 +62,15 @@ body {
   100% {
     background-position: 200% 0;
   }
+}
+
+.shimmer {
+  animation: shimmer 3s infinite linear;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(139, 92, 246, 0.3) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
 }
