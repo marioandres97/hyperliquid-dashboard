@@ -43,24 +43,18 @@ const LiquidityFlowMapPage = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-4">
-            <div className="flex items-center gap-4">
-              <div className={`w-3 h-3 rounded-full ${isCollecting ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
-              <div>
-                <div className="text-5xl md:text-6xl font-bold font-mono" style={{ color: premiumTheme.accent.gold }}>
-                  {coin}-USD ${currentPrice ? currentPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '---'}
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <ControlPanel
-                coin={coin}
-                isCollecting={isCollecting}
-                onCoinChange={setCoin}
-                onRefresh={refresh}
-              />
-            </div>
+          {/* Large Price Display */}
+          <div className="text-5xl md:text-6xl font-bold font-mono mb-4" style={{ color: premiumTheme.accent.gold }}>
+            {coin}-USD ${currentPrice ? currentPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '---'}
           </div>
+          
+          {/* Control Panel with Coin Selector and Live Indicator */}
+          <ControlPanel
+            coin={coin}
+            isCollecting={isCollecting}
+            onCoinChange={setCoin}
+            onRefresh={refresh}
+          />
         </motion.div>
 
         {/* Full-width Premium Heatmap */}
