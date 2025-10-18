@@ -2,6 +2,9 @@ import redis, { isRedisAvailable } from '@/lib/redis';
 import { NextResponse } from 'next/server';
 import { TrackedSignal, SignalStats } from '@/widgets/order-flow-signals/types';
 
+// Enable ISR with 30 second revalidation
+export const revalidate = 30;
+
 export async function GET() {
   try {
     if (!isRedisAvailable() || !redis) {

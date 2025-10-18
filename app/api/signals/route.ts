@@ -1,6 +1,9 @@
 import redis, { isRedisAvailable } from '@/lib/redis';
 import { NextRequest, NextResponse } from 'next/server';
 
+// Enable ISR with 30 second revalidation
+export const revalidate = 30;
+
 export async function POST(request: NextRequest) {
   try {
     if (!isRedisAvailable() || !redis) {
