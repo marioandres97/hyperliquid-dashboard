@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { usePrices } from './usePrices';
-import { useTrades } from '@/lib/hyperliquid/hooks/useTrades';
 import { calculateCVD, getCVDTrend, formatCVDTime, CVDDataPoint } from '@/lib/utils/cvd';
 import { TrendingUp, TrendingDown, DollarSign, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
@@ -20,59 +19,96 @@ function useMultiCoinTrades() {
       HYPE: []
     };
     
-    const ws = new WebSocket('wss://api.hyperliquid.xyz/ws');
+    let ws: WebSocket | null = null;
+    let reconnectTimeout: NodeJS.Timeout | null = null;
+    let updateTimeout: NodeJS.Timeout | null = null;
     
-    ws.onopen = () => {
-      // Subscribe to trades for all coins
-      COINS.forEach(coin => {
-        ws.send(JSON.stringify({
-          method: 'subscribe',
-          subscription: { type: 'trades', coin }
-        }));
-      });
-    };
-    
-    ws.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        
-        if (data.channel === 'trades' && data.data) {
-          const coin = data.data[0]?.coin;
-          if (!coin || !COINS.includes(coin)) return;
-          
-          const newTrades = data.data.map((t: any) => ({
-            timestamp: t.time,
-            side: t.side === 'B' ? 'BUY' as const : 'SELL' as const,
-            size: parseFloat(t.sz),
-            price: parseFloat(t.px)
+    const connectWebSocket = () => {
+      ws = new WebSocket('wss://api.hyperliquid.xyz/ws');
+      
+      ws.onopen = () => {
+        console.log('CVD trades WebSocket connected');
+        // Subscribe to trades for all coins
+        COINS.forEach(coin => {
+          ws?.send(JSON.stringify({
+            method: 'subscribe',
+            subscription: { type: 'trades', coin }
           }));
+        });
+      };
+      
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
           
-          // Add to buffer
-          tradeBuffers[coin].push(...newTrades);
-          
-          // Keep only last 24h + buffer (25h)
-          const cutoff = Date.now() - (25 * 60 * 60 * 1000);
-          tradeBuffers[coin] = tradeBuffers[coin].filter(t => t.timestamp >= cutoff);
-          
-          // Update state periodically (every 10 seconds)
-          setTrades(prev => ({
-            ...prev,
-            [coin]: [...tradeBuffers[coin]]
-          }));
+          if (data.channel === 'trades' && data.data) {
+            const coin = data.data[0]?.coin;
+            if (!coin || !COINS.includes(coin)) return;
+            
+            const newTrades = data.data.map((t: any) => ({
+              timestamp: t.time,
+              side: t.side === 'B' ? 'BUY' as const : 'SELL' as const,
+              size: parseFloat(t.sz),
+              price: parseFloat(t.px)
+            }));
+            
+            // Add to buffer
+            tradeBuffers[coin].push(...newTrades);
+            
+            // Keep only last 24h + buffer (25h)
+            const cutoff = Date.now() - (25 * 60 * 60 * 1000);
+            tradeBuffers[coin] = tradeBuffers[coin].filter(t => t.timestamp >= cutoff);
+            
+            // Debounce state updates - only update every 2 seconds max
+            if (!updateTimeout) {
+              updateTimeout = setTimeout(() => {
+                setTrades({ ...tradeBuffers });
+                updateTimeout = null;
+              }, 2000);
+            }
+          }
+        } catch (error) {
+          console.error('Error processing CVD trades:', error);
         }
-      } catch (error) {
-        console.error('Error processing trades:', error);
-      }
+      };
+      
+      ws.onerror = (error) => {
+        console.error('CVD trades WebSocket error:', error);
+      };
+      
+      ws.onclose = () => {
+        console.log('CVD trades WebSocket closed, reconnecting...');
+        // Reconnect after 5 seconds
+        reconnectTimeout = setTimeout(() => {
+          connectWebSocket();
+        }, 5000);
+      };
     };
+    
+    connectWebSocket();
     
     // Update trades state every 10 seconds
     const updateInterval = setInterval(() => {
-      setTrades({ ...tradeBuffers });
+      // Only update if data has changed
+      setTrades(prev => {
+        const hasChanges = COINS.some(coin => {
+          const prevLen = prev[coin]?.length || 0;
+          const currLen = tradeBuffers[coin]?.length || 0;
+          return prevLen !== currLen;
+        });
+        
+        if (hasChanges) {
+          return { ...tradeBuffers };
+        }
+        return prev;
+      });
     }, 10000);
     
     return () => {
       clearInterval(updateInterval);
-      ws.close();
+      if (updateTimeout) clearTimeout(updateTimeout);
+      if (reconnectTimeout) clearTimeout(reconnectTimeout);
+      if (ws) ws.close();
     };
   }, []);
   

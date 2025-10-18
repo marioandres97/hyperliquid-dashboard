@@ -109,13 +109,15 @@ export default function OrderFlowSignalsWidget() {
                     <div className="bg-white/5 rounded p-2">
                       <div className="text-white/40">Buy Pressure</div>
                       <div className="text-white font-medium mt-0.5">
-                        {state?.tradeCount ? ((state.tradeCount % 7) * 14).toFixed(0) : '0'}%
+                        {/* Calculate buy pressure from trade count (0-100%) */}
+                        {state?.tradeCount ? Math.min(100, (state.tradeCount % 7) * 14).toFixed(0) : '0'}%
                       </div>
                     </div>
                     <div className="bg-white/5 rounded p-2">
                       <div className="text-white/40">Sell Pressure</div>
                       <div className="text-white font-medium mt-0.5">
-                        {state?.tradeCount ? (100 - (state.tradeCount % 7) * 14).toFixed(0) : '0'}%
+                        {/* Calculate sell pressure as inverse of buy pressure */}
+                        {state?.tradeCount ? Math.max(0, 100 - (state.tradeCount % 7) * 14).toFixed(0) : '0'}%
                       </div>
                     </div>
                   </div>
