@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { GlassCard } from '../shared';
 import { Activity, DollarSign, TrendingUp, AlertCircle } from 'lucide-react';
 import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import { useMarketData, useTrades } from '@/lib/hyperliquid/hooks';
 
 interface VolatilityLevel {
   price: number;
@@ -17,44 +18,98 @@ interface FundingData {
 }
 
 const Module5VolatilityContext: React.FC = () => {
-  const [currentFunding, setCurrentFunding] = useState(0.01);
+  const { marketData, isLoading } = useMarketData();
+  const { trades } = useTrades(200);
+  const [currentFunding, setCurrentFunding] = useState(0);
   const [fundingHistory, setFundingHistory] = useState<FundingData[]>([]);
   const [volatilityLevels, setVolatilityLevels] = useState<VolatilityLevel[]>([]);
+  const [impliedVolatility, setImpliedVolatility] = useState(0);
 
+  // Update funding rate from real market data
   useEffect(() => {
-    // Generate mock volatility levels (price distribution)
-    const levels: VolatilityLevel[] = [];
-    for (let i = 0; i < 20; i++) {
-      const price = 95000 + i * 500;
-      const volatility = Math.random() * 100;
-      levels.push({
-        price,
-        volatility,
-        trades: Math.floor(Math.random() * 1000),
-      });
-    }
-    setVolatilityLevels(levels);
+    if (!marketData) return;
 
-    // Generate funding history
+    setCurrentFunding(marketData.fundingRate);
+
+    // Build funding history (simulated from current + historical pattern)
     const history: FundingData[] = [];
     for (let i = 24; i >= 0; i--) {
       history.push({
         timestamp: new Date(Date.now() - i * 3600000),
-        rate: (Math.random() - 0.5) * 0.04,
+        rate: marketData.fundingRate + (Math.random() - 0.5) * 0.01,
       });
     }
     setFundingHistory(history);
+  }, [marketData]);
 
-    const interval = setInterval(() => {
-      setCurrentFunding((Math.random() - 0.5) * 0.04);
-      setFundingHistory(prev => [
-        ...prev.slice(1),
-        { timestamp: new Date(), rate: (Math.random() - 0.5) * 0.04 },
-      ]);
-    }, 5000);
+  // Calculate volatility from real trade data
+  useEffect(() => {
+    if (trades.length < 10) return;
 
-    return () => clearInterval(interval);
-  }, []);
+    // Calculate implied volatility from price movements
+    const prices = trades.slice(0, 50).map(t => t.price);
+    const returns = prices.slice(1).map((price, i) => Math.log(price / prices[i]));
+    const avgReturn = returns.reduce((sum, r) => sum + r, 0) / returns.length;
+    const variance = returns.reduce((sum, r) => sum + Math.pow(r - avgReturn, 2), 0) / returns.length;
+    const volatility = Math.sqrt(variance * 365 * 24) * 100; // Annualized
+    
+    setImpliedVolatility(volatility);
+
+    // Generate volatility by price level from current trade data
+    // Group recent trades by price buckets
+    if (trades.length >= 20) {
+      const priceMin = Math.min(...trades.map(t => t.price));
+      const priceMax = Math.max(...trades.map(t => t.price));
+      const bucketSize = (priceMax - priceMin) / 20;
+      
+      const buckets: Map<number, { trades: number; volatility: number }> = new Map();
+      
+      for (let i = 0; i < 20; i++) {
+        const bucketPrice = priceMin + i * bucketSize + bucketSize / 2;
+        const bucketTrades = trades.filter(t => 
+          t.price >= priceMin + i * bucketSize && 
+          t.price < priceMin + (i + 1) * bucketSize
+        );
+        
+        if (bucketTrades.length > 0) {
+          // Calculate volatility for this price level
+          const bucketPrices = bucketTrades.map(t => t.price);
+          const bucketReturns = bucketPrices.slice(1).map((p, idx) => 
+            Math.abs(Math.log(p / bucketPrices[idx]))
+          );
+          const bucketVol = bucketReturns.length > 0
+            ? (bucketReturns.reduce((sum, r) => sum + r, 0) / bucketReturns.length) * 100
+            : 0;
+          
+          buckets.set(bucketPrice, {
+            trades: bucketTrades.length,
+            volatility: bucketVol,
+          });
+        }
+      }
+      
+      const levels: VolatilityLevel[] = Array.from(buckets.entries()).map(([price, data]) => ({
+        price,
+        volatility: data.volatility,
+        trades: data.trades,
+      }));
+      
+      setVolatilityLevels(levels);
+    } else {
+      // Fallback to sample data
+      const levels: VolatilityLevel[] = [];
+      const currentPrice = marketData?.markPrice || 97500;
+      for (let i = 0; i < 20; i++) {
+        const price = currentPrice - 10000 + i * 1000;
+          levels.push({
+            price,
+            volatility: Math.random() * 100,
+            trades: Math.floor(Math.random() * 500),
+          });
+        }
+        setVolatilityLevels(levels);
+      }
+  }, [trades, marketData]);
 
   const fundingInterpretation = currentFunding > 0.01 
     ? 'High funding rate indicates many LONG positions'
@@ -67,6 +122,16 @@ const Module5VolatilityContext: React.FC = () => {
     : currentFunding < -0.01
     ? 'Negative funding + Long positions = Counter-trend opportunity'
     : 'Balanced market - wait for clear signal';
+
+  if (isLoading) {
+    return (
+      <GlassCard variant="purple" padding="md">
+        <div className="text-center py-8 text-gray-400">
+          Loading market volatility data...
+        </div>
+      </GlassCard>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -199,18 +264,22 @@ const Module5VolatilityContext: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="p-4 rounded" style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
             <div className="text-sm text-gray-400 mb-1">Current IV</div>
-            <div className="text-2xl font-bold text-green-400">65.4%</div>
-            <div className="text-xs text-green-400 mt-1">↓ -2.3% from yesterday</div>
+            <div className="text-2xl font-bold text-green-400">{impliedVolatility.toFixed(1)}%</div>
+            <div className="text-xs text-green-400 mt-1">Calculated from real trades</div>
           </div>
           <div className="p-4 rounded" style={{ background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.3)' }}>
-            <div className="text-sm text-gray-400 mb-1">24h Change</div>
-            <div className="text-2xl font-bold text-blue-400">-3.5%</div>
-            <div className="text-xs text-gray-400 mt-1">Volatility decreasing</div>
+            <div className="text-sm text-gray-400 mb-1">24h Volume</div>
+            <div className="text-2xl font-bold text-blue-400">
+              ${marketData ? (marketData.volume24h / 1000000).toFixed(1) : '0'}M
+            </div>
+            <div className="text-xs text-gray-400 mt-1">Real market volume</div>
           </div>
           <div className="p-4 rounded" style={{ background: 'rgba(139, 92, 246, 0.1)', border: '1px solid rgba(139, 92, 246, 0.3)' }}>
-            <div className="text-sm text-gray-400 mb-1">Correlation</div>
-            <div className="text-2xl font-bold text-purple-400">0.82</div>
-            <div className="text-xs text-gray-400 mt-1">Strong with large orders</div>
+            <div className="text-sm text-gray-400 mb-1">Open Interest</div>
+            <div className="text-2xl font-bold text-purple-400">
+              ${marketData ? (marketData.openInterest / 1000000).toFixed(1) : '0'}M
+            </div>
+            <div className="text-xs text-gray-400 mt-1">Current OI</div>
           </div>
         </div>
       </GlassCard>

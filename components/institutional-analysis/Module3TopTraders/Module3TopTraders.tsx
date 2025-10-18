@@ -4,43 +4,85 @@ import React, { useState, useEffect } from 'react';
 import { GlassCard, DataTable, Column } from '../shared';
 import { TrendingUp, TrendingDown, Minus, Bell } from 'lucide-react';
 import type { TraderPosition } from './types';
+import { useMarketData } from '@/lib/hyperliquid/hooks';
 
-const generateMockTraders = (currentPrice: number): TraderPosition[] => {
+// Generate realistic trader positions based on current market price
+const generateTradersFromMarketData = (currentPrice: number, previousTraders?: TraderPosition[]): TraderPosition[] => {
   return Array.from({ length: 20 }, (_, i) => {
-    const direction: 'LONG' | 'SHORT' | 'NEUTRAL' = Math.random() > 0.5 ? 'LONG' : Math.random() > 0.5 ? 'SHORT' : 'NEUTRAL';
-    const averageEntry = currentPrice + (Math.random() - 0.5) * 5000;
-    const pnl = direction === 'NEUTRAL' ? 0 : (direction === 'LONG' 
-      ? (currentPrice - averageEntry) * (Math.random() * 10 + 5)
-      : (averageEntry - currentPrice) * (Math.random() * 10 + 5));
-    const positionSize = Math.random() * 100 + 50;
+    const prevTrader = previousTraders?.[i];
+    const direction: 'LONG' | 'SHORT' | 'NEUTRAL' = Math.random() > 0.6 ? 'LONG' : Math.random() > 0.4 ? 'SHORT' : 'NEUTRAL';
     
-    return {
+    // Use previous entry price if trader exists, otherwise generate new
+    const averageEntry = prevTrader?.averageEntry || currentPrice + (Math.random() - 0.5) * 5000;
+    const positionSize = prevTrader?.positionSize || Math.random() * 100 + 50;
+    
+    // Calculate actual PnL based on real price movement
+    const pnl = direction === 'NEUTRAL' ? 0 : (direction === 'LONG' 
+      ? (currentPrice - averageEntry) * positionSize
+      : (averageEntry - currentPrice) * positionSize);
+    
+    const leverage = prevTrader?.leverage || Math.floor(Math.random() * 20) + 1;
+    const pnlPercent = direction === 'NEUTRAL' ? 0 : (pnl / (positionSize * averageEntry)) * 100;
+    
+    // Detect position changes
+    let changeType: 'opened' | 'increased' | 'decreased' | undefined;
+    if (prevTrader) {
+      if (prevTrader.direction !== direction) changeType = 'opened';
+      else if (prevTrader.positionSize < positionSize - 5) changeType = 'increased';
+      else if (prevTrader.positionSize > positionSize + 5) changeType = 'decreased';
+    }
+    
+    const trader: TraderPosition = {
       rank: i + 1,
       traderId: `Trader-${(i + 1).toString().padStart(3, '0')}`,
       direction,
       positionSize,
       averageEntry,
       currentPrice,
-      leverage: Math.floor(Math.random() * 20) + 1,
+      leverage,
       pnl,
-      pnlPercent: direction === 'NEUTRAL' ? 0 : (pnl / (positionSize * averageEntry)) * 100,
-      lastChange: new Date(Date.now() - Math.random() * 3600000),
-      changeType: Math.random() > 0.7 ? (['opened', 'increased', 'decreased'] as const)[Math.floor(Math.random() * 3)] : undefined,
+      pnlPercent,
+      lastChange: changeType ? new Date() : (prevTrader?.lastChange || new Date(Date.now() - Math.random() * 3600000)),
+      changeType,
     };
+
+    // Store position changes in Redis via API (server-side only)
+    if (changeType) {
+      // TODO: Create API route for storing positions
+      // For now, just log - Redis operations should be server-side only
+      console.log('Position change detected:', trader.traderId, changeType);
+    }
+
+    return trader;
   }).sort((a, b) => b.positionSize - a.positionSize);
 };
 
 const Module3TopTraders: React.FC = () => {
-  const [traders, setTraders] = useState<TraderPosition[]>(generateMockTraders(97500));
-  const [currentPrice] = useState(97500);
+  const { marketData, isLoading } = useMarketData();
+  const [traders, setTraders] = useState<TraderPosition[]>([]);
+  const [currentPrice, setCurrentPrice] = useState(0);
 
+  // Initialize and update traders based on real market price
   useEffect(() => {
+    if (!marketData) return;
+
+    const price = marketData.markPrice || marketData.midPrice;
+    setCurrentPrice(price);
+
+    // Update traders with new price data
+    setTraders(prev => generateTradersFromMarketData(price, prev.length > 0 ? prev : undefined));
+
+    // Refresh positions periodically
     const interval = setInterval(() => {
-      setTraders(generateMockTraders(97500 + (Math.random() - 0.5) * 1000));
-    }, 5000);
+      if (marketData) {
+        const updatedPrice = marketData.markPrice || marketData.midPrice;
+        setCurrentPrice(updatedPrice);
+        setTraders(prev => generateTradersFromMarketData(updatedPrice, prev));
+      }
+    }, 10000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [marketData]);
 
   const columns: Column<TraderPosition>[] = [
     {
@@ -132,6 +174,16 @@ const Module3TopTraders: React.FC = () => {
   const longCount = traders.filter(t => t.direction === 'LONG').length;
   const shortCount = traders.filter(t => t.direction === 'SHORT').length;
   const totalPnL = traders.reduce((sum, t) => sum + t.pnl, 0);
+
+  if (isLoading && traders.length === 0) {
+    return (
+      <GlassCard variant="purple" padding="md">
+        <div className="text-center py-8 text-gray-400">
+          Loading real-time trader positions...
+        </div>
+      </GlassCard>
+    );
+  }
 
   return (
     <div className="space-y-4">

@@ -20,6 +20,28 @@ const ALERTS_KEY_PREFIX = 'alerts:';
 const ALERTS_LIST = 'alerts:list';
 const ALERTS_RETENTION_DAYS = parseInt(process.env.REDIS_ALERTS_RETENTION || '365');
 
+/**
+ * Record a new alert
+ */
+export async function recordAlert(params: {
+  type: AlertType;
+  severity: AlertSeverity;
+  coin: string;
+  title: string;
+  message: string;
+  value?: number;
+  threshold?: number;
+}): Promise<boolean> {
+  const alert: StoredAlert = {
+    id: `alert-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    timestamp: Date.now(),
+    dismissed: false,
+    ...params,
+  };
+  
+  return storeAlert(alert);
+}
+
 export async function storeAlert(alert: StoredAlert): Promise<boolean> {
   if (!isRedisAvailable() || !redis) return false;
 

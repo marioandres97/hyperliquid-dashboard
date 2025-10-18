@@ -1,45 +1,13 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { GlassCard, DataTable, Column, RealTimeFeed, FeedItem } from '../shared';
-import { TrendingUp, TrendingDown, Filter, Zap, Wallet } from 'lucide-react';
+import { TrendingUp, TrendingDown, Filter, Zap } from 'lucide-react';
 import type { LargeTrade, TradeFilter } from './types';
-
-// Mock wallet labels
-const WALLET_LABELS = [
-  'Binance Hot Wallet',
-  'Whale #42',
-  'Market Maker A',
-  'Institutional Fund',
-  'Unknown',
-];
-
-// Mock data generator
-const generateMockTrade = (id: number): LargeTrade => {
-  const direction = Math.random() > 0.5 ? 'BUY' : 'SELL';
-  const priceBefore = 97500 + (Math.random() - 0.5) * 1000;
-  const priceImpact = Math.random() * 2 + 0.1;
-  const priceAfter = direction === 'BUY' 
-    ? priceBefore + (priceBefore * priceImpact / 100)
-    : priceBefore - (priceBefore * priceImpact / 100);
-  const volume = Math.random() * 50 + 10;
-  const hasCascade = Math.random() > 0.8;
-
-  return {
-    id: `trade-${id}`,
-    timestamp: new Date(),
-    volume,
-    priceBefore,
-    priceAfter,
-    priceImpact,
-    direction,
-    walletLabel: Math.random() > 0.3 ? WALLET_LABELS[Math.floor(Math.random() * WALLET_LABELS.length)] : undefined,
-    cascadeDepth: hasCascade ? Math.floor(Math.random() * 5 + 1) : undefined,
-    cascadeVolume: hasCascade ? Math.random() * 100 + 50 : undefined,
-  };
-};
+import { useTrades } from '@/lib/hyperliquid/hooks';
 
 const Module2LargeOrdersFeed: React.FC = () => {
+  const { trades: rawTrades, isLoading } = useTrades(100);
   const [trades, setTrades] = useState<LargeTrade[]>([]);
   const [filters, setFilters] = useState<TradeFilter>({
     minSize: 10,
@@ -48,21 +16,52 @@ const Module2LargeOrdersFeed: React.FC = () => {
     timeRange: '1h',
   });
   const [showFilters, setShowFilters] = useState(false);
+  const previousPricesRef = useRef<Map<string, number>>(new Map());
 
+  // Convert real trades to LargeTrade format and detect cascades
   useEffect(() => {
-    // Initialize with some trades
-    const initialTrades = Array.from({ length: 10 }, (_, i) => generateMockTrade(i));
-    setTrades(initialTrades);
+    if (rawTrades.length === 0) return;
 
-    // Simulate real-time trade updates
-    let tradeId = 10;
-    const interval = setInterval(() => {
-      const newTrade = generateMockTrade(tradeId++);
-      setTrades(prev => [newTrade, ...prev].slice(0, 50));
-    }, 3000);
+    const convertedTrades: LargeTrade[] = rawTrades.map((trade, index) => {
+      // Calculate price impact by comparing with previous price
+      const previousPrice = previousPricesRef.current.get(trade.side) || trade.price;
+      const priceImpact = Math.abs(((trade.price - previousPrice) / previousPrice) * 100);
+      
+      previousPricesRef.current.set(trade.side, trade.price);
 
-    return () => clearInterval(interval);
-  }, []);
+      // Detect cascade: check if there are multiple large trades in quick succession (within 10 seconds)
+      const recentTrades = rawTrades.slice(Math.max(0, index - 5), index);
+      const cascadeTrades = recentTrades.filter(t => 
+        t.side === trade.side && 
+        Math.abs(t.timestamp.getTime() - trade.timestamp.getTime()) < 10000 &&
+        t.size >= 10
+      );
+      const hasCascade = cascadeTrades.length >= 2;
+
+      const largeTrade: LargeTrade = {
+        id: `${trade.id}-${trade.timestamp.getTime()}`,
+        timestamp: trade.timestamp,
+        volume: trade.size,
+        priceBefore: previousPrice,
+        priceAfter: trade.price,
+        priceImpact: priceImpact,
+        direction: trade.side,
+        cascadeDepth: hasCascade ? cascadeTrades.length + 1 : undefined,
+        cascadeVolume: hasCascade ? cascadeTrades.reduce((sum, t) => sum + t.size, trade.size) : undefined,
+      };
+
+      // Store large trades in Redis via API (server-side only)
+      if (trade.isLarge) {
+        // TODO: Create API route for storing trades
+        // For now, just log - Redis operations should be server-side only
+        console.log('Large trade detected:', largeTrade.id, trade.size);
+      }
+
+      return largeTrade;
+    });
+
+    setTrades(convertedTrades);
+  }, [rawTrades]);
 
   const filteredTrades = trades.filter(trade => {
     if (trade.volume < filters.minSize) return false;
@@ -100,7 +99,7 @@ const Module2LargeOrdersFeed: React.FC = () => {
       label: 'Volume',
       align: 'right',
       render: (value) => (
-        <span className="font-mono text-white">{value.toFixed(2)}</span>
+        <span className="font-mono text-white">{value.toFixed(4)}</span>
       ),
     },
     {
@@ -142,11 +141,10 @@ const Module2LargeOrdersFeed: React.FC = () => {
       render: (value) => (
         value ? (
           <div className="flex items-center gap-1 text-xs text-blue-400">
-            <Wallet size={12} />
             <span>{value}</span>
           </div>
         ) : (
-          <span className="text-xs text-gray-500">Unknown</span>
+          <span className="text-xs text-gray-500">-</span>
         )
       ),
     },
@@ -169,7 +167,7 @@ const Module2LargeOrdersFeed: React.FC = () => {
           </span>
         </div>
         <div className="flex items-center gap-4 text-sm">
-          <span className="text-white font-mono">{trade.volume.toFixed(2)} BTC</span>
+          <span className="text-white font-mono">{trade.volume.toFixed(4)} BTC</span>
           <span className="text-gray-400">→</span>
           <span className={`font-bold ${trade.priceImpact > 1 ? 'text-yellow-400' : 'text-gray-300'}`}>
             {trade.priceImpact.toFixed(2)}% impact
@@ -184,6 +182,16 @@ const Module2LargeOrdersFeed: React.FC = () => {
       </div>
     ),
   }));
+
+  if (isLoading && trades.length === 0) {
+    return (
+      <GlassCard variant="purple" padding="md">
+        <div className="text-center py-8 text-gray-400">
+          Loading real-time trade data...
+        </div>
+      </GlassCard>
+    );
+  }
 
   return (
     <div className="space-y-4">
