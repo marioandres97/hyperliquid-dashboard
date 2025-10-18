@@ -8,6 +8,7 @@ export * from './useLiquidationCascades';
 export * from './useSupportResistance';
 export * from './usePatternDetection';
 export * from './useAlerts';
+export * from './useCandleData';
 
 // Phase 4 hooks
 export * from './useHistoryPlayback';
