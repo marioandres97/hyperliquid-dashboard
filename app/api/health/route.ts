@@ -16,12 +16,6 @@ interface HealthStatus {
   uptime: number;
   version: string;
   environment: string;
-  memory: {
-    heapUsed: number;
-    heapTotal: number;
-    rss: number;
-    external: number;
-  };
   services: {
     database: {
       available: boolean;
@@ -34,11 +28,19 @@ interface HealthStatus {
       latency?: number;
     };
     websocket: {
-      status: string;
+      connected: boolean;
     };
     hyperliquidApi: {
       reachable: boolean;
       latency?: number;
+    };
+  };
+  metrics: {
+    memory: {
+      heapUsed: number;
+      heapTotal: number;
+      rss: number;
+      external: number;
     };
   };
 }
@@ -113,9 +115,9 @@ export async function GET() {
       checkHyperliquidApi(),
     ]);
 
-    // WebSocket status is client-side only, so we report it as managed by client
+    // WebSocket status is client-side only, so we report it as not connected on server
     const websocketHealth = {
-      status: 'client-managed',
+      connected: false,
     };
 
     // Determine overall health status
@@ -135,12 +137,14 @@ export async function GET() {
       uptime,
       version: process.env.npm_package_version || '0.1.0',
       environment: config.env,
-      memory,
       services: {
         database: databaseHealth,
         redis: redisHealth,
         websocket: websocketHealth,
         hyperliquidApi: hyperliquidHealth,
+      },
+      metrics: {
+        memory,
       },
     };
 
@@ -150,7 +154,7 @@ export async function GET() {
       memoryMB: memory.heapUsed,
       databaseConnected: databaseHealth.connected,
       redisConnected: redisHealth.connected,
-      wsStatus: websocketHealth.status,
+      wsConnected: websocketHealth.connected,
       apiReachable: hyperliquidHealth.reachable,
     });
 

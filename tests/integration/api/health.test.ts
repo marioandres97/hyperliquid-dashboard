@@ -54,12 +54,6 @@ describe('Health Check API', () => {
       uptime: expect.any(Number),
       version: expect.any(String),
       environment: expect.any(String),
-      memory: {
-        heapUsed: expect.any(Number),
-        heapTotal: expect.any(Number),
-        rss: expect.any(Number),
-        external: expect.any(Number),
-      },
       services: {
         database: {
           available: expect.any(Boolean),
@@ -69,10 +63,18 @@ describe('Health Check API', () => {
           available: expect.any(Boolean),
         },
         websocket: {
-          status: expect.any(String),
+          connected: expect.any(Boolean),
         },
         hyperliquidApi: {
           reachable: expect.any(Boolean),
+        },
+      },
+      metrics: {
+        memory: {
+          heapUsed: expect.any(Number),
+          heapTotal: expect.any(Number),
+          rss: expect.any(Number),
+          external: expect.any(Number),
         },
       },
     };
