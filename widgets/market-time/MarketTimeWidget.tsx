@@ -76,11 +76,13 @@ export default function MarketTimeWidget() {
           
           {/* Second hand */}
           <div
-            className="absolute top-1/2 left-1/2 w-px h-14 bg-red-400 rounded-full origin-bottom"
+            className={`absolute top-1/2 left-1/2 w-px h-14 bg-red-400 rounded-full origin-bottom ${
+              seconds === 0 ? '' : 'transition-transform duration-500'
+            }`}
             style={{
               transform: `translate(-50%, -100%) rotate(${secondAngle}deg)`,
               transformOrigin: 'bottom center',
-              transition: seconds === 0 ? 'none' : 'transform 0.5s cubic-bezier(0.4, 0.0, 0.2, 1)'
+              transitionTimingFunction: 'cubic-bezier(0.4, 0.0, 0.2, 1)'
             }}
           />
           

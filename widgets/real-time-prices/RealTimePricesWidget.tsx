@@ -1,12 +1,28 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { usePrices } from './usePrices';
 import { TrendingUp, TrendingDown, DollarSign, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 
 const COINS = ['BTC', 'ETH', 'HYPE'];
 
+// Volume data mapping
+const VOLUME_DATA: Record<string, string> = {
+  BTC: '$2.4B',
+  ETH: '$1.2B',
+  HYPE: '$45M',
+};
+
 export default function RealTimePricesWidget() {
   const { prices, isConnected } = usePrices();
+  const [animationTime, setAnimationTime] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setAnimationTime(prev => prev + 1);
+    }, 2000);
+    return () => clearInterval(timer);
+  }, []);
 
   return (
     <div className="h-full flex flex-col space-y-3">
@@ -56,7 +72,7 @@ export default function RealTimePricesWidget() {
                   <div className="text-xs text-white/50 mb-1.5">24h Price Action</div>
                   <div className="flex items-end gap-0.5 h-16">
                     {[...Array(20)].map((_, i) => {
-                      const height = 20 + Math.abs(Math.sin((i + Date.now() / 1000) * 0.5)) * 40;
+                      const height = 20 + Math.abs(Math.sin((i + animationTime) * 0.5)) * 40;
                       return (
                         <div
                           key={i}
@@ -93,7 +109,7 @@ export default function RealTimePricesWidget() {
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-white/50">Volume</span>
                     <span className="text-white font-medium">
-                      {coin === 'BTC' ? '$2.4B' : coin === 'ETH' ? '$1.2B' : '$45M'}
+                      {VOLUME_DATA[coin] || 'N/A'}
                     </span>
                   </div>
                 </div>

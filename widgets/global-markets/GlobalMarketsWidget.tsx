@@ -1,16 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Globe, TrendingUp, Clock } from 'lucide-react';
-
-interface Market {
-  name: string;
-  openHour: number;
-  openMinute: number;
-  closeHour: number;
-  closeMinute: number;
-  region: string;
-}
+import { Globe, Clock } from 'lucide-react';
+import { Market, getMarketStatus, formatTime, formatCountdown } from '@/lib/utils/marketHours';
 
 const MARKETS: Market[] = [
   { name: 'Tokyo', openHour: 0, openMinute: 0, closeHour: 6, closeMinute: 0, region: 'Asia' },
@@ -19,71 +11,6 @@ const MARKETS: Market[] = [
   { name: 'Wall Street', openHour: 14, openMinute: 30, closeHour: 21, closeMinute: 0, region: 'Americas' },
   { name: 'CME Chicago', openHour: 17, openMinute: 0, closeHour: 16, closeMinute: 0, region: 'Americas' },
 ];
-
-function getMarketStatus(market: Market, now: Date) {
-  const utcHour = now.getUTCHours();
-  const utcMinute = now.getUTCMinutes();
-  const currentMinutes = utcHour * 60 + utcMinute;
-  
-  const dayOfWeek = now.getUTCDay();
-  const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-  
-  if (isWeekend) {
-    return { isOpen: false, status: 'CLOSED', reason: 'Weekend', minutesToNext: 0, progress: 0 };
-  }
-
-  let openMinutes = market.openHour * 60 + market.openMinute;
-  let closeMinutes = market.closeHour * 60 + market.closeMinute;
-  
-  // Handle markets that cross midnight (like CME)
-  if (closeMinutes < openMinutes) {
-    if (currentMinutes >= openMinutes || currentMinutes < closeMinutes) {
-      const totalDuration = (24 * 60 - openMinutes) + closeMinutes;
-      const elapsed = currentMinutes >= openMinutes 
-        ? currentMinutes - openMinutes 
-        : (24 * 60 - openMinutes) + currentMinutes;
-      const progress = (elapsed / totalDuration) * 100;
-      const minutesToClose = currentMinutes >= openMinutes
-        ? (24 * 60 - currentMinutes) + closeMinutes
-        : closeMinutes - currentMinutes;
-      return { isOpen: true, status: 'OPEN', minutesToNext: minutesToClose, progress };
-    } else {
-      const minutesToOpen = openMinutes - currentMinutes;
-      return { isOpen: false, status: 'CLOSED', minutesToNext: minutesToOpen, progress: 0 };
-    }
-  }
-  
-  // Normal case
-  if (currentMinutes >= openMinutes && currentMinutes < closeMinutes) {
-    const totalDuration = closeMinutes - openMinutes;
-    const elapsed = currentMinutes - openMinutes;
-    const progress = (elapsed / totalDuration) * 100;
-    const minutesToClose = closeMinutes - currentMinutes;
-    return { isOpen: true, status: 'OPEN', minutesToNext: minutesToClose, progress };
-  } else if (currentMinutes < openMinutes) {
-    const minutesToOpen = openMinutes - currentMinutes;
-    return { isOpen: false, status: 'CLOSED', minutesToNext: minutesToOpen, progress: 0 };
-  } else {
-    const minutesToOpen = (24 * 60 - currentMinutes) + openMinutes;
-    return { isOpen: false, status: 'CLOSED', minutesToNext: minutesToOpen, progress: 0 };
-  }
-}
-
-function formatTime(minutes: number) {
-  const hours = Math.floor(minutes / 60);
-  const mins = minutes % 60;
-  return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
-}
-
-function formatCountdown(totalMinutes: number) {
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-  
-  if (hours > 0) {
-    return `${hours}h ${minutes}m`;
-  }
-  return `${minutes}m`;
-}
 
 export default function GlobalMarketsWidget() {
   const [now, setNow] = useState(new Date());

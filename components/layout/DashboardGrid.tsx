@@ -42,7 +42,7 @@ export default function DashboardGrid({ children }: DashboardGridProps) {
           />
           
           {/* Floating market icons background */}
-          <div className="absolute inset-0 overflow-hidden opacity-10">
+          <div className="absolute inset-0 overflow-hidden opacity-10" aria-hidden="true">
             <div className="absolute top-2 left-10 text-2xl animate-pulse" style={{ animationDelay: '0s' }}>₿</div>
             <div className="absolute top-4 right-20 text-xl animate-pulse" style={{ animationDelay: '1s' }}>Ξ</div>
             <div className="absolute bottom-3 left-1/4 text-lg animate-pulse" style={{ animationDelay: '2s' }}>$</div>
