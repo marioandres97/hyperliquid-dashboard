@@ -4,6 +4,7 @@ import { getWSClient } from '@/lib/hyperliquid/websocket';
 import { errorHandler } from '@/lib/middleware/errorHandler';
 import { log } from '@/lib/core/logger';
 import { config } from '@/lib/core/config';
+import { checkDatabaseHealth } from '@/lib/database/client';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,7 +17,18 @@ interface HealthStatus {
   uptime: number;
   version: string;
   environment: string;
+  memory: {
+    heapUsed: number;
+    heapTotal: number;
+    rss: number;
+    external: number;
+  };
   services: {
+    database: {
+      available: boolean;
+      connected?: boolean;
+      latency?: number;
+    };
     redis: {
       available: boolean;
       connected?: boolean;
@@ -88,8 +100,18 @@ export async function GET() {
     
     const wsClient = getWSClient();
     
+    // Get memory usage
+    const memoryUsage = process.memoryUsage();
+    const memory = {
+      heapUsed: Math.round(memoryUsage.heapUsed / 1024 / 1024), // MB
+      heapTotal: Math.round(memoryUsage.heapTotal / 1024 / 1024), // MB
+      rss: Math.round(memoryUsage.rss / 1024 / 1024), // MB
+      external: Math.round(memoryUsage.external / 1024 / 1024), // MB
+    };
+    
     // Run health checks in parallel
-    const [redisHealth, hyperliquidHealth] = await Promise.all([
+    const [databaseHealth, redisHealth, hyperliquidHealth] = await Promise.all([
+      checkDatabaseHealth(),
       checkRedisHealth(),
       checkHyperliquidApi(),
     ]);
@@ -103,7 +125,7 @@ export async function GET() {
     
     if (!hyperliquidHealth.reachable) {
       status = 'unhealthy';
-    } else if (!redisHealth.connected || !websocketHealth.connected) {
+    } else if (!databaseHealth.connected || !redisHealth.connected || !websocketHealth.connected) {
       status = 'degraded';
     }
 
@@ -115,7 +137,9 @@ export async function GET() {
       uptime,
       version: process.env.npm_package_version || '0.1.0',
       environment: config.env,
+      memory,
       services: {
+        database: databaseHealth,
         redis: redisHealth,
         websocket: websocketHealth,
         hyperliquidApi: hyperliquidHealth,
@@ -125,6 +149,8 @@ export async function GET() {
     log.info('Health check completed', {
       status,
       uptime,
+      memoryMB: memory.heapUsed,
+      databaseConnected: databaseHealth.connected,
       redisConnected: redisHealth.connected,
       wsConnected: websocketHealth.connected,
       apiReachable: hyperliquidHealth.reachable,

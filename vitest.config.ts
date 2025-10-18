@@ -8,6 +8,7 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./tests/setup.ts'],
+    exclude: ['**/e2e/**', '**/node_modules/**'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
@@ -17,6 +18,8 @@ export default defineConfig({
         '*.config.*',
         '.next/',
         'out/',
+        'lib/generated/**',
+        'sentry.*.config.ts',
       ],
     },
   },
