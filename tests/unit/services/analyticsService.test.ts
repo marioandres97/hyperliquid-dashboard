@@ -13,8 +13,8 @@ describe('AnalyticsService', () => {
   ];
 
   describe('calculateAssetCVD', () => {
-    it('should calculate CVD for given trades', () => {
-      const cvdData = analyticsService.calculateAssetCVD(mockTrades, 'BTC', 24);
+    it('should calculate CVD for given trades', async () => {
+      const cvdData = await analyticsService.calculateAssetCVD(mockTrades, 'BTC', 24);
       
       expect(cvdData).toBeInstanceOf(Array);
       expect(cvdData.length).toBeGreaterThan(0);
@@ -22,21 +22,21 @@ describe('AnalyticsService', () => {
       expect(cvdData[0]).toHaveProperty('cvd');
     });
 
-    it('should return empty array for no trades', () => {
-      const cvdData = analyticsService.calculateAssetCVD([], 'BTC', 24);
+    it('should return empty array for no trades', async () => {
+      const cvdData = await analyticsService.calculateAssetCVD([], 'BTC', 24);
       expect(cvdData).toEqual([]);
     });
 
-    it('should throw ValidationError for invalid hours', () => {
-      expect(() => {
-        analyticsService.calculateAssetCVD(mockTrades, 'BTC', 0);
-      }).toThrow('Hours must be greater than 0');
+    it('should throw ValidationError for invalid hours', async () => {
+      await expect(async () => {
+        await analyticsService.calculateAssetCVD(mockTrades, 'BTC', 0);
+      }).rejects.toThrow('Hours must be greater than 0');
     });
   });
 
   describe('getMarketMetrics', () => {
-    it('should calculate market metrics from trades', () => {
-      const metrics = analyticsService.getMarketMetrics('BTC', mockTrades);
+    it('should calculate market metrics from trades', async () => {
+      const metrics = await analyticsService.getMarketMetrics('BTC', mockTrades);
       
       expect(metrics).toHaveProperty('asset', 'BTC');
       expect(metrics).toHaveProperty('cvd');
@@ -50,8 +50,8 @@ describe('AnalyticsService', () => {
       expect(typeof metrics.totalVolume).toBe('number');
     });
 
-    it('should return zero metrics for no trades', () => {
-      const metrics = analyticsService.getMarketMetrics('ETH', []);
+    it('should return zero metrics for no trades', async () => {
+      const metrics = await analyticsService.getMarketMetrics('ETH', []);
       
       expect(metrics.cvd).toBe(0);
       expect(metrics.cvdTrend).toBe(0);
@@ -60,8 +60,8 @@ describe('AnalyticsService', () => {
       expect(metrics.sellVolume).toBe(0);
     });
 
-    it('should calculate buy and sell volumes correctly', () => {
-      const metrics = analyticsService.getMarketMetrics('BTC', mockTrades);
+    it('should calculate buy and sell volumes correctly', async () => {
+      const metrics = await analyticsService.getMarketMetrics('BTC', mockTrades);
       
       // Buy trades: 10 * 100 + 8 * 99 = 1792
       // Sell trades: 5 * 101 + 12 * 102 = 1729

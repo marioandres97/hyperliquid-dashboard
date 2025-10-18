@@ -25,8 +25,6 @@ export async function GET(req: NextRequest) {
     // Get cache statistics
     const stats = await cacheService.getStats();
 
-    log.debug('Cache stats retrieved', stats);
-
     return NextResponse.json(stats, {
       headers: rateLimitResult.headers,
     });

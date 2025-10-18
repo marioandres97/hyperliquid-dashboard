@@ -9,7 +9,7 @@ import { z } from 'zod';
 
 // Configuration schema
 const configSchema = z.object({
-  env: z.enum(['development', 'staging', 'production']).default('development'),
+  env: z.enum(['development', 'staging', 'production', 'test']).default('development'),
   port: z.coerce.number().int().positive().default(3000),
   
   redis: z.object({
