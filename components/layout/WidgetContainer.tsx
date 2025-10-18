@@ -6,12 +6,13 @@ interface WidgetContainerProps {
   title: string;
   children: React.ReactNode;
   background?: React.ReactNode;
+  transparent?: boolean;
 }
 
-export default function WidgetContainer({ title, children, background }: WidgetContainerProps) {
+export default function WidgetContainer({ title, children, background, transparent = false }: WidgetContainerProps) {
   return (
     <div 
-      className="relative premium-glass rounded-2xl p-4 shadow-2xl transition-all duration-300 hover:shadow-purple-500/20 overflow-hidden"
+      className={`relative ${transparent ? 'bg-transparent' : 'premium-glass'} rounded-2xl p-4 shadow-2xl transition-all duration-300 hover:shadow-purple-500/20 overflow-hidden`}
     >
       {/* Background layer */}
       {background && (

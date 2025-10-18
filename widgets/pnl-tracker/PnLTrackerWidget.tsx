@@ -46,7 +46,7 @@ export default function PnLTrackerWidget({ isProfitable }: PnLTrackerWidgetProps
   return (
     <div className="h-full flex flex-col space-y-3">
       {/* Total PnL */}
-      <div className={`p-3 rounded-xl border-2 ${
+      <div className={`p-3 rounded-xl border-2 flex-shrink-0 ${
         currentIsProfitable 
           ? 'bg-green-500/10 border-green-400' 
           : 'bg-red-500/10 border-red-400'
@@ -64,7 +64,7 @@ export default function PnLTrackerWidget({ isProfitable }: PnLTrackerWidgetProps
 
       {/* Equity Curve */}
       {chartData.length > 0 && (
-        <div className="bg-white/5 backdrop-blur-sm rounded-xl p-3 border border-white/10">
+        <div className="bg-white/5 backdrop-blur-sm rounded-xl p-3 border border-white/10 flex-shrink-0">
           <h3 className="text-sm font-medium text-white/70 mb-2">Equity Curve</h3>
           <ResponsiveContainer width="100%" height={180}>
             <LineChart data={chartData}>
@@ -104,7 +104,7 @@ export default function PnLTrackerWidget({ isProfitable }: PnLTrackerWidgetProps
       )}
 
       {/* LONG/SHORT Win Rates */}
-      <div className="grid grid-cols-2 gap-2.5">
+      <div className="grid grid-cols-2 gap-2.5 flex-shrink-0">
         <div className="bg-green-500/10 border border-green-400/30 rounded-xl p-2.5 backdrop-blur-sm">
           <div className="flex items-center gap-2 mb-1">
             <ArrowUpRight className="w-4 h-4 text-green-400" />
@@ -143,7 +143,7 @@ export default function PnLTrackerWidget({ isProfitable }: PnLTrackerWidgetProps
       </div>
 
       {/* Timeframe PnL */}
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-3 gap-2 flex-shrink-0">
         <div className="bg-white/5 backdrop-blur-sm rounded-xl p-2.5 border border-white/10">
           <div className="text-xs text-white/50 mb-1">Today</div>
           <div className={`text-lg font-bold ${
@@ -171,7 +171,7 @@ export default function PnLTrackerWidget({ isProfitable }: PnLTrackerWidgetProps
       </div>
 
       {/* Win Rate & Stats */}
-      <div className="grid grid-cols-2 gap-2.5">
+      <div className="grid grid-cols-2 gap-2.5 flex-shrink-0">
         <div className="bg-white/5 backdrop-blur-sm rounded-xl p-2.5 border border-white/10">
           <div className="flex items-center gap-2 mb-1">
             <Target className="w-4 h-4 text-white/60" />
@@ -200,7 +200,7 @@ export default function PnLTrackerWidget({ isProfitable }: PnLTrackerWidgetProps
       </div>
 
       {/* Avg Win/Loss */}
-      <div className="grid grid-cols-2 gap-2.5">
+      <div className="grid grid-cols-2 gap-2.5 flex-shrink-0">
         <div className="bg-green-500/10 border border-green-400/30 rounded-xl p-2.5 backdrop-blur-sm">
           <div className="flex items-center gap-2 mb-1">
             <TrendingUp className="w-4 h-4 text-green-400" />
@@ -223,7 +223,7 @@ export default function PnLTrackerWidget({ isProfitable }: PnLTrackerWidgetProps
       </div>
 
       {/* Largest Win/Loss */}
-      <div className="bg-white/5 backdrop-blur-sm rounded-xl p-2.5 border border-white/10">
+      <div className="bg-white/5 backdrop-blur-sm rounded-xl p-2.5 border border-white/10 flex-shrink-0">
         <div className="flex justify-between items-center">
           <div>
             <div className="text-xs text-white/50 mb-1">Largest Win</div>
@@ -235,6 +235,35 @@ export default function PnLTrackerWidget({ isProfitable }: PnLTrackerWidgetProps
             <div className="text-xs text-white/50 mb-1">Largest Loss</div>
             <div className="text-lg font-bold text-red-400">
               ${stats.largestLoss.toFixed(2)}
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Additional sections for large screens */}
+      <div className="hidden xl:block flex-1 min-h-0 overflow-y-auto">
+        <div className="bg-white/5 backdrop-blur-sm rounded-xl p-3 border border-white/10">
+          <h3 className="text-sm font-medium text-white/70 mb-3">Trading Summary</h3>
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            <div className="bg-white/5 rounded-lg p-2">
+              <div className="text-white/50 mb-1">Total Trades</div>
+              <div className="text-white font-medium text-lg">{stats.totalTrades}</div>
+            </div>
+            <div className="bg-white/5 rounded-lg p-2">
+              <div className="text-white/50 mb-1">Win Streak</div>
+              <div className="text-green-400 font-medium text-lg">{stats.winningTrades}</div>
+            </div>
+            <div className="bg-white/5 rounded-lg p-2">
+              <div className="text-white/50 mb-1">Avg Trade PnL</div>
+              <div className={`font-medium text-lg ${(stats.totalPnL / stats.totalTrades) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                {stats.totalTrades > 0 ? `$${(stats.totalPnL / stats.totalTrades).toFixed(2)}` : '$0.00'}
+              </div>
+            </div>
+            <div className="bg-white/5 rounded-lg p-2">
+              <div className="text-white/50 mb-1">Risk/Reward</div>
+              <div className="text-white font-medium text-lg">
+                {stats.avgLoss > 0 ? `1:${(stats.avgWin / stats.avgLoss).toFixed(2)}` : 'N/A'}
+              </div>
             </div>
           </div>
         </div>
