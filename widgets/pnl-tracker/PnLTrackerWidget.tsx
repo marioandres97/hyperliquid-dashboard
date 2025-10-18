@@ -6,7 +6,11 @@ import WidgetContainer from '@/components/layout/WidgetContainer';
 import { TrendingUp, TrendingDown, DollarSign, Target, Award, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
-export default function PnLTrackerWidget() {
+interface PnLTrackerWidgetProps {
+  isProfitable?: boolean;
+}
+
+export default function PnLTrackerWidget({ isProfitable }: PnLTrackerWidgetProps) {
   const { stats, isLoading } = usePnLTracking();
 
   if (isLoading) {
@@ -25,7 +29,7 @@ export default function PnLTrackerWidget() {
     );
   }
 
-  const isProfitable = stats.totalPnL >= 0;
+  const currentIsProfitable = isProfitable ?? stats.totalPnL >= 0;
 
   // Format equity curve data for chart
   const chartData = (stats.equityCurve || []).map(point => ({
@@ -43,7 +47,7 @@ export default function PnLTrackerWidget() {
     <div className="space-y-3">
       {/* Total PnL */}
       <div className={`p-3 rounded-xl border-2 ${
-        isProfitable 
+        currentIsProfitable 
           ? 'bg-green-500/10 border-green-400' 
           : 'bg-red-500/10 border-red-400'
       }`}>
@@ -52,9 +56,9 @@ export default function PnLTrackerWidget() {
           <span className="text-sm text-white/60">Total PnL</span>
         </div>
         <div className={`text-3xl font-bold ${
-          isProfitable ? 'text-green-400' : 'text-red-400'
+          currentIsProfitable ? 'text-green-400' : 'text-red-400'
         }`}>
-          {isProfitable ? '+' : ''}${stats.totalPnL.toFixed(2)}
+          {currentIsProfitable ? '+' : ''}${stats.totalPnL.toFixed(2)}
         </div>
       </div>
 
@@ -241,15 +245,15 @@ export default function PnLTrackerWidget() {
 
 // Wrapper component for PnL widget with dynamic background
 export function PnLTrackerWidgetWithBackground() {
-  const { stats, isLoading } = usePnLTracking();
-  const isProfitable = stats ? stats.totalPnL >= 0 : true;
+  const { stats } = usePnLTracking();
+  const isProfitable = stats ? stats.totalPnL >= 0 : false;
 
   return (
     <WidgetContainer 
       title="PnL Tracker"
       background={<PnLBackground isPositive={isProfitable} />}
     >
-      <PnLTrackerWidget />
+      <PnLTrackerWidget isProfitable={isProfitable} />
     </WidgetContainer>
   );
 }
