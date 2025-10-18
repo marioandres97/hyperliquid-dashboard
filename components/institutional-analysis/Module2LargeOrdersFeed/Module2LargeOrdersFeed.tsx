@@ -1,75 +1,101 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { GlassCard, DataTable, Column, RealTimeFeed, FeedItem } from '../shared';
 import { TrendingUp, TrendingDown, Filter, Zap, Wallet } from 'lucide-react';
 import type { LargeTrade, TradeFilter } from './types';
-
-// Mock wallet labels
-const WALLET_LABELS = [
-  'Binance Hot Wallet',
-  'Whale #42',
-  'Market Maker A',
-  'Institutional Fund',
-  'Unknown',
-];
-
-// Mock data generator
-const generateMockTrade = (id: number): LargeTrade => {
-  const direction = Math.random() > 0.5 ? 'BUY' : 'SELL';
-  const priceBefore = 97500 + (Math.random() - 0.5) * 1000;
-  const priceImpact = Math.random() * 2 + 0.1;
-  const priceAfter = direction === 'BUY' 
-    ? priceBefore + (priceBefore * priceImpact / 100)
-    : priceBefore - (priceBefore * priceImpact / 100);
-  const volume = Math.random() * 50 + 10;
-  const hasCascade = Math.random() > 0.8;
-
-  return {
-    id: `trade-${id}`,
-    timestamp: new Date(),
-    volume,
-    priceBefore,
-    priceAfter,
-    priceImpact,
-    direction,
-    walletLabel: Math.random() > 0.3 ? WALLET_LABELS[Math.floor(Math.random() * WALLET_LABELS.length)] : undefined,
-    cascadeDepth: hasCascade ? Math.floor(Math.random() * 5 + 1) : undefined,
-    cascadeVolume: hasCascade ? Math.random() * 100 + 50 : undefined,
-  };
-};
+import { useTrades } from '@/lib/hyperliquid/hooks';
 
 const Module2LargeOrdersFeed: React.FC = () => {
-  const [trades, setTrades] = useState<LargeTrade[]>([]);
+  const { trades: rawTrades, isConnected } = useTrades('BTC');
   const [filters, setFilters] = useState<TradeFilter>({
-    minSize: 10,
+    minSize: 1,
     direction: 'BOTH',
-    minPriceImpact: 0.1,
+    minPriceImpact: 0.05,
     timeRange: '1h',
   });
   const [showFilters, setShowFilters] = useState(false);
+  const [priceHistory, setPriceHistory] = useState<{ price: number; timestamp: number }[]>([]);
 
+  // Track price changes to calculate impact
   useEffect(() => {
-    // Initialize with some trades
-    const initialTrades = Array.from({ length: 10 }, (_, i) => generateMockTrade(i));
-    setTrades(initialTrades);
+    if (rawTrades.length > 0) {
+      const latestTrade = rawTrades[0];
+      setPriceHistory(prev => {
+        const updated = [...prev, { price: latestTrade.price, timestamp: latestTrade.timestamp.getTime() }];
+        // Keep last 100 price points
+        return updated.slice(-100);
+      });
+    }
+  }, [rawTrades]);
 
-    // Simulate real-time trade updates
-    let tradeId = 10;
-    const interval = setInterval(() => {
-      const newTrade = generateMockTrade(tradeId++);
-      setTrades(prev => [newTrade, ...prev].slice(0, 50));
-    }, 3000);
+  // Convert raw trades to LargeTrade format with calculated price impact
+  const trades = useMemo(() => {
+    return rawTrades.map((trade, index) => {
+      // Calculate price impact by comparing with previous trade
+      let priceBefore = trade.price;
+      let priceImpact = 0;
+      
+      if (index < rawTrades.length - 1) {
+        priceBefore = rawTrades[index + 1].price;
+        priceImpact = Math.abs((trade.price - priceBefore) / priceBefore) * 100;
+      }
 
-    return () => clearInterval(interval);
-  }, []);
+      // Detect cascades (multiple trades in same direction rapidly)
+      let cascadeDepth: number | undefined;
+      let cascadeVolume: number | undefined;
+      
+      if (index > 0 && index < rawTrades.length - 3) {
+        const sameDirTrades = rawTrades.slice(index, index + 5).filter(
+          t => t.direction === trade.direction && 
+          (t.timestamp.getTime() - trade.timestamp.getTime()) < 5000
+        );
+        
+        if (sameDirTrades.length >= 3) {
+          cascadeDepth = sameDirTrades.length;
+          cascadeVolume = sameDirTrades.reduce((sum, t) => sum + t.value, 0);
+        }
+      }
 
-  const filteredTrades = trades.filter(trade => {
-    if (trade.volume < filters.minSize) return false;
-    if (filters.direction !== 'BOTH' && trade.direction !== filters.direction) return false;
-    if (trade.priceImpact < filters.minPriceImpact) return false;
-    return true;
-  });
+      const largeTrade: LargeTrade = {
+        id: trade.id,
+        timestamp: trade.timestamp,
+        volume: trade.volume,
+        priceBefore,
+        priceAfter: trade.price,
+        priceImpact,
+        direction: trade.direction,
+        cascadeDepth,
+        cascadeVolume,
+      };
+
+      return largeTrade;
+    });
+  }, [rawTrades]);
+
+  // Filter trades based on criteria
+  const filteredTrades = useMemo(() => {
+    return trades.filter(trade => {
+      if (trade.volume < filters.minSize) return false;
+      if (filters.direction !== 'BOTH' && trade.direction !== filters.direction) return false;
+      if (trade.priceImpact < filters.minPriceImpact) return false;
+      
+      // Filter by time range
+      const now = Date.now();
+      const tradeTime = trade.timestamp.getTime();
+      const timeRanges = {
+        '5m': 5 * 60 * 1000,
+        '15m': 15 * 60 * 1000,
+        '1h': 60 * 60 * 1000,
+        '4h': 4 * 60 * 60 * 1000,
+        '24h': 24 * 60 * 60 * 1000,
+      };
+      
+      if (now - tradeTime > timeRanges[filters.timeRange]) return false;
+      
+      return true;
+    });
+  }, [trades, filters]);
 
   const sortedByImpact = [...filteredTrades].sort((a, b) => b.priceImpact - a.priceImpact);
 
@@ -190,7 +216,15 @@ const Module2LargeOrdersFeed: React.FC = () => {
       {/* Header with filters */}
       <GlassCard variant="purple" padding="md">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-bold text-purple-200">Large Orders Real-Time Feed</h2>
+          <div className="flex items-center gap-3">
+            <h2 className="text-2xl font-bold text-purple-200">Large Orders Real-Time Feed</h2>
+            <div className={`flex items-center gap-1 text-xs px-2 py-1 rounded ${
+              isConnected ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
+            }`}>
+              <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-400' : 'bg-red-400'} ${isConnected ? 'animate-pulse' : ''}`} />
+              {isConnected ? 'LIVE' : 'DISCONNECTED'}
+            </div>
+          </div>
           <button
             onClick={() => setShowFilters(!showFilters)}
             className="flex items-center gap-2 px-4 py-2 rounded-lg transition-all"

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { GlassCard } from '../shared';
 import { Activity, DollarSign, TrendingUp, AlertCircle } from 'lucide-react';
 import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import { useFundingRate, useMarketMetrics } from '@/lib/hyperliquid/hooks';
 
 interface VolatilityLevel {
   price: number;
@@ -17,45 +18,45 @@ interface FundingData {
 }
 
 const Module5VolatilityContext: React.FC = () => {
-  const [currentFunding, setCurrentFunding] = useState(0.01);
+  const { fundingRate, isLoading: fundingLoading } = useFundingRate('BTC');
+  const { metrics, isLoading: metricsLoading } = useMarketMetrics('BTC');
   const [fundingHistory, setFundingHistory] = useState<FundingData[]>([]);
   const [volatilityLevels, setVolatilityLevels] = useState<VolatilityLevel[]>([]);
 
+  // Track funding rate history
   useEffect(() => {
-    // Generate mock volatility levels (price distribution)
-    const levels: VolatilityLevel[] = [];
-    for (let i = 0; i < 20; i++) {
-      const price = 95000 + i * 500;
-      const volatility = Math.random() * 100;
-      levels.push({
-        price,
-        volatility,
-        trades: Math.floor(Math.random() * 1000),
+    if (fundingRate) {
+      setFundingHistory(prev => {
+        const newHistory = [...prev, { timestamp: fundingRate.timestamp, rate: fundingRate.fundingRate }];
+        // Keep last 24 hours (assuming updates every 30 seconds, ~2880 points)
+        return newHistory.slice(-100);
       });
     }
-    setVolatilityLevels(levels);
+  }, [fundingRate]);
 
-    // Generate funding history
-    const history: FundingData[] = [];
-    for (let i = 24; i >= 0; i--) {
-      history.push({
-        timestamp: new Date(Date.now() - i * 3600000),
-        rate: (Math.random() - 0.5) * 0.04,
-      });
+  // Calculate volatility from price changes
+  useEffect(() => {
+    if (metrics) {
+      // Generate volatility levels based on current price
+      const levels: VolatilityLevel[] = [];
+      const basePrice = metrics.markPrice;
+      
+      for (let i = -10; i < 10; i++) {
+        const priceOffset = i * (basePrice * 0.01); // 1% intervals
+        const price = basePrice + priceOffset;
+        // Simulate volatility based on distance from current price
+        const volatility = 100 - Math.abs(i) * 5;
+        levels.push({
+          price,
+          volatility,
+          trades: Math.floor(Math.random() * 1000),
+        });
+      }
+      setVolatilityLevels(levels);
     }
-    setFundingHistory(history);
+  }, [metrics]);
 
-    const interval = setInterval(() => {
-      setCurrentFunding((Math.random() - 0.5) * 0.04);
-      setFundingHistory(prev => [
-        ...prev.slice(1),
-        { timestamp: new Date(), rate: (Math.random() - 0.5) * 0.04 },
-      ]);
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, []);
-
+  const currentFunding = fundingRate?.fundingRate || 0;
   const fundingInterpretation = currentFunding > 0.01 
     ? 'High funding rate indicates many LONG positions'
     : currentFunding < -0.01
@@ -68,12 +69,22 @@ const Module5VolatilityContext: React.FC = () => {
     ? 'Negative funding + Long positions = Counter-trend opportunity'
     : 'Balanced market - wait for clear signal';
 
+  const isConnected = !fundingLoading && !metricsLoading;
+
   return (
     <div className="space-y-4">
       <GlassCard variant="purple" padding="md">
-        <div className="flex items-center gap-2 mb-6">
-          <Activity className="text-purple-400" size={24} />
-          <h2 className="text-2xl font-bold text-purple-200">Volatility & Market Context</h2>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <Activity className="text-purple-400" size={24} />
+            <h2 className="text-2xl font-bold text-purple-200">Volatility & Market Context</h2>
+          </div>
+          <div className={`flex items-center gap-1 text-xs px-2 py-1 rounded ${
+            isConnected ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'
+          }`}>
+            <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-400' : 'bg-yellow-400'} ${isConnected ? 'animate-pulse' : ''}`} />
+            {isConnected ? 'LIVE' : 'LOADING'}
+          </div>
         </div>
 
         {/* Current Funding Rate */}
