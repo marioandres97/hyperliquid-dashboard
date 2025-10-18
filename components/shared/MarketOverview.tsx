@@ -21,11 +21,11 @@ export default function MarketOverview() {
   });
 
   useEffect(() => {
-    // Fetch market overview data
+    // TODO: Fetch market overview data from API
+    // For now, we'll calculate based on the tracked coins
     const fetchMarketData = async () => {
       try {
-        // For now, we'll calculate based on the tracked coins
-        // In a real implementation, this could call an API endpoint
+        // Placeholder: In production, this would call an API endpoint
         setData(prev => ({
           ...prev,
           lastUpdate: Date.now(),

@@ -99,7 +99,7 @@ export async function getAssetContext(coin: string) {
   }
 }
 
-// Función helper para obtener velas de 1H para las últimas 24 horas
+// Helper function to get 1H candles for the last 24 hours
 export async function get1HCandlesLast24Hours(coin: string) {
   try {
     const now = Date.now();

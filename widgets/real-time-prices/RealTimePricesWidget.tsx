@@ -22,6 +22,7 @@ export default function RealTimePricesWidget() {
   const { prices, isConnected } = usePrices();
   const { candles, isLoading, error, retry } = useCandleData();
   const [lastUpdateTimes, setLastUpdateTimes] = useState<Record<string, number>>({});
+  const [, forceUpdate] = useState(0);
 
   // Update the last update time when prices change
   useEffect(() => {
@@ -32,10 +33,10 @@ export default function RealTimePricesWidget() {
     });
   }, [prices]);
 
-  // Update timestamp display every second
+  // Force re-render every second to update timestamp display
   useEffect(() => {
     const interval = setInterval(() => {
-      setLastUpdateTimes(prev => ({ ...prev }));
+      forceUpdate(prev => prev + 1);
     }, 1000);
 
     return () => clearInterval(interval);

@@ -8,7 +8,7 @@ export function useCandleData() {
   const [candles, setCandles] = useState<Record<string, OHLCCandle[]>>({});
   const [isLoading, setIsLoading] = useState<Record<string, boolean>>({});
   const [error, setError] = useState<Record<string, string | null>>({});
-  const refreshTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const fetchCandlesForCoin = async (coin: string) => {
     setIsLoading(prev => ({ ...prev, [coin]: true }));
@@ -42,7 +42,7 @@ export function useCandleData() {
       const data = await response.json();
 
       // Transform the data to our OHLCCandle format
-      const candleData: OHLCCandle[] = data.map((candle: any) => ({
+      const candleData: OHLCCandle[] = (data as Array<{t: number, o: string, h: string, l: string, c: string, v?: string}>).map((candle) => ({
         time: candle.t,
         open: parseFloat(candle.o),
         high: parseFloat(candle.h),
@@ -73,13 +73,13 @@ export function useCandleData() {
     fetchAllCandles();
 
     // Set up auto-refresh every 1 hour
-    refreshTimeoutRef.current = setInterval(() => {
+    refreshIntervalRef.current = setInterval(() => {
       fetchAllCandles();
     }, REFRESH_INTERVAL);
 
     return () => {
-      if (refreshTimeoutRef.current) {
-        clearInterval(refreshTimeoutRef.current);
+      if (refreshIntervalRef.current) {
+        clearInterval(refreshIntervalRef.current);
       }
     };
   }, []);
