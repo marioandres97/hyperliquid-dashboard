@@ -10,6 +10,9 @@ import { useCanvasRenderer } from '../../hooks/useCanvasRenderer';
 import { premiumTheme } from '@/lib/theme/premium-colors';
 import { heatmapVariants } from '@/lib/effects/premium-effects';
 
+// Display constants
+const MIN_HEATMAP_HEIGHT = 400; // Minimum height in pixels for the heatmap canvas
+
 export interface PremiumLiquidityHeatmapProps {
   nodes: Map<number, LiquidityNode>;
   currentPrice?: number;
@@ -240,7 +243,7 @@ export function PremiumLiquidityHeatmap({
       <div className="relative rounded-lg overflow-hidden" style={{ 
         border: `1px solid ${premiumTheme.borders.medium}`,
         backgroundColor: premiumTheme.background.primary,
-        minHeight: '400px',
+        minHeight: `${MIN_HEATMAP_HEIGHT}px`,
       }}>
         <canvas
           ref={canvasRef}

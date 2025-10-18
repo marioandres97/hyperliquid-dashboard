@@ -13,6 +13,21 @@ export interface HeatmapConfig {
   pixelRatio: number;
 }
 
+// Rendering constants
+const MIN_BAR_WIDTH = 3; // Minimum width for main bars in pixels
+const MIN_VOLUME_BAR_WIDTH = 2; // Minimum width for volume bars in pixels
+const LOG_SCALE_MULTIPLIER = 9; // Multiplier for logarithmic scaling (controls intensity range)
+const MIN_ALPHA = 0.15; // Minimum alpha for visibility
+const MAX_ALPHA = 0.8; // Maximum alpha to avoid overwhelming colors
+
+/**
+ * Apply logarithmic scaling to make low values more visible
+ * Uses log10(1 + value * multiplier) / log10(1 + multiplier)
+ */
+function logScale(value: number, multiplier: number = LOG_SCALE_MULTIPLIER): number {
+  return Math.log10(1 + value * multiplier) / Math.log10(1 + multiplier);
+}
+
 export class HeatmapRenderer {
   private ctx: CanvasRenderingContext2D;
   private config: HeatmapConfig;
@@ -79,13 +94,12 @@ export class HeatmapRenderer {
 
     // Calculate alpha based on intensity with better scaling for low volumes
     // Use logarithmic scaling to make low volumes more visible
-    const logIntensity = Math.log10(1 + intensity * 9) / Math.log10(10);
-    const alpha = Math.min(Math.max(logIntensity * 0.8, 0.15), 0.8);
+    const logIntensity = logScale(intensity);
+    const alpha = Math.min(Math.max(logIntensity * MAX_ALPHA, MIN_ALPHA), MAX_ALPHA);
 
     // Draw main bar with minimum width for visibility
     const calculatedWidth = (Math.abs(netFlow) / maxVolume) * (width - 200);
-    const minBarWidth = 3; // Minimum bar width in pixels
-    const barWidth = Math.max(calculatedWidth, netFlow !== 0 ? minBarWidth : 0);
+    const barWidth = Math.max(calculatedWidth, netFlow !== 0 ? MIN_BAR_WIDTH : 0);
     
     ctx.fillStyle = this.hexToRGBA(baseColor, alpha);
     ctx.fillRect(150, y, barWidth, rowHeight - 2);
@@ -133,17 +147,15 @@ export class HeatmapRenderer {
     const { width, maxVolume } = config;
 
     // Use logarithmic scaling for better visibility of low volumes
-    const scaledBuyVolume = buyVolume > 0 ? Math.log10(1 + buyVolume) : 0;
-    const scaledSellVolume = sellVolume > 0 ? Math.log10(1 + sellVolume) : 0;
-    const maxScaledVolume = Math.log10(1 + maxVolume);
+    const scaledBuyVolume = buyVolume > 0 ? logScale(buyVolume / maxVolume) : 0;
+    const scaledSellVolume = sellVolume > 0 ? logScale(sellVolume / maxVolume) : 0;
 
-    const buyWidth = (scaledBuyVolume / maxScaledVolume) * 150;
-    const sellWidth = (scaledSellVolume / maxScaledVolume) * 150;
+    const buyWidth = scaledBuyVolume * 150;
+    const sellWidth = scaledSellVolume * 150;
 
-    // Minimum bar width for visibility
-    const minBarWidth = 2;
-    const finalBuyWidth = buyVolume > 0 ? Math.max(buyWidth, minBarWidth) : 0;
-    const finalSellWidth = sellVolume > 0 ? Math.max(sellWidth, minBarWidth) : 0;
+    // Apply minimum bar width for visibility
+    const finalBuyWidth = buyVolume > 0 ? Math.max(buyWidth, MIN_VOLUME_BAR_WIDTH) : 0;
+    const finalSellWidth = sellVolume > 0 ? Math.max(sellWidth, MIN_VOLUME_BAR_WIDTH) : 0;
 
     const centerX = width - 300;
 
