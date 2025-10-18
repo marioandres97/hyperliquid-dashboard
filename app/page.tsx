@@ -4,7 +4,6 @@ import OrderFlowSignalsWidget from '@/widgets/order-flow-signals/OrderFlowSignal
 import { SignalPerformanceWidget } from '@/widgets/signal-performance/SignalPerformanceWidget';
 import RealTimePricesWidget from '@/widgets/real-time-prices/RealTimePricesWidget';
 import PnLTrackerWidget from '@/widgets/pnl-tracker/PnLTrackerWidget';
-import LiquidityAtlasPortalWidget from '@/widgets/liquidity-atlas-portal/LiquidityAtlasPortalWidget';
 
 export default function Home() {
   return (
@@ -23,11 +22,6 @@ export default function Home() {
 
       <WidgetContainer title="PnL Tracker">
         <PnLTrackerWidget />
-      </WidgetContainer>
-
-      {/* Nuevo Widget Premium - Sin título porque el widget tiene su propio diseño */}
-      <WidgetContainer title="">
-        <LiquidityAtlasPortalWidget />
       </WidgetContainer>
     </DashboardGrid>
   );
