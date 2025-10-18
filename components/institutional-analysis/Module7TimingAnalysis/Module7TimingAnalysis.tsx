@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { GlassCard } from '../shared';
+import { GlassCard, EducationalTooltip } from '../shared';
 import { Clock, Calendar, TrendingUp, Brain } from 'lucide-react';
 import { HourlyVolumeChart } from './HourlyVolumeChart';
 import { MacroEventsCalendar } from './MacroEventsCalendar';
@@ -11,6 +11,20 @@ import { BehavioralInsights } from './BehavioralInsights';
 const Module7TimingAnalysis: React.FC = () => {
   return (
     <div className="space-y-4">
+      {/* Educational Tooltip */}
+      <EducationalTooltip
+        sections={{
+          howToAnalyze: [
+            'Picos de volumen: Hora del día con más actividad institucional = mejor liquidez',
+            'Eventos Macro: Trades grandes antes de CPI/Fed = posible información privilegiada',
+            'Patrones horarios: Institucionales entran a horas específicas, seguir su timing',
+            'Ventana de ejecución: 14:00-16:00 UTC típicamente tiene mejor liquidez y menos slippage',
+          ],
+          example: 'Si 60% del volumen ocurre 14:00-16:00 UTC, esa es tu mejor ventana para entrar/salir. Fuera de esas horas, espera mayor slippage.',
+          tip: 'Evita operar 00:00-06:00 UTC (Asia dormida, USA cerrada). Liquidez baja = slippage alto. Espera London/NY open para mejores entradas.',
+        }}
+      />
+
       <GlassCard variant="purple" padding="md">
         <div className="flex items-center gap-2 mb-6">
           <Clock className="text-purple-400" size={24} />

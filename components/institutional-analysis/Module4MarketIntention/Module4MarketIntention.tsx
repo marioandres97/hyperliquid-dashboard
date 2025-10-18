@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { GlassCard } from '../shared';
+import { GlassCard, EducationalTooltip } from '../shared';
 import { Target, AlertTriangle, TrendingUp, Activity } from 'lucide-react';
 import { useOrderBook } from '@/lib/hyperliquid/hooks';
 
@@ -128,6 +128,20 @@ const Module4MarketIntention: React.FC = () => {
 
   return (
     <div className="space-y-4">
+      {/* Educational Tooltip */}
+      <EducationalTooltip
+        sections={{
+          howToAnalyze: [
+            'Zonas de acumulación: Donde institucionales construyen posiciones sin mover precio',
+            'Stop hunting: Liquidez removida bruscamente = están cazando stops antes de movimiento real',
+            'Confianza alta (>80%): Patrón se repite frecuentemente, más confiable',
+            'Acumulación LONG en $95k-$96k = soporte fuerte, SHORT en $98k-$99k = resistencia',
+          ],
+          example: 'Si detectas acumulación SHORT en $98k con 85% confianza y luego ves stop hunt en $98.5k, prepara SHORT en pullback - los whales están distribuyendo.',
+          tip: 'No operes contra acumulación institucional de alta confianza. Si acumulan LONG, busca entradas LONG en retrocesos, no pelees contra ellos.',
+        }}
+      />
+
       {isLoading && zones.length === 0 && patterns.length === 0 ? (
         <GlassCard variant="purple" padding="md">
           <div className="text-center py-8 text-gray-400">

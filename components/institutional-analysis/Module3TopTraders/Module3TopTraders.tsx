@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { GlassCard, DataTable, Column } from '../shared';
+import { GlassCard, DataTable, Column, EducationalTooltip } from '../shared';
 import { TrendingUp, TrendingDown, Minus, Bell } from 'lucide-react';
 import type { TraderPosition } from './types';
 import { useMarketData } from '@/lib/hyperliquid/hooks';
@@ -187,6 +187,20 @@ const Module3TopTraders: React.FC = () => {
 
   return (
     <div className="space-y-4">
+      {/* Educational Tooltip */}
+      <EducationalTooltip
+        sections={{
+          howToAnalyze: [
+            'Direcciones de posiciones: Si mayoría es LONG/SHORT, ese es el sesgo institucional',
+            'PnL positivo consistente: Traders inteligentes con buena estrategia',
+            'Leverage alto (>10x): Operaciones de alto riesgo, pueden liquidarse rápido',
+            'Cambios de posición: "Opened/Increased" = nueva convicción, "Decreased" = toma de ganancias',
+          ],
+          example: 'Si 15 de 20 traders top están SHORT con PnL positivo y precio bajando, es señal fuerte bajista. Evita entrar LONG hasta que cambien.',
+          tip: 'Copia a los ganadores: Observa qué hacen los traders con mejor PnL. Si abren LONG en $95k, considera seguir su estrategia con stop loss estricto.',
+        }}
+      />
+
       <GlassCard variant="purple" padding="md">
         <h2 className="text-2xl font-bold text-purple-200 mb-4">Top 20 Traders Positions</h2>
         

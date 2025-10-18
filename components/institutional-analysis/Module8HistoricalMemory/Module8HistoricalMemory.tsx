@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { GlassCard } from '../shared';
+import { GlassCard, EducationalTooltip } from '../shared';
 import { History, Repeat, Search, Sparkles } from 'lucide-react';
 import { TraderTimeline } from './TraderTimeline';
 import { RecurringPatterns } from './RecurringPatterns';
@@ -11,6 +11,20 @@ import { PredictiveInsights } from './PredictiveInsights';
 const Module8HistoricalMemory: React.FC = () => {
   return (
     <div className="space-y-4">
+      {/* Educational Tooltip */}
+      <EducationalTooltip
+        sections={{
+          howToAnalyze: [
+            'Patrones recurrentes: Si funding >0.05% causó -2% 12/15 veces, es patrón confiable',
+            'Escenarios similares: Condiciones actuales vs histórico → predice movimiento probable',
+            'Timeline de traders: Ve cómo ballenas abren/cierran posiciones y cuándo toman profit',
+            'Probabilidad predictiva: >70% indica alta confiabilidad basada en datos históricos',
+          ],
+          example: 'Patrón: "Funding >0.05% → Precio cae 2-4% en 4h (82% éxito, 15 veces)". Si funding está en 0.053%, espera caída pronto.',
+          tip: 'Usa "Similar Scenarios" para ver qué pasó en situaciones idénticas. Si 3/3 escenarios similares subieron +3%, probabilidad alta de repetirse.',
+        }}
+      />
+
       <GlassCard variant="purple" padding="md">
         <div className="flex items-center gap-2 mb-6">
           <History className="text-purple-400" size={24} />

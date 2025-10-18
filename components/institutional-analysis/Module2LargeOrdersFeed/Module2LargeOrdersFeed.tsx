@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { GlassCard, DataTable, Column, RealTimeFeed, FeedItem } from '../shared';
+import { GlassCard, DataTable, Column, RealTimeFeed, FeedItem, EducationalTooltip } from '../shared';
 import { TrendingUp, TrendingDown, Filter, Zap } from 'lucide-react';
 import type { LargeTrade, TradeFilter } from './types';
 import { useTrades } from '@/lib/hyperliquid/hooks';
@@ -195,6 +195,20 @@ const Module2LargeOrdersFeed: React.FC = () => {
 
   return (
     <div className="space-y-4">
+      {/* Educational Tooltip */}
+      <EducationalTooltip
+        sections={{
+          howToAnalyze: [
+            'Órdenes grandes (>10 BTC): Indican movimientos institucionales significativos',
+            'Impacto de precio: >1% sugiere baja liquidez o trade muy agresivo',
+            'Cascadas (Cascade): Múltiples trades en segundos = posible liquidación forzada',
+            'Dirección BUY/SELL: Observa el sesgo institucional dominante',
+          ],
+          example: 'Si ves 5 trades SELL de >20 BTC con impacto >2% en 10 minutos, los institucionales están descargando posiciones. Prepara salida de LONG o entrada SHORT.',
+          tip: 'Presta atención a trades grandes ANTES de noticias importantes - los institucionales suelen posicionarse 1-2 horas antes con información privilegiada.',
+        }}
+      />
+
       {/* Header with filters */}
       <GlassCard variant="purple" padding="md">
         <div className="flex items-center justify-between mb-4">

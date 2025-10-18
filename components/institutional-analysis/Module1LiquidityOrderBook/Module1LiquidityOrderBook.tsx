@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { GlassCard, DataTable, Column } from '../shared';
+import { GlassCard, DataTable, Column, EducationalTooltip } from '../shared';
 import { AlertTriangle, TrendingUp, TrendingDown, Activity } from 'lucide-react';
 import { useOrderBook } from '@/lib/hyperliquid/hooks';
 import { useAsset, formatPrice, formatVolume } from '@/lib/context/AssetContext';
@@ -140,6 +140,20 @@ const Module1LiquidityOrderBook: React.FC = () => {
 
   return (
     <div className="space-y-4">
+      {/* Educational Tooltip */}
+      <EducationalTooltip
+        sections={{
+          howToAnalyze: [
+            'Liquidez total: Más liquidez BID (verde) = soporte fuerte, más ASK (rojo) = resistencia fuerte',
+            'Ratio de volumen: >1.2 indica presión compradora, <0.8 indica presión vendedora',
+            'Spread: Spread amplio (>0.05%) = baja liquidez, cuidado con slippage',
+            'Órdenes iceberg: Volumen 3x mayor que promedio = ballena escondiendo intención real',
+          ],
+          example: 'Si ves 500 BTC en BID $95k vs 200 BTC en ASK $96k, ratio 2.5 = fuerte soporte. Difícil bajar de $95k sin absorber toda esa liquidez.',
+          tip: 'Observa cuando desaparece liquidez repentinamente (iceberg cancelado). Ballena cambió de opinión = posible reversión de tendencia.',
+        }}
+      />
+
       {/* Header with metrics */}
       <GlassCard variant="purple" padding="md">
         <div className="flex items-center justify-between mb-4">

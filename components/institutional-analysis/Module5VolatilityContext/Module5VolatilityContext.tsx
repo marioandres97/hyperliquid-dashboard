@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { GlassCard } from '../shared';
+import { GlassCard, EducationalTooltip } from '../shared';
 import { Activity, DollarSign, TrendingUp, AlertCircle } from 'lucide-react';
 import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { useMarketData, useTrades } from '@/lib/hyperliquid/hooks';
@@ -135,6 +135,20 @@ const Module5VolatilityContext: React.FC = () => {
 
   return (
     <div className="space-y-4">
+      {/* Educational Tooltip */}
+      <EducationalTooltip
+        sections={{
+          howToAnalyze: [
+            'Funding rate >0.02%: Muchos LONG, mercado sobrecalentado = posible corrección',
+            'Funding rate <-0.02%: Muchos SHORT, mercado sobrevendido = posible rebote',
+            'Volatilidad alta en niveles: Zonas peligrosas donde precio se mueve violento',
+            'IV (Volatilidad implícita): Alta IV = opciones caras, esperar consolidación',
+          ],
+          example: 'Funding 0.035% + SHORT accumulation = los institucionales apuestan contra el retail que está LONG. Prepara salida de LONG o entrada SHORT.',
+          tip: 'Estrategia contra-tendencia: Si funding muy alto + whales acumulando SHORT, el mercado pagará funding hasta revertir. Timing perfecto para SHORT.',
+        }}
+      />
+
       <GlassCard variant="purple" padding="md">
         <div className="flex items-center gap-2 mb-6">
           <Activity className="text-purple-400" size={24} />

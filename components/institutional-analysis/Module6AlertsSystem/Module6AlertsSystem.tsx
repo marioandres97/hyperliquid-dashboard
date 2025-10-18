@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { GlassCard, DataTable, Column, Alert } from '../shared';
+import { GlassCard, DataTable, Column, Alert, EducationalTooltip } from '../shared';
 import { Bell, Settings, Volume2, VolumeX } from 'lucide-react';
 import { useTrades, useMarketData, useOrderBook } from '@/lib/hyperliquid/hooks';
 
@@ -240,6 +240,20 @@ const Module6AlertsSystem: React.FC = () => {
 
   return (
     <div className="space-y-4">
+      {/* Educational Tooltip */}
+      <EducationalTooltip
+        sections={{
+          howToAnalyze: [
+            'Alertas de liquidez: Cuando desaparece >50 BTC = ballenas preparando movimiento',
+            'Trades grandes: Ejecuciones institucionales que mueven mercado inmediatamente',
+            'Funding rate: Cruce de umbrales críticos indica desbalance retail vs institucional',
+            'Cambios de precio rápidos: >2% en minutos = noticias o movimiento coordinado',
+          ],
+          example: 'Alerta: "Liquidez desapareció 100 BTC en $97k" → Los institucionales retiraron órdenes, esperan precio diferente. No operes hasta que vuelva liquidez.',
+          tip: 'Activa alertas para niveles clave ($95k, $98k, $100k). Cuando salte alerta + volumen alto, es señal de breakout o rechazo fuerte.',
+        }}
+      />
+
       <GlassCard variant="purple" padding="md">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
