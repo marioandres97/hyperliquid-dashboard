@@ -37,7 +37,7 @@ export function SignalPerformanceWidget() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Header con botón Reset */}
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-medium text-white/70">Overview</h3>
@@ -53,8 +53,8 @@ export function SignalPerformanceWidget() {
       </div>
 
       {/* Win Rate Global */}
-      <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
-        <div className="flex items-center justify-between mb-2">
+      <div className="bg-white/5 backdrop-blur-sm rounded-xl p-3 border border-white/10">
+        <div className="flex items-center justify-between mb-1.5">
           <span className="text-white/60 text-sm">Win Rate</span>
           <Target className="w-4 h-4 text-white/40" />
         </div>
@@ -67,8 +67,8 @@ export function SignalPerformanceWidget() {
       </div>
 
       {/* Stats por Status */}
-      <div className="grid grid-cols-2 gap-3">
-        <div className="bg-green-500/10 border border-green-400/30 rounded-xl p-3 backdrop-blur-sm">
+      <div className="grid grid-cols-2 gap-2.5">
+        <div className="bg-green-500/10 border border-green-400/30 rounded-xl p-2.5 backdrop-blur-sm">
           <div className="flex items-center gap-2 mb-1">
             <TrendingUp className="w-4 h-4 text-green-400" />
             <span className="text-xs text-white/60">Targets Hit</span>
@@ -78,7 +78,7 @@ export function SignalPerformanceWidget() {
           </div>
         </div>
 
-        <div className="bg-red-500/10 border border-red-400/30 rounded-xl p-3 backdrop-blur-sm">
+        <div className="bg-red-500/10 border border-red-400/30 rounded-xl p-2.5 backdrop-blur-sm">
           <div className="flex items-center gap-2 mb-1">
             <TrendingDown className="w-4 h-4 text-red-400" />
             <span className="text-xs text-white/60">Stops Hit</span>
@@ -93,8 +93,8 @@ export function SignalPerformanceWidget() {
       <div className="space-y-2">
         <h3 className="text-sm font-medium text-white/70">By Coin</h3>
         {Object.entries(stats.byCoin).map(([coin, data]) => (
-          <div key={coin} className="bg-white/5 backdrop-blur-sm rounded-xl p-3 border border-white/10">
-            <div className="flex items-center justify-between mb-2">
+          <div key={coin} className="bg-white/5 backdrop-blur-sm rounded-xl p-2.5 border border-white/10">
+            <div className="flex items-center justify-between mb-1.5">
               <span className="font-medium text-white">{coin}</span>
               <span className="text-sm text-white/60">
                 {data.wins}/{data.total}
