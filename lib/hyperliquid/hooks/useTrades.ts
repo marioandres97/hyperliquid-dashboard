@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { getWSClient, Trade } from '../websocket';
-import { useAsset } from '@/lib/context/AssetContext';
+import { useAssetStore } from '@/lib/stores/assetStore';
 
 export interface ProcessedTrade {
   id: number;
@@ -27,7 +27,7 @@ export interface TradeStats {
 const LARGE_TRADE_THRESHOLD = 10; // Configurable threshold for "large" trades
 
 export function useTrades(maxTrades: number = 100) {
-  const { currentAsset } = useAsset();
+  const currentAsset = useAssetStore((state) => state.currentAsset);
   const [trades, setTrades] = useState<ProcessedTrade[]>([]);
   const [stats, setStats] = useState<TradeStats>({
     buyVolume: 0,

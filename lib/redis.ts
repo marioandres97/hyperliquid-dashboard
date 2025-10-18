@@ -1,36 +1,46 @@
 import Redis from 'ioredis';
+import { config } from '@/lib/core/config';
+import { log } from '@/lib/core/logger';
 
 // Create Redis client with error handling
 const createRedisClient = () => {
-  if (!process.env.REDIS_URL) {
-    console.warn('REDIS_URL not configured, Redis features will be disabled');
+  if (!config.redis.url) {
+    log.warn('REDIS_URL not configured, Redis features will be disabled');
     return null;
   }
 
-  const redis = new Redis(process.env.REDIS_URL, {
-    maxRetriesPerRequest: 3,
+  const redis = new Redis(config.redis.url, {
+    maxRetriesPerRequest: config.redis.maxRetries,
     enableReadyCheck: true,
+    connectTimeout: config.redis.connectTimeout,
+    commandTimeout: config.redis.commandTimeout,
     retryStrategy(times) {
       const delay = Math.min(times * 50, 2000);
+      log.debug('Redis retrying connection', { attempt: times, delay });
       return delay;
     },
-    lazyConnect: true, // Don't connect immediately
+    // Set lazyConnect based on environment
+    lazyConnect: config.env !== 'production',
   });
 
   redis.on('error', (error) => {
-    console.error('Redis connection error:', error.message);
+    log.error('Redis connection error', error);
   });
 
   redis.on('connect', () => {
-    console.log('Redis connected successfully');
+    log.info('Redis connected successfully');
   });
 
   redis.on('ready', () => {
-    console.log('Redis ready to accept commands');
+    log.info('Redis ready to accept commands');
   });
 
   redis.on('close', () => {
-    console.log('Redis connection closed');
+    log.info('Redis connection closed');
+  });
+
+  redis.on('reconnecting', (delay: number) => {
+    log.info('Redis reconnecting', { delay });
   });
 
   return redis;
