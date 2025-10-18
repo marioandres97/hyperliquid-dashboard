@@ -109,7 +109,7 @@ export function TradingChart({
     lastTradeIndexRef.current = trades.length;
 
     newTrades.forEach(trade => {
-      // Log trade
+      // Log every trade as per requirements for debugging/verification
       console.log('Trade:', {
         price: trade.price,
         size: trade.size,
@@ -167,7 +167,7 @@ export function TradingChart({
       padding,
     });
 
-    console.log('[TradingChart] Renderers initialized');
+    // Renderers initialized and ready for animation
   }, [ctx, height, pixelRatio]);
 
   // Animation loop for rendering

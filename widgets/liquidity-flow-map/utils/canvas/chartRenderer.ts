@@ -27,6 +27,16 @@ const DEFAULT_PADDING = {
   left: 10,
 };
 
+// Candle drawing configuration
+const CANDLE_CONFIG = {
+  MIN_WIDTH: 3,
+  MAX_WIDTH: 15,
+  BODY_WIDTH_RATIO: 0.8,
+  SPACING_RATIO: 0.8,
+  WICK_LINE_WIDTH: 1,
+  BODY_LINE_WIDTH: 1.5,
+};
+
 /**
  * Chart Renderer for candlestick charts with overlays
  */
@@ -126,11 +136,13 @@ export class ChartRenderer {
 
     // Determine color
     const isBullish = candle.close >= candle.open;
-    const color = isBullish ? '#10B981' : '#EF4444'; // Green for bullish, Red for bearish
+    const color = isBullish 
+      ? premiumTheme.trading.buy.base 
+      : premiumTheme.trading.sell.base;
 
     // Draw wick (high-low line)
     ctx.strokeStyle = color;
-    ctx.lineWidth = 1;
+    ctx.lineWidth = CANDLE_CONFIG.WICK_LINE_WIDTH;
     ctx.beginPath();
     ctx.moveTo(x + width / 2, highY);
     ctx.lineTo(x + width / 2, lowY);
@@ -141,16 +153,16 @@ export class ChartRenderer {
     const bodyY = Math.min(openY, closeY);
     
     ctx.fillStyle = color;
-    ctx.fillRect(x + width * 0.1, bodyY, width * 0.8, Math.max(bodyHeight, 1));
+    ctx.fillRect(x + width * 0.1, bodyY, width * CANDLE_CONFIG.BODY_WIDTH_RATIO, Math.max(bodyHeight, 1));
 
     // Add border for hollow effect on bullish candles
     if (isBullish) {
       ctx.strokeStyle = color;
-      ctx.lineWidth = 1.5;
-      ctx.strokeRect(x + width * 0.1, bodyY, width * 0.8, Math.max(bodyHeight, 1));
+      ctx.lineWidth = CANDLE_CONFIG.BODY_LINE_WIDTH;
+      ctx.strokeRect(x + width * 0.1, bodyY, width * CANDLE_CONFIG.BODY_WIDTH_RATIO, Math.max(bodyHeight, 1));
       // Fill with dark background
       ctx.fillStyle = premiumTheme.background.primary;
-      ctx.fillRect(x + width * 0.1 + 1, bodyY + 1, width * 0.8 - 2, Math.max(bodyHeight - 2, 0));
+      ctx.fillRect(x + width * 0.1 + 1, bodyY + 1, width * CANDLE_CONFIG.BODY_WIDTH_RATIO - 2, Math.max(bodyHeight - 2, 0));
     }
   }
 
@@ -166,7 +178,10 @@ export class ChartRenderer {
     const timeScale = chartWidth / (endTime - startTime);
 
     // Calculate candle width based on number of candles
-    const candleWidth = Math.max(3, Math.min(15, chartWidth / candles.length * 0.8));
+    const candleWidth = Math.max(
+      CANDLE_CONFIG.MIN_WIDTH, 
+      Math.min(CANDLE_CONFIG.MAX_WIDTH, chartWidth / candles.length * CANDLE_CONFIG.SPACING_RATIO)
+    );
 
     candles.forEach((candle) => {
       const x = padding.left + (candle.timestamp - startTime) * timeScale;

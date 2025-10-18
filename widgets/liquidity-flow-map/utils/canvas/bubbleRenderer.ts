@@ -19,21 +19,48 @@ export interface BubbleConfig {
   };
 }
 
+// Bubble size configuration
+const BUBBLE_SIZE_CONFIG = {
+  LARGE: { threshold: 500_000, radius: 40 },
+  MEDIUM: { threshold: 100_000, radius: 25 },
+  SMALL: { threshold: 50_000, radius: 15 },
+  TINY: { radius: 10 },
+};
+
+// Animation timing configuration
+const ANIMATION_TIMING = {
+  FADE_IN_MS: 300,
+  FADE_OUT_MS: 2000,
+  LIFETIME_MS: 15000,
+};
+
+// Bubble colors from theme
+const BUBBLE_COLORS = {
+  BUY: {
+    fill: premiumTheme.trading.buy.glow,
+    stroke: premiumTheme.trading.buy.base,
+  },
+  SELL: {
+    fill: premiumTheme.trading.sell.glow,
+    stroke: premiumTheme.trading.sell.base,
+  },
+};
+
 /**
  * Calculate bubble radius based on trade notional value
  */
 export function calculateBubbleRadius(notional: number): number {
-  if (notional >= 500_000) return 40;
-  if (notional >= 100_000) return 25;
-  if (notional >= 50_000) return 15;
-  return 10;
+  if (notional >= BUBBLE_SIZE_CONFIG.LARGE.threshold) return BUBBLE_SIZE_CONFIG.LARGE.radius;
+  if (notional >= BUBBLE_SIZE_CONFIG.MEDIUM.threshold) return BUBBLE_SIZE_CONFIG.MEDIUM.radius;
+  if (notional >= BUBBLE_SIZE_CONFIG.SMALL.threshold) return BUBBLE_SIZE_CONFIG.SMALL.radius;
+  return BUBBLE_SIZE_CONFIG.TINY.radius;
 }
 
 /**
  * Determine if trade should create a bubble (>$50K)
  */
 export function shouldCreateBubble(notional: number): boolean {
-  return notional >= 50_000;
+  return notional >= BUBBLE_SIZE_CONFIG.SMALL.threshold;
 }
 
 /**
@@ -50,7 +77,7 @@ export function createTradeBubble(
   const now = Date.now();
   
   return {
-    id: `bubble-${timestamp}-${Math.random().toString(36).substr(2, 9)}`,
+    id: `bubble-${timestamp}-${Math.random().toString(36).slice(2, 11)}`,
     timestamp,
     price,
     size,
@@ -59,7 +86,7 @@ export function createTradeBubble(
     radius,
     opacity: 0, // Start invisible for fade-in
     createdAt: now,
-    expiresAt: now + 15000, // 15 seconds lifetime
+    expiresAt: now + ANIMATION_TIMING.LIFETIME_MS,
   };
 }
 
@@ -86,7 +113,7 @@ export class BubbleRenderer {
    */
   addBubble(bubble: TradeBubble) {
     this.bubbles.push(bubble);
-    console.log(`[BubbleRenderer] Added ${bubble.side} bubble: $${bubble.notional.toFixed(0)} at $${bubble.price.toFixed(2)}`);
+    // Bubble added - tracking for large trades
   }
 
   /**
@@ -100,17 +127,17 @@ export class BubbleRenderer {
       const age = now - bubble.createdAt;
       const lifetime = bubble.expiresAt - bubble.createdAt;
       
-      // Fade in during first 300ms
-      if (age < 300) {
-        bubble.opacity = age / 300;
+      // Fade in during first phase
+      if (age < ANIMATION_TIMING.FADE_IN_MS) {
+        bubble.opacity = age / ANIMATION_TIMING.FADE_IN_MS;
       }
-      // Stay at full opacity until last 2 seconds
-      else if (age < lifetime - 2000) {
+      // Stay at full opacity until fade out phase
+      else if (age < lifetime - ANIMATION_TIMING.FADE_OUT_MS) {
         bubble.opacity = 1;
       }
-      // Fade out during last 2 seconds
+      // Fade out during last phase
       else if (age < lifetime) {
-        bubble.opacity = (lifetime - age) / 2000;
+        bubble.opacity = (lifetime - age) / ANIMATION_TIMING.FADE_OUT_MS;
       }
       // Remove if expired
       else {
@@ -154,11 +181,11 @@ export class BubbleRenderer {
     // Determine colors based on side
     const isBuy = bubble.side === 'buy';
     const fillColor = isBuy 
-      ? `rgba(0, 255, 0, ${0.3 * bubble.opacity})` 
-      : `rgba(255, 0, 0, ${0.3 * bubble.opacity})`;
+      ? BUBBLE_COLORS.BUY.fill.replace('0.4', `${0.3 * bubble.opacity}`)
+      : BUBBLE_COLORS.SELL.fill.replace('0.4', `${0.3 * bubble.opacity}`);
     const strokeColor = isBuy 
-      ? `rgba(0, 255, 0, ${bubble.opacity})` 
-      : `rgba(255, 0, 0, ${bubble.opacity})`;
+      ? BUBBLE_COLORS.BUY.stroke 
+      : BUBBLE_COLORS.SELL.stroke;
 
     // Draw bubble
     ctx.save();
