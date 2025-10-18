@@ -3,11 +3,13 @@ import { analyticsService } from '@/lib/services/analyticsService';
 import type { Trade } from '@/lib/services/marketService';
 
 describe('AnalyticsService', () => {
+  // Use fixed timestamps relative to a recent time for consistent test results
+  const baseTime = Date.now() - 60000; // 1 minute ago
   const mockTrades: Trade[] = [
-    { timestamp: Date.now() - 1000, side: 'BUY', size: 10, price: 100 },
-    { timestamp: Date.now() - 2000, side: 'SELL', size: 5, price: 101 },
-    { timestamp: Date.now() - 3000, side: 'BUY', size: 8, price: 99 },
-    { timestamp: Date.now() - 4000, side: 'SELL', size: 12, price: 102 },
+    { timestamp: baseTime - 1000, side: 'BUY', size: 10, price: 100 },
+    { timestamp: baseTime - 2000, side: 'SELL', size: 5, price: 101 },
+    { timestamp: baseTime - 3000, side: 'BUY', size: 8, price: 99 },
+    { timestamp: baseTime - 4000, side: 'SELL', size: 12, price: 102 },
   ];
 
   describe('calculateAssetCVD', () => {
