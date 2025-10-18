@@ -12,6 +12,12 @@ const configSchema = z.object({
   env: z.enum(['development', 'staging', 'production', 'test']).default('development'),
   port: z.coerce.number().int().positive().default(3000),
   
+  database: z.object({
+    url: z.string().optional(),
+    maxConnections: z.coerce.number().int().positive().default(10),
+    connectionTimeout: z.coerce.number().int().positive().default(10000),
+  }),
+  
   redis: z.object({
     url: z.string().optional(),
     maxRetries: z.coerce.number().int().positive().default(3),
@@ -54,6 +60,14 @@ const configSchema = z.object({
     rateLimitEnabled: z.coerce.boolean().default(true),
     analyticsEnabled: z.coerce.boolean().default(true),
   }),
+  
+  sentry: z.object({
+    dsn: z.string().optional(),
+    environment: z.string().optional(),
+    tracesSampleRate: z.coerce.number().min(0).max(1).default(0.1),
+    replaysSessionSampleRate: z.coerce.number().min(0).max(1).default(0.1),
+    replaysOnErrorSampleRate: z.coerce.number().min(0).max(1).default(1.0),
+  }),
 });
 
 export type Config = z.infer<typeof configSchema>;
@@ -65,6 +79,12 @@ function parseConfig(): Config {
   const rawConfig = {
     env: process.env.NODE_ENV || 'development',
     port: process.env.PORT || '3000',
+    
+    database: {
+      url: process.env.DATABASE_URL,
+      maxConnections: process.env.DATABASE_MAX_CONNECTIONS || '10',
+      connectionTimeout: process.env.DATABASE_CONNECTION_TIMEOUT || '10000',
+    },
     
     redis: {
       url: process.env.REDIS_URL,
@@ -107,6 +127,14 @@ function parseConfig(): Config {
     features: {
       rateLimitEnabled: process.env.RATE_LIMIT_ENABLED || 'true',
       analyticsEnabled: process.env.ANALYTICS_ENABLED || 'true',
+    },
+    
+    sentry: {
+      dsn: process.env.SENTRY_DSN,
+      environment: process.env.SENTRY_ENVIRONMENT || process.env.NODE_ENV || 'development',
+      tracesSampleRate: process.env.SENTRY_TRACES_SAMPLE_RATE || '0.1',
+      replaysSessionSampleRate: process.env.SENTRY_REPLAYS_SESSION_SAMPLE_RATE || '0.1',
+      replaysOnErrorSampleRate: process.env.SENTRY_REPLAYS_ON_ERROR_SAMPLE_RATE || '1.0',
     },
   };
 

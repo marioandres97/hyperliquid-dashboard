@@ -1,0 +1,104 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model for tracking dashboard users
+model User {
+  id        String   @id @default(cuid())
+  address   String   @unique
+  tier      String   @default("free") // free, pro, api
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sessions  Session[]
+  alerts    Alert[]
+  @@map("users")
+}
+
+// Session tracking for rate limiting and analytics
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([token])
+  @@map("sessions")
+}
+
+// Alert model for price/funding alerts
+model Alert {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  asset       String
+  alertType   String   // price_above, price_below, funding_rate
+  threshold   Float
+  isActive    Boolean  @default(true)
+  lastTriggered DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([asset])
+  @@index([isActive])
+  @@map("alerts")
+}
+
+// Trade snapshot for historical data
+model TradeSnapshot {
+  id        String   @id @default(cuid())
+  asset     String
+  price     Float
+  size      Float
+  side      String   // buy, sell
+  timestamp DateTime
+  createdAt DateTime @default(now())
+
+  @@index([asset])
+  @@index([timestamp])
+  @@map("trade_snapshots")
+}
+
+// Position snapshot for historical tracking
+model PositionSnapshot {
+  id           String   @id @default(cuid())
+  address      String
+  asset        String
+  szi          Float
+  entryPrice   Float
+  unrealizedPnl Float
+  timestamp    DateTime
+  createdAt    DateTime @default(now())
+
+  @@index([address])
+  @@index([asset])
+  @@index([timestamp])
+  @@map("position_snapshots")
+}
+
+// System health metrics
+model HealthMetric {
+  id        String   @id @default(cuid())
+  service   String   // redis, websocket, api, database
+  status    String   // healthy, degraded, unhealthy
+  latency   Int?
+  metadata  Json?
+  timestamp DateTime @default(now())
+
+  @@index([service])
+  @@index([timestamp])
+  @@map("health_metrics")
+}

@@ -7,6 +7,8 @@
 import { cacheWarmer } from '@/lib/jobs/cacheWarmer';
 import { log } from '@/lib/core/logger';
 import { config } from '@/lib/core/config';
+import { connectDatabase, isDatabaseAvailable } from '@/lib/database/client';
+import { setupShutdownListeners } from '@/lib/core/shutdown';
 
 /**
  * Initialize application services
@@ -16,6 +18,17 @@ export async function initializeApp(): Promise<void> {
   log.info('Initializing application services');
 
   try {
+    // Setup graceful shutdown handlers
+    setupShutdownListeners();
+
+    // Connect to database
+    if (isDatabaseAvailable()) {
+      log.info('Connecting to database');
+      await connectDatabase();
+    } else {
+      log.warn('Database not configured, skipping connection');
+    }
+
     // Start cache warming if enabled
     if (config.cache.warmOnStartup) {
       log.info('Cache warming enabled, scheduling cache warmer');
