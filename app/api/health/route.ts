@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import redis, { isRedisAvailable } from '@/lib/redis';
-import { getWSClient } from '@/lib/hyperliquid/websocket';
 import { errorHandler } from '@/lib/middleware/errorHandler';
 import { log } from '@/lib/core/logger';
 import { config } from '@/lib/core/config';
@@ -35,7 +34,7 @@ interface HealthStatus {
       latency?: number;
     };
     websocket: {
-      connected: boolean;
+      status: string;
     };
     hyperliquidApi: {
       reachable: boolean;
@@ -98,8 +97,6 @@ export async function GET() {
   return errorHandler(async () => {
     log.info('Health check started');
     
-    const wsClient = getWSClient();
-    
     // Get memory usage
     const memoryUsage = process.memoryUsage();
     const memory = {
@@ -116,8 +113,9 @@ export async function GET() {
       checkHyperliquidApi(),
     ]);
 
+    // WebSocket status is client-side only, so we report it as managed by client
     const websocketHealth = {
-      connected: wsClient.getConnectionStatus(),
+      status: 'client-managed',
     };
 
     // Determine overall health status
@@ -125,7 +123,7 @@ export async function GET() {
     
     if (!hyperliquidHealth.reachable) {
       status = 'unhealthy';
-    } else if (!databaseHealth.connected || !redisHealth.connected || !websocketHealth.connected) {
+    } else if (!databaseHealth.connected || !redisHealth.connected) {
       status = 'degraded';
     }
 
@@ -152,7 +150,7 @@ export async function GET() {
       memoryMB: memory.heapUsed,
       databaseConnected: databaseHealth.connected,
       redisConnected: redisHealth.connected,
-      wsConnected: websocketHealth.connected,
+      wsStatus: websocketHealth.status,
       apiReachable: hyperliquidHealth.reachable,
     });
 
