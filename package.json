@@ -10,7 +10,12 @@
   "dependencies": {
     "@nktkas/hyperliquid": "^0.25.2",
     "@tanstack/react-query": "^5.90.3",
+    "@tanstack/react-virtual": "^3.13.12",
     "@vercel/kv": "^3.0.0",
+    "canvas-confetti": "^1.9.3",
+    "d3-array": "^3.2.4",
+    "d3-scale": "^4.0.2",
+    "framer-motion": "^12.23.24",
     "html2canvas": "^1.4.1",
     "ioredis": "^5.8.1",
     "jspdf": "^3.0.3",
@@ -19,7 +24,8 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-zoom-pan-pinch": "^3.4.0",
-    "recharts": "^3.2.1"
+    "recharts": "^3.2.1",
+    "use-debounce": "^10.0.6"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.14",
