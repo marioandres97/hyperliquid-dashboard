@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { GlassCard } from '../shared';
+import { GlassCard, EducationalTooltip } from '../shared';
 import { Activity, DollarSign, TrendingUp, AlertCircle } from 'lucide-react';
 import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { useFundingRate, useMarketMetrics } from '@/lib/hyperliquid/hooks';
@@ -225,6 +225,37 @@ const Module5VolatilityContext: React.FC = () => {
           </div>
         </div>
       </GlassCard>
+
+      {/* Educational Tooltip */}
+      <EducationalTooltip
+        title="Volatilidad y Contexto de Mercado"
+        content={
+          <div>
+            <p className="mb-3">
+              El <strong>funding rate</strong> es el costo de mantener posiciones long o short. 
+              Un funding positivo significa que los longs pagan a los shorts, indicando sesgo alcista del mercado.
+            </p>
+            <p className="mb-3">
+              <strong>Volatilidad Implícita:</strong> Expectativa del mercado sobre movimientos futuros. 
+              Alta volatilidad = mayor incertidumbre y potencial para grandes movimientos.
+            </p>
+            <p>
+              <strong>Estrategia Contraria:</strong> Cuando el funding es muy alto y los institucionales abren shorts, 
+              están apostando contra el sentimiento retail para tomar ganancias del funding.
+            </p>
+          </div>
+        }
+        examples={[
+          'Funding de +0.01% (alto) + posiciones institutional short = señal bajista contraria.',
+          'Funding negativo de -0.02% + institutional longs = oportunidad de compra contra sentimiento.',
+          'Volatilidad cayendo después de spike = consolidación antes del próximo movimiento.',
+        ]}
+        tips={[
+          'Funding extremo (>0.02% o <-0.02%) raramente se sostiene - espera reversión.',
+          'Combina funding con volume imbalance para confirmar dirección.',
+          'Volatilidad alta + low volume = trampa, espera confirmación con volumen.',
+        ]}
+      />
     </div>
   );
 };

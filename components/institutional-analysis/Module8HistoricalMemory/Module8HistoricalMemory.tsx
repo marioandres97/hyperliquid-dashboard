@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { GlassCard, DataTable, Column } from '../shared';
+import { GlassCard, DataTable, Column, EducationalTooltip } from '../shared';
 import { Database, TrendingUp, Search, Lightbulb, Activity, Clock } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ScatterChart, Scatter } from 'recharts';
 import { useTrades, useMarketMetrics } from '@/lib/hyperliquid/hooks';
@@ -399,6 +399,37 @@ const Module8HistoricalMemory: React.FC = () => {
           ))}
         </div>
       </GlassCard>
+
+      {/* Educational Tooltip */}
+      <EducationalTooltip
+        title="Memoria Histórica y Reconocimiento de Patrones"
+        content={
+          <div>
+            <p className="mb-3">
+              La <strong>memoria histórica</strong> utiliza datos pasados para identificar patrones que se repiten. 
+              Los mercados son cíclicos y tienden a reaccionar de forma similar a condiciones similares.
+            </p>
+            <p className="mb-3">
+              <strong>Patrones Recurrentes:</strong> Comportamientos que se observan frecuentemente 
+              (ej: acumulación antes de noticias, stop hunts en soportes clave).
+            </p>
+            <p>
+              <strong>Escenarios Similares:</strong> Situaciones pasadas con condiciones de mercado parecidas 
+              (precio, funding, volumen). El outcome histórico sugiere qué podría pasar.
+            </p>
+          </div>
+        }
+        examples={[
+          'Patrón: "Shorts before US open" con 82% confianza = alta probabilidad de repetirse.',
+          'Escenario 89% similar hace 7 días resultó en +3.2% rally = posible repetición.',
+          'Predicción 72% probabilidad basada en 3 patrones = señal fuerte de trading.',
+        ]}
+        tips={[
+          'Mayor confianza (>80%) y frecuencia alta indican patrones más confiables.',
+          'Escenarios con >85% similitud son muy relevantes para decisiones actuales.',
+          'No uses predicciones como única señal - confirma con otros módulos.',
+        ]}
+      />
     </div>
   );
 };

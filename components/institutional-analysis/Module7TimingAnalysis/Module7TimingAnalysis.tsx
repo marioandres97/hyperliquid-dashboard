@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { GlassCard } from '../shared';
+import { GlassCard, EducationalTooltip } from '../shared';
 import { Clock, Calendar, TrendingUp, Brain, Activity } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { useTrades } from '@/lib/hyperliquid/hooks';
@@ -303,6 +303,37 @@ const Module7TimingAnalysis: React.FC = () => {
           ))}
         </div>
       </GlassCard>
+
+      {/* Educational Tooltip */}
+      <EducationalTooltip
+        title="Análisis de Timing y Patrones Temporales"
+        content={
+          <div>
+            <p className="mb-3">
+              El <strong>timing</strong> es crucial en trading. Los traders institucionales operan en horarios específicos 
+              basados en liquidez, eventos macroeconómicos y patrones históricos.
+            </p>
+            <p className="mb-3">
+              <strong>Distribución Horaria:</strong> Muestra cuándo hay más actividad. 
+              Picos durante horarios de EE.UU. (14:00-21:00 UTC) indican participación institucional.
+            </p>
+            <p>
+              <strong>Eventos Macro:</strong> CPI, decisiones de Fed, vencimientos de opciones pueden causar 
+              volatilidad extrema. Los institucionales posicionan antes del evento.
+            </p>
+          </div>
+        }
+        examples={[
+          'Si los top traders operan a las 14:00 UTC con éxito del 72%, considera hacer lo mismo.',
+          'Volumen bajo de 2:00-6:00 UTC + alta volatilidad = zona de stop hunting.',
+          'Antes de eventos HIGH impact, los institucionales reducen posiciones o se cubren.',
+        ]}
+        tips={[
+          'Evita operar en horas de bajo volumen a menos que seas muy experimentado.',
+          'Eventos HIGH impact pueden invalidar análisis técnico - ten precaución.',
+          'Patrones de timing se repiten - estudia el comportamiento histórico de grandes traders.',
+        ]}
+      />
     </div>
   );
 };

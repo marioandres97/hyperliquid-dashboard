@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { GlassCard, DataTable, Column } from '../shared';
+import { GlassCard, DataTable, Column, EducationalTooltip } from '../shared';
 import { AlertTriangle, TrendingUp, TrendingDown, Activity } from 'lucide-react';
 import type { OrderBookLevel, OrderBookData, VolumeImbalance } from './types';
 
@@ -267,6 +267,37 @@ const Module1LiquidityOrderBook: React.FC = () => {
       <div className="text-xs text-gray-500 text-center font-mono">
         Last updated: {orderBook.lastUpdate.toLocaleTimeString()}
       </div>
+
+      {/* Educational Tooltip */}
+      <EducationalTooltip
+        title="Cómo Entender el Libro de Órdenes"
+        content={
+          <div>
+            <p className="mb-3">
+              El <strong>libro de órdenes</strong> muestra todas las órdenes de compra (bids) y venta (asks) activas en el mercado. 
+              Los traders institucionales utilizan esta información para detectar niveles de liquidez y posibles manipulaciones.
+            </p>
+            <p className="mb-3">
+              <strong>Volume Imbalance:</strong> Cuando hay más volumen de compra que de venta (ratio &gt; 1.2), 
+              indica presión alcista. Un ratio &lt; 0.8 indica presión bajista.
+            </p>
+            <p>
+              <strong>Iceberg Orders:</strong> Órdenes grandes ocultas que solo muestran una parte pequeña. 
+              Los detectamos cuando vemos reemplazos constantes al mismo precio.
+            </p>
+          </div>
+        }
+        examples={[
+          'Si ves un ratio de 1.5, significa que hay 50% más compradores que vendedores activos.',
+          'Una orden iceberg de 100 BTC puede mostrar solo 5 BTC en el libro, reemplazándose continuamente.',
+          'Un muro de órdenes grandes en un nivel puede ser falso si desaparece cuando el precio se acerca.',
+        ]}
+        tips={[
+          'Observa los niveles con mayor volumen acumulado - suelen actuar como soporte/resistencia.',
+          'Los iceberg orders indican posiciones institucionales grandes.',
+          'Un desequilibrio alto no garantiza movimiento - puede ser trampa para retail traders.',
+        ]}
+      />
     </div>
   );
 };

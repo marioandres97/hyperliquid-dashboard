@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { GlassCard, DataTable, Column, RealTimeFeed, FeedItem } from '../shared';
+import { GlassCard, DataTable, Column, RealTimeFeed, FeedItem, EducationalTooltip } from '../shared';
 import { TrendingUp, TrendingDown, Filter, Zap, Wallet } from 'lucide-react';
 import type { LargeTrade, TradeFilter } from './types';
 import { useTrades } from '@/lib/hyperliquid/hooks';
@@ -341,6 +341,37 @@ const Module2LargeOrdersFeed: React.FC = () => {
           maxHeight="500px"
         />
       </GlassCard>
+
+      {/* Educational Tooltip */}
+      <EducationalTooltip
+        title="Cómo Interpretar Órdenes Grandes"
+        content={
+          <div>
+            <p className="mb-3">
+              Las <strong>órdenes grandes</strong> (típicamente &gt; 1 BTC) revelan la actividad de traders institucionales y whales. 
+              El impacto en el precio y las cascadas indican la profundidad real del mercado.
+            </p>
+            <p className="mb-3">
+              <strong>Price Impact:</strong> El porcentaje que movió el precio la ejecución. 
+              Un impacto &gt; 1% indica baja liquidez o ejecución agresiva.
+            </p>
+            <p>
+              <strong>Cascadas:</strong> Cuando una orden grande desencadena liquidaciones en cadena, 
+              creando un efecto dominó que amplifica el movimiento.
+            </p>
+          </div>
+        }
+        examples={[
+          'Una compra de 50 BTC que mueve el precio +0.5% indica buena liquidez.',
+          'Una venta de 20 BTC con +2% impacto sugiere libro delgado o stop loss hunting.',
+          'Una cascada de 5 niveles significa que al menos 5 órdenes de liquidación se ejecutaron en secuencia.',
+        ]}
+        tips={[
+          'Compras grandes con bajo impacto suelen preceder movimientos alcistas sostenidos.',
+          'Ventas agresivas con alto impacto pueden ser manipulación para comprar más abajo.',
+          'Observa la dirección predominante en ventanas de 1h - indica sesgo institucional.',
+        ]}
+      />
     </div>
   );
 };
