@@ -9,19 +9,21 @@ import { Module3TopTraders } from '@/components/institutional-analysis/Module3To
 import { Module4MarketIntention } from '@/components/institutional-analysis/Module4MarketIntention';
 import { Module5VolatilityContext } from '@/components/institutional-analysis/Module5VolatilityContext';
 import { Module6AlertsSystem } from '@/components/institutional-analysis/Module6AlertsSystem';
+import { Module7TimingAnalysis } from '@/components/institutional-analysis/Module7TimingAnalysis';
+import { Module8HistoricalMemory } from '@/components/institutional-analysis/Module8HistoricalMemory';
 import { Activity, ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function InstitutionalAnalysisPage() {
   const router = useRouter();
   const [alerts, setAlerts] = useState<Alert[]>([]);
-  const [activeTab, setActiveTab] = useState<'all' | 1 | 2 | 3 | 4 | 5 | 6>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8>('all');
 
   const dismissAlert = (id: string | number) => {
     setAlerts(prev => prev.filter(alert => alert.id !== id));
   };
 
-  const tabs: Array<{ id: 'all' | 1 | 2 | 3 | 4 | 5 | 6; label: string }> = [
+  const tabs: Array<{ id: 'all' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8; label: string }> = [
     { id: 'all' as const, label: 'All Modules' },
     { id: 1 as const, label: 'Liquidity & Order Book' },
     { id: 2 as const, label: 'Large Orders Feed' },
@@ -29,6 +31,8 @@ export default function InstitutionalAnalysisPage() {
     { id: 4 as const, label: 'Market Intention' },
     { id: 5 as const, label: 'Volatility & Context' },
     { id: 6 as const, label: 'Alert System' },
+    { id: 7 as const, label: 'Timing Analysis' },
+    { id: 8 as const, label: 'Historical Memory' },
   ];
 
   return (
@@ -138,6 +142,12 @@ export default function InstitutionalAnalysisPage() {
               <div id="module-6">
                 <Module6AlertsSystem />
               </div>
+              <div id="module-7">
+                <Module7TimingAnalysis />
+              </div>
+              <div id="module-8">
+                <Module8HistoricalMemory />
+              </div>
             </div>
           )}
 
@@ -147,6 +157,8 @@ export default function InstitutionalAnalysisPage() {
           {activeTab === 4 && <Module4MarketIntention />}
           {activeTab === 5 && <Module5VolatilityContext />}
           {activeTab === 6 && <Module6AlertsSystem />}
+          {activeTab === 7 && <Module7TimingAnalysis />}
+          {activeTab === 8 && <Module8HistoricalMemory />}
         </motion.div>
       </div>
     </div>

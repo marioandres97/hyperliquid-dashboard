@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { GlassCard, DataTable, Column } from '../shared';
+import { GlassCard, DataTable, Column, EducationalTooltip } from '../shared';
 import { TrendingUp, TrendingDown, Minus, Bell } from 'lucide-react';
 import type { TraderPosition } from './types';
 
@@ -180,6 +180,36 @@ const Module3TopTraders: React.FC = () => {
           }}
         />
       </GlassCard>
+
+      {/* Educational Tooltip */}
+      <EducationalTooltip
+        title="Entendiendo las Posiciones de Top Traders"
+        content={
+          <div>
+            <p className="mb-3">
+              Los <strong>top traders</strong> suelen ser instituciones, market makers o whales con historial probado. 
+              Seguir sus posiciones puede dar pistas sobre la dirección del mercado.
+            </p>
+            <p className="mb-3">
+              <strong>Leverage:</strong> Apalancamiento utilizado. Leverage &gt; 10x es muy riesgoso pero indica fuerte convicción.
+            </p>
+            <p>
+              <strong>PnL%:</strong> Ganancia/pérdida no realizada. Si muchos traders long tienen PnL negativo, 
+              puede haber presión de cierre que impulse el precio a la baja.
+            </p>
+          </div>
+        }
+        examples={[
+          'Si 5 de los top 10 traders abren posiciones LONG, sugiere sentimiento alcista institucional.',
+          'Un trader con 20x leverage y $50K de PnL tiene una convicción extremadamente alta.',
+          'Cuando traders exitosos cierran posiciones rentables, puede indicar toma de ganancias antes de corrección.',
+        ]}
+        tips={[
+          'No copies ciegamente - los institucionales pueden aguantar pérdidas que tú no puedes.',
+          'Observa cambios recientes (OPENED, INCREASED) - indican timing activo.',
+          'Alta concentración de SHORT en top traders con funding positivo = jugada contraria institucional.',
+        ]}
+      />
     </div>
   );
 };
