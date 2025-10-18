@@ -126,15 +126,17 @@ export async function storePosition(position: StoredPosition): Promise<boolean> 
 
 export async function getPositions(
   coin: string,
-  startTime: number,
-  endTime: number,
+  startTime?: number,
+  endTime?: number,
   limit: number = 100
 ): Promise<StoredPosition[]> {
   if (!isRedisAvailable() || !redis) return [];
 
   try {
     const listKey = `${POSITIONS_LIST_PREFIX}${coin}`;
-    const positionIds = await redis.zrangebyscore(listKey, startTime, endTime, 'LIMIT', 0, limit);
+    const start = startTime || '-inf';
+    const end = endTime || '+inf';
+    const positionIds = await redis.zrangebyscore(listKey, start, end, 'LIMIT', 0, limit);
     
     if (positionIds.length === 0) return [];
     
