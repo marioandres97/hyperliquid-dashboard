@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import redis, { isRedisAvailable } from '@/lib/redis';
-import { getWSClient } from '@/lib/hyperliquid/websocket';
 import { errorHandler } from '@/lib/middleware/errorHandler';
 import { log } from '@/lib/core/logger';
 import { config } from '@/lib/core/config';
@@ -17,12 +16,6 @@ interface HealthStatus {
   uptime: number;
   version: string;
   environment: string;
-  memory: {
-    heapUsed: number;
-    heapTotal: number;
-    rss: number;
-    external: number;
-  };
   services: {
     database: {
       available: boolean;
@@ -40,6 +33,14 @@ interface HealthStatus {
     hyperliquidApi: {
       reachable: boolean;
       latency?: number;
+    };
+  };
+  metrics: {
+    memory: {
+      heapUsed: number;
+      heapTotal: number;
+      rss: number;
+      external: number;
     };
   };
 }
@@ -98,8 +99,6 @@ export async function GET() {
   return errorHandler(async () => {
     log.info('Health check started');
     
-    const wsClient = getWSClient();
-    
     // Get memory usage
     const memoryUsage = process.memoryUsage();
     const memory = {
@@ -116,8 +115,11 @@ export async function GET() {
       checkHyperliquidApi(),
     ]);
 
+    // WebSocket connections are managed client-side in Next.js App Router
+    // Server-side API routes cannot access client-only modules due to 'use client' directive
+    // This field indicates server-side connection status (always false as expected)
     const websocketHealth = {
-      connected: wsClient.getConnectionStatus(),
+      connected: false,
     };
 
     // Determine overall health status
@@ -125,7 +127,7 @@ export async function GET() {
     
     if (!hyperliquidHealth.reachable) {
       status = 'unhealthy';
-    } else if (!databaseHealth.connected || !redisHealth.connected || !websocketHealth.connected) {
+    } else if (!databaseHealth.connected || !redisHealth.connected) {
       status = 'degraded';
     }
 
@@ -137,12 +139,14 @@ export async function GET() {
       uptime,
       version: process.env.npm_package_version || '0.1.0',
       environment: config.env,
-      memory,
       services: {
         database: databaseHealth,
         redis: redisHealth,
         websocket: websocketHealth,
         hyperliquidApi: hyperliquidHealth,
+      },
+      metrics: {
+        memory,
       },
     };
 

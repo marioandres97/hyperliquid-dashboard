@@ -6,11 +6,7 @@ vi.mock('@/lib/redis', () => ({
   isRedisAvailable: () => false,
 }));
 
-vi.mock('@/lib/hyperliquid/websocket', () => ({
-  getWSClient: () => ({
-    getConnectionStatus: () => false,
-  }),
-}));
+// WebSocket is now client-side only and not mocked for health check
 
 vi.mock('@/lib/database/client', () => ({
   checkDatabaseHealth: vi.fn().mockResolvedValue({
@@ -58,12 +54,6 @@ describe('Health Check API', () => {
       uptime: expect.any(Number),
       version: expect.any(String),
       environment: expect.any(String),
-      memory: {
-        heapUsed: expect.any(Number),
-        heapTotal: expect.any(Number),
-        rss: expect.any(Number),
-        external: expect.any(Number),
-      },
       services: {
         database: {
           available: expect.any(Boolean),
@@ -77,6 +67,14 @@ describe('Health Check API', () => {
         },
         hyperliquidApi: {
           reachable: expect.any(Boolean),
+        },
+      },
+      metrics: {
+        memory: {
+          heapUsed: expect.any(Number),
+          heapTotal: expect.any(Number),
+          rss: expect.any(Number),
+          external: expect.any(Number),
         },
       },
     };
@@ -116,14 +114,13 @@ describe('Health Check API', () => {
     // Test logic for determining degraded status
     const databaseConnected = false;
     const redisConnected = false;
-    const wsConnected = false;
     const apiReachable = true;
 
     let status: 'healthy' | 'degraded' | 'unhealthy' = 'healthy';
 
     if (!apiReachable) {
       status = 'unhealthy';
-    } else if (!databaseConnected || !redisConnected || !wsConnected) {
+    } else if (!databaseConnected || !redisConnected) {
       status = 'degraded';
     }
 
@@ -145,14 +142,13 @@ describe('Health Check API', () => {
   it('should return healthy status when all services are up', () => {
     const databaseConnected = true;
     const redisConnected = true;
-    const wsConnected = true;
     const apiReachable = true;
 
     let status: 'healthy' | 'degraded' | 'unhealthy' = 'healthy';
 
     if (!apiReachable) {
       status = 'unhealthy';
-    } else if (!databaseConnected || !redisConnected || !wsConnected) {
+    } else if (!databaseConnected || !redisConnected) {
       status = 'degraded';
     }
 
