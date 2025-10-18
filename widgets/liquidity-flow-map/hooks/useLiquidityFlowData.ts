@@ -70,6 +70,8 @@ export function useLiquidityFlowData({
       const data = aggregatorRef.current.getFlowData(coin, timeWindow);
       const series = aggregatorRef.current.getTimeSeries(coin, timeWindow);
 
+      console.log('Nodes count:', data.nodes.size);
+
       setFlowData(data);
       setMetrics(data.metrics);
       setTimeSeries(series);
@@ -126,6 +128,7 @@ export function useLiquidityFlowData({
 
     // Trade callback
     const handleTrade = (trade: any) => {
+      console.log('Trade received:', trade);
       aggregatorRef.current.addTrade(trade);
       setState(prev => ({
         ...prev,
