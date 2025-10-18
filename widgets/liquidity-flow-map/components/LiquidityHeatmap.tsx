@@ -3,6 +3,7 @@
 import React, { useMemo } from 'react';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import type { LiquidityNode, AbsorptionZone, SupportResistanceLevel } from '../types';
+import { PremiumLiquidityHeatmap } from './premium';
 
 export interface LiquidityHeatmapProps {
   nodes: Map<number, LiquidityNode>;
@@ -10,6 +11,7 @@ export interface LiquidityHeatmapProps {
   absorptionZones?: AbsorptionZone[];
   supportResistanceLevels?: SupportResistanceLevel[];
   showPatterns?: boolean;
+  usePremium?: boolean;
 }
 
 export function LiquidityHeatmap({ 
@@ -18,7 +20,20 @@ export function LiquidityHeatmap({
   absorptionZones = [],
   supportResistanceLevels = [],
   showPatterns = true,
+  usePremium = false,
 }: LiquidityHeatmapProps) {
+  // Use premium version if enabled
+  if (usePremium) {
+    return (
+      <PremiumLiquidityHeatmap
+        nodes={nodes}
+        currentPrice={currentPrice}
+        absorptionZones={absorptionZones}
+        supportResistanceLevels={supportResistanceLevels}
+        showPatterns={showPatterns}
+      />
+    );
+  }
   // Convert nodes to sorted array for visualization
   const sortedNodes = useMemo(() => {
     const nodeArray = Array.from(nodes.values());
