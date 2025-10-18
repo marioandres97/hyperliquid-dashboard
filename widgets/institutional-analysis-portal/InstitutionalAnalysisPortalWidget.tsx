@@ -134,9 +134,10 @@ export default function InstitutionalAnalysisPortalWidget() {
           }}
         >
           <div
-            className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 animate-shimmer"
+            className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700"
             style={{
               background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent)',
+              animation: 'shimmer 2s infinite',
             }}
           />
           <span className="relative z-10 text-white">Open Analysis Platform</span>
