@@ -57,13 +57,3 @@ export const itemVariants = {
   hidden: { opacity: 0, y: 20 },
   show: { opacity: 1, y: 0 },
 };
-
-// Slide in for heatmap
-export const heatmapVariants = {
-  hidden: { opacity: 0, x: -50 },
-  show: { 
-    opacity: 1, 
-    x: 0,
-    transition: { type: 'spring' as const, stiffness: 100 },
-  },
-};
