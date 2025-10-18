@@ -19,85 +19,109 @@ export function LiquidityLevelIndicator({ metrics }: LiquidityLevelIndicatorProp
 
   const levels = [
     {
-      name: 'Whale',
+      name: 'Ballenas',
       count: metrics.whaleTradeCount,
       percent: whalePercent,
       bgColor: 'bg-purple-500',
       textColor: 'text-purple-500',
       icon: '🐋',
-      description: 'High volume trades',
+      description: 'Operaciones grandes',
     },
     {
-      name: 'Regular',
+      name: 'Regulares',
       count: totalTrades - metrics.whaleTradeCount,
       percent: 100 - whalePercent,
       bgColor: 'bg-blue-500',
       textColor: 'text-blue-500',
       icon: '🐟',
-      description: 'Standard trades',
+      description: 'Operaciones estándar',
     },
     {
-      name: 'Buy',
+      name: 'Compras',
       count: metrics.buyTradeCount,
       percent: buyPercent,
       bgColor: 'bg-green-500',
       textColor: 'text-green-500',
       icon: '⬆️',
-      description: 'Buy side trades',
+      description: 'Lado comprador',
     },
     {
-      name: 'Sell',
+      name: 'Ventas',
       count: metrics.sellTradeCount,
       percent: sellPercent,
       bgColor: 'bg-red-500',
       textColor: 'text-red-500',
       icon: '⬇️',
-      description: 'Sell side trades',
+      description: 'Lado vendedor',
     },
   ];
 
   return (
-    <div className="glass rounded-xl p-6">
-      <h3 className="text-xl font-semibold text-white mb-4">Trade Distribution</h3>
+    <div className="glass rounded-xl p-4 md:p-6">
+      <h3 className="text-lg md:text-xl font-semibold text-white mb-4">Distribución de Operaciones</h3>
       
-      {/* Visual Bar */}
-      <div className="mb-6">
-        <div className="flex h-8 rounded-lg overflow-hidden">
-          {levels.map((level, index) => (
-            level.percent > 0 && (
-              <div
-                key={index}
-                className={`${level.bgColor} flex items-center justify-center text-white text-xs font-bold transition-all hover:opacity-80`}
-                style={{ width: `${level.percent}%` }}
-                title={`${level.name}: ${level.percent.toFixed(1)}%`}
-              >
-                {level.percent > 10 && `${level.percent.toFixed(0)}%`}
-              </div>
-            )
-          ))}
+      {/* Visual Bar with better visibility */}
+      <div className="mb-4 space-y-3">
+        {/* Whale vs Regular */}
+        <div>
+          <div className="text-xs text-white/60 mb-1">Tipo de Operación</div>
+          <div className="flex h-10 rounded-lg overflow-hidden shadow-lg">
+            {[levels[0], levels[1]].map((level, index) => (
+              level.percent > 0 && (
+                <div
+                  key={index}
+                  className={`${level.bgColor} flex items-center justify-center text-white text-sm font-bold transition-all hover:opacity-80 cursor-pointer`}
+                  style={{ width: `${level.percent}%`, minWidth: '40px' }}
+                  title={`${level.name}: ${level.percent.toFixed(1)}%`}
+                >
+                  <span className="hidden sm:inline">{level.icon}</span>
+                  <span className="ml-1">{level.percent.toFixed(0)}%</span>
+                </div>
+              )
+            ))}
+          </div>
+        </div>
+
+        {/* Buy vs Sell */}
+        <div>
+          <div className="text-xs text-white/60 mb-1">Dirección</div>
+          <div className="flex h-10 rounded-lg overflow-hidden shadow-lg">
+            {[levels[2], levels[3]].map((level, index) => (
+              level.percent > 0 && (
+                <div
+                  key={index}
+                  className={`${level.bgColor} flex items-center justify-center text-white text-sm font-bold transition-all hover:opacity-80 cursor-pointer`}
+                  style={{ width: `${level.percent}%`, minWidth: '40px' }}
+                  title={`${level.name}: ${level.percent.toFixed(1)}%`}
+                >
+                  <span className="hidden sm:inline">{level.icon}</span>
+                  <span className="ml-1">{level.percent.toFixed(0)}%</span>
+                </div>
+              )
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Level Details */}
-      <div className="grid grid-cols-2 gap-4">
+      {/* Level Details - Compact Grid */}
+      <div className="grid grid-cols-2 gap-2">
         {levels.map((level, index) => (
           <div
             key={index}
-            className="bg-white/5 rounded-lg p-4 border border-white/10 hover:bg-white/10 transition-all"
+            className="bg-white/5 rounded-lg p-2 border border-white/10 hover:bg-white/10 transition-all"
           >
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-2xl">{level.icon}</span>
-              <div>
-                <div className="text-sm font-semibold text-white">{level.name}</div>
-                <div className="text-xs text-white/60">{level.description}</div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-xl">{level.icon}</span>
+              <div className="flex-1 min-w-0">
+                <div className="text-xs font-semibold text-white truncate">{level.name}</div>
+                <div className="text-xs text-white/60 truncate">{level.description}</div>
               </div>
             </div>
-            <div className="mt-2 flex justify-between items-end">
+            <div className="flex justify-between items-end">
               <div>
-                <div className="text-2xl font-bold text-white">{level.count}</div>
-                <div className="text-xs text-white/60">trades</div>
+                <div className="text-lg font-bold text-white">{level.count}</div>
               </div>
-              <div className={`text-xl font-bold ${level.textColor}`}>
+              <div className={`text-base font-bold ${level.textColor}`}>
                 {level.percent.toFixed(1)}%
               </div>
             </div>

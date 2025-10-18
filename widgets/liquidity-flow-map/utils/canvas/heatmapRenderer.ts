@@ -77,11 +77,15 @@ export class HeatmapRenderer {
       glowColor = premiumTheme.trading.neutral.glow;
     }
 
-    // Calculate alpha based on intensity
-    const alpha = Math.min(intensity * 0.8, 0.8);
+    // Calculate alpha based on intensity with better scaling for low volumes
+    // Use logarithmic scaling to make low volumes more visible
+    const logIntensity = Math.log10(1 + intensity * 9) / Math.log10(10);
+    const alpha = Math.min(Math.max(logIntensity * 0.8, 0.15), 0.8);
 
-    // Draw main bar
-    const barWidth = (Math.abs(netFlow) / maxVolume) * (width - 200);
+    // Draw main bar with minimum width for visibility
+    const calculatedWidth = (Math.abs(netFlow) / maxVolume) * (width - 200);
+    const minBarWidth = 3; // Minimum bar width in pixels
+    const barWidth = Math.max(calculatedWidth, netFlow !== 0 ? minBarWidth : 0);
     
     ctx.fillStyle = this.hexToRGBA(baseColor, alpha);
     ctx.fillRect(150, y, barWidth, rowHeight - 2);
@@ -128,18 +132,32 @@ export class HeatmapRenderer {
     const { ctx, config } = this;
     const { width, maxVolume } = config;
 
-    const buyWidth = (buyVolume / maxVolume) * 150;
-    const sellWidth = (sellVolume / maxVolume) * 150;
+    // Use logarithmic scaling for better visibility of low volumes
+    const scaledBuyVolume = buyVolume > 0 ? Math.log10(1 + buyVolume) : 0;
+    const scaledSellVolume = sellVolume > 0 ? Math.log10(1 + sellVolume) : 0;
+    const maxScaledVolume = Math.log10(1 + maxVolume);
+
+    const buyWidth = (scaledBuyVolume / maxScaledVolume) * 150;
+    const sellWidth = (scaledSellVolume / maxScaledVolume) * 150;
+
+    // Minimum bar width for visibility
+    const minBarWidth = 2;
+    const finalBuyWidth = buyVolume > 0 ? Math.max(buyWidth, minBarWidth) : 0;
+    const finalSellWidth = sellVolume > 0 ? Math.max(sellWidth, minBarWidth) : 0;
 
     const centerX = width - 300;
 
     // Buy volume (left)
-    ctx.fillStyle = this.hexToRGBA(premiumTheme.trading.buy.base, 0.7);
-    ctx.fillRect(centerX - buyWidth, y + 4, buyWidth, rowHeight - 8);
+    if (finalBuyWidth > 0) {
+      ctx.fillStyle = this.hexToRGBA(premiumTheme.trading.buy.base, 0.7);
+      ctx.fillRect(centerX - finalBuyWidth, y + 4, finalBuyWidth, rowHeight - 8);
+    }
 
     // Sell volume (right)
-    ctx.fillStyle = this.hexToRGBA(premiumTheme.trading.sell.base, 0.7);
-    ctx.fillRect(centerX, y + 4, sellWidth, rowHeight - 8);
+    if (finalSellWidth > 0) {
+      ctx.fillStyle = this.hexToRGBA(premiumTheme.trading.sell.base, 0.7);
+      ctx.fillRect(centerX, y + 4, finalSellWidth, rowHeight - 8);
+    }
   }
 
   private hexToRGBA(hex: string, alpha: number): string {

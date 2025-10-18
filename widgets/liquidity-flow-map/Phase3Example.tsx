@@ -236,8 +236,6 @@ export function Phase3Example() {
             <FlowMetricsPanel
               metrics={metrics}
               lastUpdate={new Date()}
-              patterns={patterns}
-              showPatterns={true}
             />
 
             <TimeSeriesChart
