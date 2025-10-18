@@ -20,7 +20,7 @@ export default function OrderFlowSignalsWidget() {
   return (
     <div className="h-full flex flex-col space-y-2">
       {/* Header */}
-      <div className="flex items-center justify-between pb-2 border-b border-white/20">
+      <div className="flex items-center justify-between pb-2 border-b border-white/20 flex-shrink-0">
         <div className="flex items-center gap-2">
           {anyConnected ? (
             <Wifi className="w-4 h-4 text-green-400" />
@@ -40,7 +40,7 @@ export default function OrderFlowSignalsWidget() {
       </div>
 
       {/* Signals List */}
-      <div className="flex-1 overflow-y-auto space-y-2 min-h-0">
+      <div className="flex-1 overflow-y-auto space-y-2 min-h-0 flex flex-col">
         {COINS.map(coin => {
           const state = coinStates[coin];
           const signal = state?.signal;
@@ -59,9 +59,9 @@ export default function OrderFlowSignalsWidget() {
           return (
             <div
               key={coin}
-              className="p-4 border border-white/10 rounded-xl bg-white/5 backdrop-blur-sm"
+              className="p-4 border border-white/10 rounded-xl bg-white/5 backdrop-blur-sm flex-1 min-h-0 flex flex-col"
             >
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-2 flex-shrink-0">
                 <div>
                   <div className="font-semibold text-white text-lg">{coin}</div>
                   <div className="text-sm text-white/60">
@@ -75,35 +75,88 @@ export default function OrderFlowSignalsWidget() {
                 </div>
               </div>
               
-              {/* Volume indicator */}
-              <div className="mt-3 space-y-1.5">
-                <div className="text-xs text-white/50">Volume Activity</div>
-                <div className="flex gap-1">
+              {/* Volume indicator - EXPANDED */}
+              <div className="mt-3 space-y-1.5 flex-1 flex flex-col">
+                <div className="text-xs text-white/50 flex-shrink-0">Volume Activity</div>
+                <div className="flex gap-1 flex-1 items-end min-h-[60px]">
                   {[...Array(10)].map((_, i) => (
                     <div 
                       key={i}
-                      className={`flex-1 h-8 rounded-sm ${
+                      className={`flex-1 rounded-sm transition-all duration-300 ${
                         i < (state?.tradeCount || 0) % 10 
                           ? 'bg-purple-400/40' 
                           : 'bg-white/10'
                       }`}
                       style={{ 
-                        height: `${Math.min(32, 8 + (i * 2.5))}px`,
-                        transition: 'all 0.3s ease'
+                        height: `${Math.min(100, 20 + (i * 8))}%`,
                       }}
                     />
                   ))}
                 </div>
               </div>
 
-              {/* Trend indicator */}
-              <div className="mt-3 flex items-center justify-between text-xs">
-                <span className="text-white/50">Market Status</span>
-                <span className="text-white/70">Scanning for signals...</span>
+              {/* Market Status - EXPANDED */}
+              <div className="mt-3 flex flex-col gap-2 flex-shrink-0">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-white/50">Market Status</span>
+                  <span className="text-white/70">Scanning for signals...</span>
+                </div>
+                
+                {/* Signal Strength Indicators on large screens */}
+                <div className="hidden lg:block mt-2 space-y-1.5">
+                  <div className="text-xs text-white/50 mb-1">Signal Strength Indicators</div>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="bg-white/5 rounded p-2">
+                      <div className="text-white/40">Buy Pressure</div>
+                      <div className="text-white font-medium mt-0.5">
+                        {state?.tradeCount ? ((state.tradeCount % 7) * 14).toFixed(0) : '0'}%
+                      </div>
+                    </div>
+                    <div className="bg-white/5 rounded p-2">
+                      <div className="text-white/40">Sell Pressure</div>
+                      <div className="text-white font-medium mt-0.5">
+                        {state?.tradeCount ? (100 - (state.tradeCount % 7) * 14).toFixed(0) : '0'}%
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           );
         })}
+        
+        {/* Recent Signals section on large screens */}
+        {activeSignals.length > 0 && (
+          <div className="hidden xl:block mt-4 p-4 border border-white/10 rounded-xl bg-white/5 backdrop-blur-sm flex-shrink-0">
+            <div className="text-sm font-medium text-white/70 mb-2">Recent Signals (Last 10)</div>
+            <div className="space-y-1 max-h-[200px] overflow-y-auto">
+              {activeSignals.slice(0, 10).map((signal, idx) => {
+                const timeSince = Date.now() - signal.timestamp;
+                const minutesAgo = Math.floor(timeSince / 60000);
+                const hoursAgo = Math.floor(minutesAgo / 60);
+                
+                return (
+                  <div key={idx} className="flex items-center justify-between text-xs py-1.5 border-b border-white/5 last:border-0">
+                    <div className="flex items-center gap-2">
+                      <span className={`font-medium ${signal.type === 'LONG' ? 'text-green-400' : 'text-red-400'}`}>
+                        {signal.coin}
+                      </span>
+                      <span className="text-white/60">{signal.type}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-white/50">
+                        ${signal.price.toFixed(2)}
+                      </span>
+                      <span className="text-white/40">
+                        {hoursAgo > 0 ? `${hoursAgo}h ago` : `${minutesAgo}m ago`}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

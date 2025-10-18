@@ -58,7 +58,7 @@ export default function Home() {
 
         {/* Row 3: Institutional Analysis - full width */}
         <div className="md:col-span-2 xl:col-span-3">
-          <WidgetContainer title="">
+          <WidgetContainer title="" transparent>
             <InstitutionalAnalysisPortalWidget />
           </WidgetContainer>
         </div>

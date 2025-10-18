@@ -39,7 +39,7 @@ export function SignalPerformanceWidget() {
   return (
     <div className="h-full flex flex-col space-y-4">
       {/* Header con botón Reset */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-shrink-0">
         <h3 className="text-sm font-medium text-white/70">Overview</h3>
         <button
           onClick={handleReset}
@@ -53,7 +53,7 @@ export function SignalPerformanceWidget() {
       </div>
 
       {/* Win Rate Global */}
-      <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
+      <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10 flex-shrink-0">
         <div className="flex items-center justify-between mb-2">
           <span className="text-white/60 text-sm">Win Rate</span>
           <Target className="w-4 h-4 text-white/40" />
@@ -75,7 +75,7 @@ export function SignalPerformanceWidget() {
       </div>
 
       {/* Stats por Status */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-3 flex-shrink-0">
         <div className="bg-green-500/10 border border-green-400/30 rounded-xl p-3 backdrop-blur-sm">
           <div className="flex items-center gap-2 mb-2">
             <TrendingUp className="w-5 h-5 text-green-400" />
@@ -104,7 +104,7 @@ export function SignalPerformanceWidget() {
       </div>
 
       {/* Win Rate por Moneda */}
-      <div className="flex-1 space-y-2 min-h-0">
+      <div className="flex-1 space-y-2 min-h-0 overflow-y-auto">
         <h3 className="text-sm font-medium text-white/70">By Coin</h3>
         {Object.entries(stats.byCoin).map(([coin, data]) => (
           <div key={coin} className="bg-white/5 backdrop-blur-sm rounded-xl p-3 border border-white/10">
@@ -137,6 +137,37 @@ export function SignalPerformanceWidget() {
             </div>
           </div>
         ))}
+        
+        {/* Performance History Table - Large Screens */}
+        {stats.totalSignals > 0 && (
+          <div className="hidden xl:block mt-4 bg-white/5 backdrop-blur-sm rounded-xl p-3 border border-white/10">
+            <h3 className="text-sm font-medium text-white/70 mb-3">Performance Statistics</h3>
+            <div className="grid grid-cols-2 gap-3 text-xs">
+              <div className="bg-white/5 rounded-lg p-2">
+                <div className="text-white/50 mb-1">Best Asset</div>
+                <div className="text-white font-medium">
+                  {Object.entries(stats.byCoin).reduce((best, [coin, data]) => 
+                    data.winRate > (stats.byCoin[best]?.winRate || 0) ? coin : best
+                  , Object.keys(stats.byCoin)[0])}
+                </div>
+              </div>
+              <div className="bg-white/5 rounded-lg p-2">
+                <div className="text-white/50 mb-1">Total Signals</div>
+                <div className="text-white font-medium">{stats.totalSignals}</div>
+              </div>
+              <div className="bg-white/5 rounded-lg p-2">
+                <div className="text-white/50 mb-1">Success Rate</div>
+                <div className={`font-medium ${stats.winRate >= 50 ? 'text-green-400' : 'text-red-400'}`}>
+                  {stats.winRate.toFixed(1)}%
+                </div>
+              </div>
+              <div className="bg-white/5 rounded-lg p-2">
+                <div className="text-white/50 mb-1">Targets Hit</div>
+                <div className="text-green-400 font-medium">{stats.byStatus.hit_target}</div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
