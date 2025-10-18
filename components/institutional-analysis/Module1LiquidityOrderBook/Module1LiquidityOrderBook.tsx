@@ -4,7 +4,7 @@ import React from 'react';
 import { GlassCard, DataTable, Column, EducationalTooltip } from '../shared';
 import { AlertTriangle, TrendingUp, TrendingDown, Activity } from 'lucide-react';
 import { useOrderBook } from '@/lib/hyperliquid/hooks';
-import { useAsset, formatPrice, formatVolume } from '@/lib/context/AssetContext';
+import { useAssetStore, formatPrice, formatVolume } from '@/lib/stores/assetStore';
 
 interface OrderBookLevel {
   price: number;
@@ -15,7 +15,7 @@ interface OrderBookLevel {
 }
 
 const Module1LiquidityOrderBook: React.FC = () => {
-  const { currentAsset } = useAsset();
+  const currentAsset = useAssetStore((state) => state.currentAsset);
   const { orderBook, isLoading, error } = useOrderBook(15);
 
   if (error) {

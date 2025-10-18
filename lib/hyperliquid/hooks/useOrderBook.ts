@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { getWSClient, OrderBookSnapshot } from '../websocket';
 import { getOrderBook } from '../client';
-import { useAsset } from '@/lib/context/AssetContext';
+import { useAssetStore } from '@/lib/stores/assetStore';
 
 export interface ProcessedOrderBookLevel {
   price: number;
@@ -23,7 +23,7 @@ export interface ProcessedOrderBook {
 }
 
 export function useOrderBook(maxLevels: number = 15) {
-  const { currentAsset } = useAsset();
+  const currentAsset = useAssetStore((state) => state.currentAsset);
   const [orderBook, setOrderBook] = useState<ProcessedOrderBook | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

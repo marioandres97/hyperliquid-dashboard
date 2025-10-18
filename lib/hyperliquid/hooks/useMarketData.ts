@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { getWSClient, AllMids } from '../websocket';
 import { getAssetContext, getCurrentFundingRates } from '../client';
-import { useAsset } from '@/lib/context/AssetContext';
+import { useAssetStore } from '@/lib/stores/assetStore';
 
 export interface MarketData {
   coin: string;
@@ -17,7 +17,7 @@ export interface MarketData {
 }
 
 export function useMarketData() {
-  const { currentAsset } = useAsset();
+  const currentAsset = useAssetStore((state) => state.currentAsset);
   const [marketData, setMarketData] = useState<MarketData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

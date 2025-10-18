@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { useAsset, Asset } from '@/lib/context/AssetContext';
+import { useAssetStore, type Asset } from '@/lib/stores/assetStore';
 import { ASSET_COLORS } from '@/lib/theme/colors';
 
 const ASSETS: Asset[] = ['BTC', 'ETH', 'HYPE'];
@@ -14,7 +14,8 @@ const ASSET_INFO = {
 };
 
 export const AssetToggle: React.FC = () => {
-  const { currentAsset, setAsset } = useAsset();
+  const currentAsset = useAssetStore((state) => state.currentAsset);
+  const setAsset = useAssetStore((state) => state.setAsset);
 
   return (
     <div
