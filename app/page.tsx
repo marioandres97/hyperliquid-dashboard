@@ -8,9 +8,8 @@ import InstitutionalAnalysisPortalWidget from '@/widgets/institutional-analysis-
 
 export default function Home() {
   return (
-    <div style={{
-      background: 'linear-gradient(135deg, #0a0e17 0%, #1a1f2e 50%, #0f1419 100%)',
-      minHeight: '100vh',
+    <div className="min-h-screen" style={{
+      background: 'linear-gradient(135deg, var(--color-bg-dark-start) 0%, var(--color-bg-dark-mid) 50%, var(--color-bg-dark-end) 100%)',
     }}>
       <DashboardGrid>
         <WidgetContainer title="Order Flow Signals">
