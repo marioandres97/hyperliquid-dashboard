@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { GlassCard, DataTable, Column, Alert } from '../shared';
+import { GlassCard, DataTable, Column, Alert, EducationalTooltip } from '../shared';
 import { Bell, Settings, Volume2, VolumeX } from 'lucide-react';
+import { useTrades, useMarketData, useOrderBook } from '@/lib/hyperliquid/hooks';
 
 interface AlertConfig {
   id: string;
@@ -21,53 +22,124 @@ interface TriggeredAlert {
 }
 
 const Module6AlertsSystem: React.FC = () => {
+  const { trades } = useTrades(50);
+  const { marketData } = useMarketData();
+  const { orderBook } = useOrderBook(15);
+  
   const [alertConfigs, setAlertConfigs] = useState<AlertConfig[]>([
     { id: 'liquidity_disappear', name: 'Liquidity Disappearance', enabled: true, threshold: 50, description: 'Alert when >50 BTC liquidity disappears' },
     { id: 'liquidity_appear', name: 'Large Order Appearance', enabled: true, threshold: 100, description: 'Alert when >100 BTC order appears' },
-    { id: 'large_trade', name: 'Large Trade Execution', enabled: true, threshold: 25, description: 'Alert when trade >25 BTC executes' },
-    { id: 'trader_position', name: 'Top Trader Position Change', enabled: true, description: 'Alert when top trader opens/closes position' },
-    { id: 'funding_rate', name: 'Funding Rate Threshold', enabled: false, threshold: 0.02, description: 'Alert when funding rate crosses 0.02%' },
-    { id: 'stop_hunt', name: 'Stop Hunt Detection', enabled: true, description: 'Alert when stop hunting pattern detected' },
+    { id: 'large_trade', name: 'Large Trade Execution', enabled: true, threshold: 10, description: 'Alert when trade >10 BTC executes' },
+    { id: 'funding_rate', name: 'Funding Rate Threshold', enabled: true, threshold: 0.02, description: 'Alert when funding rate crosses 0.02%' },
+    { id: 'price_change', name: 'Rapid Price Change', enabled: true, threshold: 2, description: 'Alert when price changes >2% in 5 min' },
+    { id: 'volume_spike', name: 'Volume Spike', enabled: true, threshold: 50, description: 'Alert when volume spikes >50% above average' },
   ]);
 
   const [triggeredAlerts, setTriggeredAlerts] = useState<TriggeredAlert[]>([]);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [previousOrderBookSize, setPreviousOrderBookSize] = useState(0);
+  const [previousPrice, setPreviousPrice] = useState(0);
 
+  // Monitor real-time data for alert conditions
   useEffect(() => {
-    // Simulate alert triggers
-    const interval = setInterval(() => {
-      const enabledAlerts = alertConfigs.filter(a => a.enabled);
-      if (enabledAlerts.length > 0 && Math.random() > 0.7) {
-        const alertConfig = enabledAlerts[Math.floor(Math.random() * enabledAlerts.length)];
-        const newAlert: TriggeredAlert = {
-          id: `alert-${Date.now()}`,
-          type: alertConfig.name,
-          message: getAlertMessage(alertConfig.id),
-          timestamp: new Date(),
-          details: alertConfig.description,
-        };
-        setTriggeredAlerts(prev => [newAlert, ...prev].slice(0, 50));
+    // Check large trades
+    if (trades.length > 0 && alertConfigs.find(a => a.id === 'large_trade')?.enabled) {
+      const config = alertConfigs.find(a => a.id === 'large_trade');
+      const threshold = config?.threshold || 10;
+      
+      const largeTrades = trades.filter(t => t.isLarge && t.size >= threshold);
+      if (largeTrades.length > 0) {
+        const latestLargeTrade = largeTrades[0];
+        const message = `${latestLargeTrade.side} ${latestLargeTrade.size.toFixed(4)} BTC at $${latestLargeTrade.price.toFixed(0)}`;
         
-        if (soundEnabled) {
-          // In real implementation, play sound here
-          console.log('🔔 Alert triggered:', newAlert.message);
-        }
+        triggerAlert('large_trade', 'Large Trade Execution', message, config?.description || '');
+        // TODO: Store alerts in Redis via API route
       }
-    }, 8000);
+    }
+  }, [trades, alertConfigs]);
 
-    return () => clearInterval(interval);
-  }, [alertConfigs, soundEnabled]);
+  // Monitor funding rate
+  useEffect(() => {
+    if (!marketData || !alertConfigs.find(a => a.id === 'funding_rate')?.enabled) return;
+    
+    const config = alertConfigs.find(a => a.id === 'funding_rate');
+    const threshold = config?.threshold || 0.02;
+    
+    if (Math.abs(marketData.fundingRate) >= threshold) {
+      const message = `Funding rate at ${(marketData.fundingRate * 100).toFixed(4)}% - ${marketData.fundingRate > 0 ? 'Many LONGS' : 'Many SHORTS'}`;
+      triggerAlert('funding_rate', 'Funding Rate Alert', message, config?.description || '');
+      // TODO: Store alerts in Redis via API route
+    }
+  }, [marketData, alertConfigs]);
 
-  const getAlertMessage = (alertId: string): string => {
-    const messages: Record<string, string> = {
-      liquidity_disappear: `$${(Math.random() * 100 + 50).toFixed(0)}M liquidity removed at $${(97500 + Math.random() * 1000).toFixed(0)}`,
-      liquidity_appear: `Large ${Math.random() > 0.5 ? 'BUY' : 'SELL'} wall: ${(Math.random() * 100 + 100).toFixed(0)} BTC at $${(97500 + Math.random() * 1000).toFixed(0)}`,
-      large_trade: `${Math.random() > 0.5 ? 'BUY' : 'SELL'} ${(Math.random() * 50 + 25).toFixed(1)} BTC - Price impact: ${(Math.random() * 2).toFixed(2)}%`,
-      trader_position: `Trader-${Math.floor(Math.random() * 20 + 1).toString().padStart(3, '0')} ${['opened', 'closed', 'increased'][Math.floor(Math.random() * 3)]} position`,
-      funding_rate: `Funding rate crossed ${(Math.random() * 0.04).toFixed(4)}% - ${Math.random() > 0.5 ? 'Many LONGS' : 'Many SHORTS'}`,
-      stop_hunt: `Stop hunt detected at $${(97500 + Math.random() * 2000 - 1000).toFixed(0)} - Confidence: ${Math.floor(Math.random() * 30 + 70)}%`,
+  // Monitor order book for liquidity changes
+  useEffect(() => {
+    if (!orderBook || !alertConfigs.find(a => a.id === 'liquidity_disappear')?.enabled) return;
+    
+    const totalBidLiquidity = orderBook.bids.reduce((sum, level) => sum + level.volume, 0);
+    const totalAskLiquidity = orderBook.asks.reduce((sum, level) => sum + level.volume, 0);
+    const totalLiquidity = totalBidLiquidity + totalAskLiquidity;
+    
+    if (previousOrderBookSize > 0) {
+      const liquidityChange = previousOrderBookSize - totalLiquidity;
+      const config = alertConfigs.find(a => a.id === 'liquidity_disappear');
+      const threshold = config?.threshold || 50;
+      
+      if (liquidityChange >= threshold) {
+        const message = `${liquidityChange.toFixed(2)} BTC liquidity removed at $${orderBook.currentPrice.toFixed(0)}`;
+        triggerAlert('liquidity_disappear', 'Liquidity Disappearance', message, config?.description || '');
+        // TODO: Store alerts in Redis via API route
+      }
+    }
+    
+    setPreviousOrderBookSize(totalLiquidity);
+  }, [orderBook, previousOrderBookSize, alertConfigs]);
+
+  // Monitor price changes
+  useEffect(() => {
+    if (!marketData || !alertConfigs.find(a => a.id === 'price_change')?.enabled) return;
+    
+    const currentPrice = marketData.markPrice || marketData.midPrice;
+    
+    if (previousPrice > 0) {
+      const priceChange = Math.abs(((currentPrice - previousPrice) / previousPrice) * 100);
+      const config = alertConfigs.find(a => a.id === 'price_change');
+      const threshold = config?.threshold || 2;
+      
+      if (priceChange >= threshold) {
+        const direction = currentPrice > previousPrice ? 'UP' : 'DOWN';
+        const message = `Price ${direction} ${priceChange.toFixed(2)}% to $${currentPrice.toFixed(0)}`;
+        triggerAlert('price_change', 'Rapid Price Change', message, config?.description || '');
+        // TODO: Store alerts in Redis via API route
+      }
+    }
+    
+    setPreviousPrice(currentPrice);
+  }, [marketData, previousPrice, alertConfigs]);
+
+  const triggerAlert = (id: string, type: string, message: string, details: string) => {
+    const newAlert: TriggeredAlert = {
+      id: `alert-${Date.now()}-${id}`,
+      type,
+      message,
+      timestamp: new Date(),
+      details,
     };
-    return messages[alertId] || 'Alert triggered';
+    
+    setTriggeredAlerts(prev => {
+      // Avoid duplicate alerts within 30 seconds
+      const recent = prev.find(a => 
+        a.type === type && 
+        Date.now() - a.timestamp.getTime() < 30000
+      );
+      if (recent) return prev;
+      
+      if (soundEnabled) {
+        console.log('🔔 Alert triggered:', message);
+      }
+      
+      return [newAlert, ...prev].slice(0, 50);
+    });
   };
 
   const toggleAlert = (id: string) => {
@@ -168,6 +240,20 @@ const Module6AlertsSystem: React.FC = () => {
 
   return (
     <div className="space-y-4">
+      {/* Educational Tooltip */}
+      <EducationalTooltip
+        sections={{
+          howToAnalyze: [
+            'Alertas de liquidez: Cuando desaparece >50 BTC = ballenas preparando movimiento',
+            'Trades grandes: Ejecuciones institucionales que mueven mercado inmediatamente',
+            'Funding rate: Cruce de umbrales críticos indica desbalance retail vs institucional',
+            'Cambios de precio rápidos: >2% en minutos = noticias o movimiento coordinado',
+          ],
+          example: 'Alerta: "Liquidez desapareció 100 BTC en $97k" → Los institucionales retiraron órdenes, esperan precio diferente. No operes hasta que vuelva liquidez.',
+          tip: 'Activa alertas para niveles clave ($95k, $98k, $100k). Cuando salte alerta + volumen alto, es señal de breakout o rechazo fuerte.',
+        }}
+      />
+
       <GlassCard variant="purple" padding="md">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">

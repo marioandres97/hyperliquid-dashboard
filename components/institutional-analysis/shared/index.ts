@@ -5,3 +5,4 @@ export { RealTimeFeed } from './RealTimeFeed';
 export type { FeedItem } from './RealTimeFeed';
 export { AlertNotification } from './AlertNotification';
 export type { Alert, AlertType } from './AlertNotification';
+export { EducationalTooltip } from './EducationalTooltip';
