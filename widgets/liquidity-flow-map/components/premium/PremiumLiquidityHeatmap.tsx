@@ -11,7 +11,7 @@ import { premiumTheme } from '@/lib/theme/premium-colors';
 import { heatmapVariants } from '@/lib/effects/premium-effects';
 
 // Display constants
-const MIN_HEATMAP_HEIGHT = 400; // Minimum height in pixels for the heatmap canvas
+const MIN_HEATMAP_HEIGHT = 800; // Minimum height in pixels for the heatmap canvas
 
 export interface PremiumLiquidityHeatmapProps {
   nodes: Map<number, LiquidityNode>;
@@ -29,7 +29,7 @@ export function PremiumLiquidityHeatmap({
   absorptionZones = [],
   supportResistanceLevels = [],
   showPatterns = true,
-  height = 600,
+  height = 800,
 }: PremiumLiquidityHeatmapProps) {
   const [hoveredNode, setHoveredNode] = useState<LiquidityNode | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
@@ -84,14 +84,11 @@ export function PremiumLiquidityHeatmap({
 
       const isCurrent = currentPrice && Math.abs(node.price - currentPrice) < 1;
 
-      // Draw price label
-      renderer.drawPriceLabel(node.price, y, rowHeight, !!isCurrent);
-
-      // Draw main heatmap bar
+      // Draw main heatmap bar (full-width horizontal band)
       renderer.drawNode(node, y, rowHeight);
 
-      // Draw volume bars
-      renderer.drawVolumeBar(node.buyVolume, node.sellVolume, y, rowHeight);
+      // Draw price label on the right side
+      renderer.drawPriceLabel(node.price, y, rowHeight, !!isCurrent);
     });
   }, [ctx, sortedNodes, metrics, priceRange, zoomLevel, scrollOffset, height, currentPrice, pixelRatio]);
 
@@ -226,12 +223,16 @@ export function PremiumLiquidityHeatmap({
       {/* Legend */}
       <div className="flex flex-wrap items-center gap-3 md:gap-6 mb-4 text-xs">
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded" style={{ backgroundColor: premiumTheme.trading.buy.base }}></div>
-          <span style={{ color: premiumTheme.accent.platinum }}>Compra</span>
+          <div className="w-4 h-4 rounded" style={{ backgroundColor: 'rgba(255, 20, 147, 0.8)' }}></div>
+          <span style={{ color: premiumTheme.accent.platinum }}>Compra (Pink)</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded" style={{ backgroundColor: premiumTheme.trading.sell.base }}></div>
-          <span style={{ color: premiumTheme.accent.platinum }}>Venta</span>
+          <div className="w-4 h-4 rounded" style={{ backgroundColor: 'rgba(138, 43, 226, 0.6)' }}></div>
+          <span style={{ color: premiumTheme.accent.platinum }}>Venta (Purple)</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 rounded" style={{ backgroundColor: 'rgba(59, 130, 246, 0.7)' }}></div>
+          <span style={{ color: premiumTheme.accent.platinum }}>Neutral (Blue)</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 rounded-full" style={{ backgroundColor: premiumTheme.accent.gold }}></div>

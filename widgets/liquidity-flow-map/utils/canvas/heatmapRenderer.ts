@@ -74,42 +74,51 @@ export class HeatmapRenderer {
     const { ctx, config } = this;
     const { width, maxVolume } = config;
 
-    const intensity = Math.abs(node.netFlow) / maxVolume;
+    // Calculate total volume for intensity
+    const totalVolume = node.buyVolume + node.sellVolume;
+    const intensity = totalVolume / maxVolume;
     const netFlow = node.netFlow;
 
-    // Determine color based on flow
+    // Determine color based on net flow - Coinglass style with vibrant colors
     let baseColor: string;
     let glowColor: string;
     
     if (netFlow > 0) {
-      baseColor = premiumTheme.trading.buy.base;
-      glowColor = premiumTheme.trading.buy.glow;
+      // Pink for buying pressure
+      baseColor = 'rgba(255, 20, 147, 0.8)';
+      glowColor = 'rgba(255, 20, 147, 0.6)';
     } else if (netFlow < 0) {
-      baseColor = premiumTheme.trading.sell.base;
-      glowColor = premiumTheme.trading.sell.glow;
+      // Purple for selling pressure
+      baseColor = 'rgba(138, 43, 226, 0.6)';
+      glowColor = 'rgba(138, 43, 226, 0.4)';
     } else {
-      baseColor = premiumTheme.trading.neutral.base;
-      glowColor = premiumTheme.trading.neutral.glow;
+      // Blue for neutral
+      baseColor = 'rgba(59, 130, 246, 0.7)';
+      glowColor = 'rgba(59, 130, 246, 0.5)';
     }
 
-    // Calculate alpha based on intensity with better scaling for low volumes
-    // Use logarithmic scaling to make low volumes more visible
+    // Calculate alpha based on intensity with logarithmic scaling
     const logIntensity = logScale(intensity);
-    const alpha = Math.min(Math.max(logIntensity * MAX_ALPHA, MIN_ALPHA), MAX_ALPHA);
+    const alpha = Math.min(Math.max(logIntensity * 0.9, 0.2), 0.9);
 
-    // Draw main bar with minimum width for visibility
-    const calculatedWidth = (Math.abs(netFlow) / maxVolume) * (width - 200);
-    const barWidth = Math.max(calculatedWidth, netFlow !== 0 ? MIN_BAR_WIDTH : 0);
+    // Draw full-width horizontal band (Coinglass style)
+    const barWidth = width - 150; // Leave space for price labels on right
     
-    ctx.fillStyle = this.hexToRGBA(baseColor, alpha);
-    ctx.fillRect(150, y, barWidth, rowHeight - 2);
+    // Create gradient for depth effect
+    const gradient = ctx.createLinearGradient(0, y, width, y);
+    gradient.addColorStop(0, this.adjustAlpha(baseColor, alpha * 0.3));
+    gradient.addColorStop(0.5, this.adjustAlpha(baseColor, alpha));
+    gradient.addColorStop(1, this.adjustAlpha(baseColor, alpha * 0.5));
+    
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, y, barWidth, rowHeight - 1);
 
-    // Draw glow effect for high intensity
+    // Add glow effect for high intensity (Coinglass style)
     if (intensity > 0.5) {
-      ctx.shadowBlur = 20 * intensity;
+      ctx.shadowBlur = 20;
       ctx.shadowColor = glowColor;
-      ctx.fillStyle = this.hexToRGBA(baseColor, alpha * 0.5);
-      ctx.fillRect(150, y, barWidth, rowHeight - 2);
+      ctx.fillStyle = this.adjustAlpha(baseColor, alpha * 0.3);
+      ctx.fillRect(0, y, barWidth, rowHeight - 1);
       ctx.shadowBlur = 0;
     }
 
@@ -117,27 +126,37 @@ export class HeatmapRenderer {
     if (node.whaleActivity) {
       ctx.fillStyle = premiumTheme.accent.gold;
       ctx.beginPath();
-      ctx.arc(140, y + rowHeight / 2, 4, 0, Math.PI * 2);
+      ctx.arc(20, y + rowHeight / 2, 4, 0, Math.PI * 2);
       ctx.fill();
     }
   }
 
   drawPriceLabel(price: number, y: number, rowHeight: number, isCurrent: boolean = false) {
-    const { ctx } = this;
+    const { ctx, config } = this;
+    const { width } = config;
 
+    // Draw price label on the RIGHT side (Coinglass style)
     ctx.font = isCurrent ? 'bold 14px monospace' : '12px monospace';
-    ctx.fillStyle = isCurrent ? premiumTheme.accent.gold : premiumTheme.accent.platinum;
-    ctx.textAlign = 'right';
+    ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
 
     const priceText = `$${price.toFixed(2)}`;
-    ctx.fillText(priceText, 130, y + rowHeight / 2);
+    const labelX = width - 140;
+    const labelY = y + rowHeight / 2;
+
+    // Draw background for readability
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+    ctx.fillRect(labelX - 5, labelY - 10, 135, 20);
+
+    // Draw price text
+    ctx.fillStyle = isCurrent ? premiumTheme.accent.gold : premiumTheme.accent.platinum;
+    ctx.fillText(priceText, labelX, labelY);
 
     // Current price marker
     if (isCurrent) {
       ctx.fillStyle = premiumTheme.accent.gold;
       ctx.beginPath();
-      ctx.arc(135, y + rowHeight / 2, 6, 0, Math.PI * 2);
+      ctx.arc(labelX - 15, labelY, 6, 0, Math.PI * 2);
       ctx.fill();
     }
   }
@@ -177,5 +196,14 @@ export class HeatmapRenderer {
     const g = parseInt(hex.slice(3, 5), 16);
     const b = parseInt(hex.slice(5, 7), 16);
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+
+  private adjustAlpha(rgbaString: string, alpha: number): string {
+    // Parse rgba string and replace alpha value
+    const match = rgbaString.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*[\d.]+)?\)/);
+    if (match) {
+      return `rgba(${match[1]}, ${match[2]}, ${match[3]}, ${alpha})`;
+    }
+    return rgbaString;
   }
 }
