@@ -258,8 +258,6 @@ export function Phase4Example({ coin = 'BTC' }: Phase4ExampleProps) {
           {metrics && (
             <FlowMetricsPanel
               metrics={metrics}
-              patterns={patterns}
-              showPatterns
             />
           )}
 

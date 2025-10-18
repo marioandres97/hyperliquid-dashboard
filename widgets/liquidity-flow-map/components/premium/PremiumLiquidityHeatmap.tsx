@@ -10,6 +10,9 @@ import { useCanvasRenderer } from '../../hooks/useCanvasRenderer';
 import { premiumTheme } from '@/lib/theme/premium-colors';
 import { heatmapVariants } from '@/lib/effects/premium-effects';
 
+// Display constants
+const MIN_HEATMAP_HEIGHT = 400; // Minimum height in pixels for the heatmap canvas
+
 export interface PremiumLiquidityHeatmapProps {
   nodes: Map<number, LiquidityNode>;
   currentPrice?: number;
@@ -143,15 +146,15 @@ export function PremiumLiquidityHeatmap({
   if (sortedNodes.length === 0) {
     return (
       <motion.div 
-        className="premium-glass rounded-xl p-6"
+        className="premium-glass rounded-xl p-4 md:p-6"
         variants={heatmapVariants}
         initial="hidden"
         animate="show"
       >
-        <h3 className="text-xl font-semibold text-white mb-4" style={{ color: premiumTheme.accent.gold }}>
-          Premium Liquidity Heatmap
+        <h3 className="text-lg md:text-xl font-semibold text-white mb-4" style={{ color: premiumTheme.accent.gold }}>
+          Mapa de Calor de Liquidez
         </h3>
-        <p className="text-white/60 text-center py-12">No liquidity data available</p>
+        <p className="text-white/60 text-center py-12">No hay datos de liquidez disponibles</p>
       </motion.div>
     );
   }
@@ -159,16 +162,25 @@ export function PremiumLiquidityHeatmap({
   return (
     <motion.div
       ref={containerRef}
-      className="premium-glass rounded-xl p-6"
+      className="premium-glass rounded-xl p-4 md:p-6"
       variants={heatmapVariants}
       initial="hidden"
       animate="show"
     >
       {/* Header */}
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-xl font-semibold" style={{ color: premiumTheme.accent.gold }}>
-          Premium Liquidity Heatmap
-        </h3>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
+        <div>
+          <h3 className="text-lg md:text-xl font-semibold" style={{ color: premiumTheme.accent.gold }}>
+            Mapa de Calor de Liquidez
+          </h3>
+          {currentPrice && (
+            <div className="text-xs md:text-sm mt-1" style={{ color: premiumTheme.accent.platinum + '99' }}>
+              Precio actual: <span className="font-mono font-bold" style={{ color: premiumTheme.accent.gold }}>
+                ${currentPrice.toFixed(2)}
+              </span>
+            </div>
+          )}
+        </div>
 
         {/* Controls */}
         <div className="flex items-center gap-2">
@@ -180,7 +192,7 @@ export function PremiumLiquidityHeatmap({
               color: premiumTheme.accent.platinum,
               border: `1px solid ${premiumTheme.borders.medium}`,
             }}
-            title="Zoom In (+)"
+            title="Acercar (+)"
           >
             +
           </button>
@@ -192,7 +204,7 @@ export function PremiumLiquidityHeatmap({
               color: premiumTheme.accent.platinum,
               border: `1px solid ${premiumTheme.borders.medium}`,
             }}
-            title="Zoom Out (-)"
+            title="Alejar (-)"
           >
             −
           </button>
@@ -204,7 +216,7 @@ export function PremiumLiquidityHeatmap({
               color: premiumTheme.accent.platinum,
               border: `1px solid ${premiumTheme.borders.medium}`,
             }}
-            title="Reset (R)"
+            title="Reiniciar (R)"
           >
             Reset
           </button>
@@ -212,18 +224,18 @@ export function PremiumLiquidityHeatmap({
       </div>
 
       {/* Legend */}
-      <div className="flex items-center gap-6 mb-4 text-xs">
+      <div className="flex flex-wrap items-center gap-3 md:gap-6 mb-4 text-xs">
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 rounded" style={{ backgroundColor: premiumTheme.trading.buy.base }}></div>
-          <span style={{ color: premiumTheme.accent.platinum }}>Buying Pressure</span>
+          <span style={{ color: premiumTheme.accent.platinum }}>Compra</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 rounded" style={{ backgroundColor: premiumTheme.trading.sell.base }}></div>
-          <span style={{ color: premiumTheme.accent.platinum }}>Selling Pressure</span>
+          <span style={{ color: premiumTheme.accent.platinum }}>Venta</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 rounded-full" style={{ backgroundColor: premiumTheme.accent.gold }}></div>
-          <span style={{ color: premiumTheme.accent.platinum }}>Whale Activity</span>
+          <span style={{ color: premiumTheme.accent.platinum }}>Ballenas</span>
         </div>
       </div>
 
@@ -231,12 +243,13 @@ export function PremiumLiquidityHeatmap({
       <div className="relative rounded-lg overflow-hidden" style={{ 
         border: `1px solid ${premiumTheme.borders.medium}`,
         backgroundColor: premiumTheme.background.primary,
+        minHeight: `${MIN_HEATMAP_HEIGHT}px`,
       }}>
         <canvas
           ref={canvasRef}
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
-          style={{ display: 'block', cursor: 'crosshair' }}
+          style={{ display: 'block', cursor: 'crosshair', width: '100%' }}
         />
 
         {/* Tooltip */}
@@ -257,17 +270,17 @@ export function PremiumLiquidityHeatmap({
             </div>
             <div className="space-y-1 text-xs">
               <div style={{ color: premiumTheme.trading.buy.base }}>
-                Buy: ${formatVolume(hoveredNode.buyVolume)} ({hoveredNode.buyCount})
+                Compra: ${formatVolume(hoveredNode.buyVolume)} ({hoveredNode.buyCount})
               </div>
               <div style={{ color: premiumTheme.trading.sell.base }}>
-                Sell: ${formatVolume(hoveredNode.sellVolume)} ({hoveredNode.sellCount})
+                Venta: ${formatVolume(hoveredNode.sellVolume)} ({hoveredNode.sellCount})
               </div>
               <div style={{ color: premiumTheme.accent.platinum }}>
-                Net: ${formatVolume(hoveredNode.netFlow)}
+                Neto: ${formatVolume(hoveredNode.netFlow)}
               </div>
               {hoveredNode.whaleActivity && (
                 <div style={{ color: premiumTheme.accent.gold }}>
-                  🐋 Whale Activity Detected
+                  🐋 Actividad Ballena
                 </div>
               )}
             </div>
@@ -275,46 +288,9 @@ export function PremiumLiquidityHeatmap({
         )}
       </div>
 
-      {/* Stats Footer */}
-      <div className="grid grid-cols-3 gap-4 mt-4">
-        <div className="p-3 rounded-lg" style={{ 
-          backgroundColor: premiumTheme.background.secondary,
-          border: `1px solid ${premiumTheme.borders.subtle}`,
-        }}>
-          <div className="text-xs mb-1" style={{ color: premiumTheme.accent.platinum + '99' }}>
-            Price Levels
-          </div>
-          <div className="text-lg font-bold" style={{ color: premiumTheme.accent.platinum }}>
-            {sortedNodes.length}
-          </div>
-        </div>
-        <div className="p-3 rounded-lg" style={{ 
-          backgroundColor: premiumTheme.background.secondary,
-          border: `1px solid ${premiumTheme.borders.subtle}`,
-        }}>
-          <div className="text-xs mb-1" style={{ color: premiumTheme.accent.platinum + '99' }}>
-            Total Volume
-          </div>
-          <div className="text-lg font-bold" style={{ color: premiumTheme.trading.buy.base }}>
-            ${formatVolume(metrics.totalBuyVolume + metrics.totalSellVolume)}
-          </div>
-        </div>
-        <div className="p-3 rounded-lg" style={{ 
-          backgroundColor: premiumTheme.background.secondary,
-          border: `1px solid ${premiumTheme.borders.subtle}`,
-        }}>
-          <div className="text-xs mb-1" style={{ color: premiumTheme.accent.platinum + '99' }}>
-            Zoom Level
-          </div>
-          <div className="text-lg font-bold" style={{ color: premiumTheme.accent.gold }}>
-            {(zoomLevel * 100).toFixed(0)}%
-          </div>
-        </div>
-      </div>
-
       {/* Keyboard Shortcuts Hint */}
       <div className="mt-4 text-xs text-center" style={{ color: premiumTheme.accent.platinum + '66' }}>
-        Keyboard: <span className="font-mono">+/-</span> Zoom • <span className="font-mono">R</span> Reset
+        Teclado: <span className="font-mono">+/-</span> Zoom • <span className="font-mono">R</span> Reiniciar
       </div>
     </motion.div>
   );
