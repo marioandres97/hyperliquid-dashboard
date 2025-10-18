@@ -1,4 +1,4 @@
-import redis from '@/lib/redis';
+import redis, { isRedisAvailable } from '@/lib/redis';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function PATCH(
@@ -6,6 +6,13 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    if (!isRedisAvailable() || !redis) {
+      return NextResponse.json(
+        { error: 'Redis not available' },
+        { status: 503 }
+      );
+    }
+
     const { id } = await params;
     const body = await request.json();
     

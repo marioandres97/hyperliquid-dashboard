@@ -1,9 +1,13 @@
-import redis from '@/lib/redis';
+import redis, { isRedisAvailable } from '@/lib/redis';
 import { NextResponse } from 'next/server';
 import { TrackedSignal, SignalStats } from '@/widgets/order-flow-signals/types';
 
 export async function GET() {
   try {
+    if (!isRedisAvailable() || !redis) {
+      return NextResponse.json(getEmptyStats());
+    }
+
     // Get signals from Redis
     const signalIds = (await redis.smembers('signals:active')) || [];
     

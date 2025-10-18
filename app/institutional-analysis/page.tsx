@@ -11,6 +11,7 @@ import { Module5VolatilityContext } from '@/components/institutional-analysis/Mo
 import { Module6AlertsSystem } from '@/components/institutional-analysis/Module6AlertsSystem';
 import { Activity, ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { AssetToggle } from '@/components/shared/AssetToggle';
 
 export default function InstitutionalAnalysisPage() {
   const router = useRouter();
@@ -63,6 +64,8 @@ export default function InstitutionalAnalysisPage() {
             </button>
 
             <div className="flex items-center gap-3">
+              <AssetToggle />
+              <div className="h-6 w-px bg-purple-400/30" />
               <Activity className="text-green-400 animate-pulse" size={24} />
               <span className="text-sm font-semibold text-green-400">LIVE DATA</span>
             </div>
