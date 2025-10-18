@@ -115,7 +115,9 @@ export async function GET() {
       checkHyperliquidApi(),
     ]);
 
-    // WebSocket status is client-side only, so we report it as not connected on server
+    // WebSocket connections are managed client-side in Next.js App Router
+    // Server-side API routes cannot access client-only modules due to 'use client' directive
+    // This field indicates server-side connection status (always false as expected)
     const websocketHealth = {
       connected: false,
     };
