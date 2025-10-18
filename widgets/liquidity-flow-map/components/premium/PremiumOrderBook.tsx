@@ -16,7 +16,16 @@ export function PremiumOrderBook({ nodes, currentPrice, depth = 10 }: PremiumOrd
   const { asks, bids, spread, spreadPercent } = useMemo(() => {
     const sortedNodes = Array.from(nodes.values()).sort((a, b) => b.price - a.price);
     
-    const currentPriceValue = currentPrice || (sortedNodes[0]?.price || 0);
+    // Use provided currentPrice, or calculate mid-price from nodes
+    let currentPriceValue = currentPrice;
+    if (!currentPriceValue && sortedNodes.length > 0) {
+      // Calculate mid-price from available nodes
+      const allPrices = sortedNodes.map(n => n.price);
+      const minPrice = Math.min(...allPrices);
+      const maxPrice = Math.max(...allPrices);
+      currentPriceValue = (minPrice + maxPrice) / 2;
+    }
+    currentPriceValue = currentPriceValue || 0;
     
     const asks = sortedNodes
       .filter(n => n.price > currentPriceValue && n.sellVolume > 0)
@@ -44,6 +53,9 @@ export function PremiumOrderBook({ nodes, currentPrice, depth = 10 }: PremiumOrd
   }, [asks, bids]);
 
   const formatPrice = (price: number) => {
+    if (!isFinite(price) || isNaN(price)) {
+      return '0.00';
+    }
     return price.toLocaleString(undefined, { 
       minimumFractionDigits: 2, 
       maximumFractionDigits: 2 

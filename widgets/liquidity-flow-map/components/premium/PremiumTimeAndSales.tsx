@@ -19,6 +19,9 @@ export function PremiumTimeAndSales({ trades, maxTrades = 50 }: PremiumTimeAndSa
   }, [trades, maxTrades]);
 
   const formatTime = (timestamp: number) => {
+    if (!timestamp || timestamp < 0 || isNaN(timestamp)) {
+      return '--:--:--';
+    }
     const date = new Date(timestamp);
     return date.toLocaleTimeString('en-US', { 
       hour12: false,
@@ -29,6 +32,9 @@ export function PremiumTimeAndSales({ trades, maxTrades = 50 }: PremiumTimeAndSa
   };
 
   const formatPrice = (price: number) => {
+    if (!isFinite(price) || isNaN(price)) {
+      return '0.00';
+    }
     return price.toLocaleString(undefined, { 
       minimumFractionDigits: 2, 
       maximumFractionDigits: 2 
@@ -111,7 +117,13 @@ export function PremiumTimeAndSales({ trades, maxTrades = 50 }: PremiumTimeAndSa
                   {trade.side === 'buy' ? 'BUY' : 'SELL'}
                 </span>
                 {trade.classification.isWhale && (
-                  <span style={{ color: premiumTheme.accent.gold }}>🐋</span>
+                  <span 
+                    style={{ color: premiumTheme.accent.gold }}
+                    role="img"
+                    aria-label="Whale trade"
+                  >
+                    🐋
+                  </span>
                 )}
               </div>
             </motion.div>
