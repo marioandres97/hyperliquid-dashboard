@@ -9,7 +9,7 @@ export default function RealTimePricesWidget() {
   const { prices, isConnected } = usePrices();
 
   return (
-    <div className="h-full flex flex-col space-y-4">
+    <div className="h-full flex flex-col space-y-3">
       {COINS.map(coin => {
         const data = prices[coin];
         const connected = isConnected[coin];
@@ -18,9 +18,9 @@ export default function RealTimePricesWidget() {
         return (
           <div
             key={coin}
-            className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10"
+            className="bg-white/5 backdrop-blur-sm rounded-xl p-3 border border-white/10"
           >
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between mb-1.5">
               <div className="flex items-center gap-2">
                 <DollarSign className="w-5 h-5 text-white/60" />
                 <span className="text-lg font-bold text-white">{coin}</span>
@@ -30,7 +30,7 @@ export default function RealTimePricesWidget() {
 
             {data ? (
               <>
-                <div className="text-3xl font-bold text-white mb-2">
+                <div className="text-3xl font-bold text-white mb-1.5">
                   ${data.price.toLocaleString(undefined, {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2

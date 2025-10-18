@@ -18,9 +18,9 @@ export default function OrderFlowSignalsWidget() {
   const anyConnected = Object.values(isConnected).some(c => c);
 
   return (
-    <div className="h-full flex flex-col space-y-3">
+    <div className="h-full flex flex-col space-y-2">
       {/* Header */}
-      <div className="flex items-center justify-between pb-3 border-b border-white/20">
+      <div className="flex items-center justify-between pb-2 border-b border-white/20">
         <div className="flex items-center gap-2">
           {anyConnected ? (
             <Wifi className="w-4 h-4 text-green-400" />
@@ -40,7 +40,7 @@ export default function OrderFlowSignalsWidget() {
       </div>
 
       {/* Signals List */}
-      <div className="flex-1 overflow-y-auto space-y-3">
+      <div className="flex-1 overflow-y-auto space-y-2">
         {COINS.map(coin => {
           const state = coinStates[coin];
           const signal = state?.signal;
@@ -59,7 +59,7 @@ export default function OrderFlowSignalsWidget() {
           return (
             <div
               key={coin}
-              className="p-4 border border-white/10 rounded-xl bg-white/5 backdrop-blur-sm"
+              className="p-3 border border-white/10 rounded-xl bg-white/5 backdrop-blur-sm"
             >
               <div className="flex items-center justify-between">
                 <div>
@@ -74,7 +74,7 @@ export default function OrderFlowSignalsWidget() {
                   {state?.tradeCount || 0} trades
                 </div>
               </div>
-              <div className="mt-2 text-xs text-white/50">Scanning...</div>
+              <div className="mt-1.5 text-xs text-white/50">Scanning...</div>
             </div>
           );
         })}
@@ -129,13 +129,13 @@ function SignalCard({
   const totalCount = signal.confirmations.length;
 
   return (
-    <div className={`border-2 rounded-xl p-4 backdrop-blur-sm ${
+    <div className={`border-2 rounded-xl p-3 backdrop-blur-sm ${
       isLong 
         ? 'border-green-400 bg-green-500/10' 
         : 'border-red-400 bg-red-500/10'
     }`}>
       {/* Header */}
-      <div className="flex items-start justify-between mb-3">
+      <div className="flex items-start justify-between mb-2">
         <div className="flex items-center gap-2">
           {isLong ? (
             <TrendingUp className="w-5 h-5 text-green-400" />
@@ -167,7 +167,7 @@ function SignalCard({
       </div>
 
       {/* Price & Confidence */}
-      <div className="mb-3 pb-3 border-b border-white/20">
+      <div className="mb-2 pb-2 border-b border-white/20">
         <div className="text-2xl font-bold text-white">
           ${signal.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
         </div>
@@ -177,7 +177,7 @@ function SignalCard({
       </div>
 
       {/* Confirmations */}
-      <div className="mb-3 space-y-1.5">
+      <div className="mb-2 space-y-1">
         {signal.confirmations.map((conf, idx) => (
           <div
             key={idx}
@@ -199,7 +199,7 @@ function SignalCard({
       </div>
 
       {/* Trade Details */}
-      <div className="grid grid-cols-2 gap-2 p-3 bg-white/5 rounded-lg text-sm backdrop-blur-sm">
+      <div className="grid grid-cols-2 gap-2 p-2.5 bg-white/5 rounded-lg text-sm backdrop-blur-sm">
         <div>
           <div className="text-xs text-white/50">Entry → Target</div>
           <div className="font-bold text-green-400">
@@ -217,7 +217,7 @@ function SignalCard({
       </div>
 
       {/* R:R */}
-      <div className="mt-2 text-center text-xs text-white/60">
+      <div className="mt-1.5 text-center text-xs text-white/60">
         Risk:Reward = <span className="font-bold text-white">1:{riskReward.toFixed(1)}</span>
       </div>
     </div>
