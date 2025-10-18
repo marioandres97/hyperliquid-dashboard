@@ -1,139 +1,46 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { usePrices } from './usePrices';
-import { calculateCVD, getCVDTrend, formatCVDTime, CVDDataPoint } from '@/lib/utils/cvd';
-import { TrendingUp, TrendingDown, DollarSign, ArrowUpRight, ArrowDownRight } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { useCandleData } from './useCandleData';
+import { TrendingUp, TrendingDown, DollarSign, ArrowUpRight, ArrowDownRight, RefreshCw } from 'lucide-react';
+import CandlestickChart from '@/components/shared/CandlestickChart';
+import ChartFullscreen from '@/components/shared/ChartFullscreen';
 
 const COINS = ['BTC', 'ETH', 'HYPE'];
 
-// Hook to collect trades for CVD calculation for multiple coins
-function useMultiCoinTrades() {
-  const [trades, setTrades] = useState<Record<string, { timestamp: number; side: 'BUY' | 'SELL'; size: number; price: number }[]>>({});
+// Helper to format time since last update
+function formatTimeSince(timestamp: number): string {
+  const seconds = Math.floor((Date.now() - timestamp) / 1000);
   
-  useEffect(() => {
-    const tradeBuffers: Record<string, any[]> = {
-      BTC: [],
-      ETH: [],
-      HYPE: []
-    };
-    
-    let ws: WebSocket | null = null;
-    let reconnectTimeout: NodeJS.Timeout | null = null;
-    let updateTimeout: NodeJS.Timeout | null = null;
-    
-    const connectWebSocket = () => {
-      ws = new WebSocket('wss://api.hyperliquid.xyz/ws');
-      
-      ws.onopen = () => {
-        console.log('CVD trades WebSocket connected');
-        // Subscribe to trades for all coins
-        COINS.forEach(coin => {
-          ws?.send(JSON.stringify({
-            method: 'subscribe',
-            subscription: { type: 'trades', coin }
-          }));
-        });
-      };
-      
-      ws.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          
-          if (data.channel === 'trades' && data.data) {
-            const coin = data.data[0]?.coin;
-            if (!coin || !COINS.includes(coin)) return;
-            
-            const newTrades = data.data.map((t: any) => ({
-              timestamp: t.time,
-              side: t.side === 'B' ? 'BUY' as const : 'SELL' as const,
-              size: parseFloat(t.sz),
-              price: parseFloat(t.px)
-            }));
-            
-            // Add to buffer
-            tradeBuffers[coin].push(...newTrades);
-            
-            // Keep only last 24h + buffer (25h)
-            const cutoff = Date.now() - (25 * 60 * 60 * 1000);
-            tradeBuffers[coin] = tradeBuffers[coin].filter(t => t.timestamp >= cutoff);
-            
-            // Debounce state updates - only update every 2 seconds max
-            if (!updateTimeout) {
-              updateTimeout = setTimeout(() => {
-                setTrades({ ...tradeBuffers });
-                updateTimeout = null;
-              }, 2000);
-            }
-          }
-        } catch (error) {
-          console.error('Error processing CVD trades:', error);
-        }
-      };
-      
-      ws.onerror = (error) => {
-        console.error('CVD trades WebSocket error:', error);
-      };
-      
-      ws.onclose = () => {
-        console.log('CVD trades WebSocket closed, reconnecting...');
-        // Reconnect after 5 seconds
-        reconnectTimeout = setTimeout(() => {
-          connectWebSocket();
-        }, 5000);
-      };
-    };
-    
-    connectWebSocket();
-    
-    // Update trades state every 10 seconds
-    const updateInterval = setInterval(() => {
-      // Only update if data has changed
-      setTrades(prev => {
-        const hasChanges = COINS.some(coin => {
-          const prevLen = prev[coin]?.length || 0;
-          const currLen = tradeBuffers[coin]?.length || 0;
-          return prevLen !== currLen;
-        });
-        
-        if (hasChanges) {
-          return { ...tradeBuffers };
-        }
-        return prev;
-      });
-    }, 10000);
-    
-    return () => {
-      clearInterval(updateInterval);
-      if (updateTimeout) clearTimeout(updateTimeout);
-      if (reconnectTimeout) clearTimeout(reconnectTimeout);
-      if (ws) ws.close();
-    };
-  }, []);
-  
-  return trades;
+  if (seconds < 60) return `${seconds}s ago`;
+  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+  return `${Math.floor(seconds / 3600)}h ago`;
 }
 
 export default function RealTimePricesWidget() {
   const { prices, isConnected } = usePrices();
-  const coinTrades = useMultiCoinTrades();
+  const { candles, isLoading, error, retry } = useCandleData();
+  const [lastUpdateTimes, setLastUpdateTimes] = useState<Record<string, number>>({});
+  const [, forceUpdate] = useState(0);
 
-  // Calculate CVD data for each coin
-  const cvdDataByCoins = useMemo(() => {
-    const result: Record<string, CVDDataPoint[]> = {};
-    
+  // Update the last update time when prices change
+  useEffect(() => {
     COINS.forEach(coin => {
-      const trades = coinTrades[coin] || [];
-      if (trades.length > 0) {
-        result[coin] = calculateCVD(trades, 24);
-      } else {
-        result[coin] = [];
+      if (prices[coin]) {
+        setLastUpdateTimes(prev => ({ ...prev, [coin]: Date.now() }));
       }
     });
-    
-    return result;
-  }, [coinTrades]);
+  }, [prices]);
+
+  // Force re-render every second to update timestamp display
+  useEffect(() => {
+    const interval = setInterval(() => {
+      forceUpdate(prev => prev + 1);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="h-full flex flex-col space-y-3">
@@ -141,21 +48,40 @@ export default function RealTimePricesWidget() {
         const data = prices[coin];
         const connected = isConnected[coin];
         const isPositive = data?.change24h >= 0;
-        const cvdData = cvdDataByCoins[coin] || [];
-        const cvdTrend = getCVDTrend(cvdData);
-        const isCVDBullish = cvdTrend >= 0;
+        const candleData = candles[coin] || [];
+        const loading = isLoading[coin];
+        const errorMsg = error[coin];
+        const lastUpdate = lastUpdateTimes[coin] || Date.now();
 
         return (
           <div
             key={coin}
-            className="flex-1 bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10 flex flex-col"
+            className="relative flex-1 bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10 flex flex-col group"
           >
+            {/* Fullscreen button */}
+            <ChartFullscreen coin={coin}>
+              <CandlestickChart data={candleData} height={500} />
+            </ChartFullscreen>
+
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
                 <DollarSign className="w-5 h-5 text-white/60" />
                 <span className="text-lg font-bold text-white">{coin}</span>
               </div>
-              <div className={`w-2 h-2 rounded-full ${connected ? 'bg-green-400' : 'bg-red-400'}`} />
+              
+              {/* Live indicator with last update */}
+              <div className="flex items-center gap-2 text-xs">
+                <div className="flex items-center gap-1.5">
+                  <div className={`w-2 h-2 rounded-full ${connected ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`} />
+                  <span className="text-white/60">
+                    {connected ? '🟢 Live' : '🔴 Disconnected'}
+                  </span>
+                </div>
+                <span className="text-white/40">|</span>
+                <span className="text-white/50">
+                  Updated: {formatTimeSince(lastUpdate)}
+                </span>
+              </div>
             </div>
 
             {data ? (
@@ -181,61 +107,45 @@ export default function RealTimePricesWidget() {
                   <span className="text-xs text-white/50">24h</span>
                 </div>
 
-                {/* CVD Chart - replaces fake price action chart */}
-                {cvdData.length > 0 ? (
-                  <div className="mb-3">
-                    <div className="text-xs text-white/50 mb-1.5">
-                      CVD (24h) - {isCVDBullish ? 'Bullish' : 'Bearish'}
+                {/* Candlestick Chart */}
+                <div className="mb-3">
+                  <div className="text-xs text-white/50 mb-1.5 flex items-center justify-between">
+                    <span>Price Action (1H, 24h)</span>
+                    {errorMsg && (
+                      <button
+                        onClick={() => retry(coin)}
+                        className="text-blue-400 hover:text-blue-300 flex items-center gap-1"
+                      >
+                        <RefreshCw className="w-3 h-3" />
+                        Retry
+                      </button>
+                    )}
+                  </div>
+                  
+                  {loading && candleData.length === 0 ? (
+                    <div className="h-[120px] flex items-center justify-center bg-white/5 rounded-lg animate-pulse">
+                      <div className="text-xs text-white/40">Loading chart data...</div>
                     </div>
-                    <ResponsiveContainer width="100%" height={120}>
-                      <LineChart data={cvdData}>
-                        <XAxis 
-                          dataKey="time" 
-                          tickFormatter={formatCVDTime}
-                          stroke="#ffffff40"
-                          tick={{ fill: '#ffffff60', fontSize: 10 }}
-                          tickCount={6}
-                        />
-                        <YAxis 
-                          stroke="#ffffff40"
-                          tick={{ fill: '#ffffff60', fontSize: 10 }}
-                          width={60}
-                          tickFormatter={(val) => {
-                            if (Math.abs(val) >= 1000000) {
-                              return `${(val / 1000000).toFixed(1)}M`;
-                            } else if (Math.abs(val) >= 1000) {
-                              return `${(val / 1000).toFixed(1)}K`;
-                            }
-                            return val.toFixed(0);
-                          }}
-                        />
-                        <Tooltip 
-                          contentStyle={{ 
-                            backgroundColor: '#1a1a1a',
-                            border: '1px solid #ffffff20',
-                            borderRadius: '8px',
-                            color: '#fff'
-                          }}
-                          labelFormatter={formatCVDTime}
-                          formatter={(value: number) => [`$${value.toFixed(2)}`, 'CVD']}
-                        />
-                        <Line 
-                          type="monotone" 
-                          dataKey="cvd" 
-                          stroke={isCVDBullish ? '#10B981' : '#EF4444'}
-                          strokeWidth={2}
-                          dot={false}
-                          fill={isCVDBullish ? '#10B98120' : '#EF444420'}
-                          fillOpacity={0.3}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </div>
-                ) : (
-                  <div className="mb-3 h-[120px] flex items-center justify-center">
-                    <div className="text-xs text-white/40">Loading CVD data...</div>
-                  </div>
-                )}
+                  ) : errorMsg ? (
+                    <div className="h-[120px] flex items-center justify-center bg-red-500/10 border border-red-500/30 rounded-lg">
+                      <div className="text-xs text-red-400 text-center px-4">
+                        <div className="mb-2">Failed to load chart</div>
+                        <button
+                          onClick={() => retry(coin)}
+                          className="text-blue-400 hover:text-blue-300 underline"
+                        >
+                          Click to retry
+                        </button>
+                      </div>
+                    </div>
+                  ) : candleData.length > 0 ? (
+                    <CandlestickChart data={candleData} height={120} />
+                  ) : (
+                    <div className="h-[120px] flex items-center justify-center bg-white/5 rounded-lg">
+                      <div className="text-xs text-white/40">No data available</div>
+                    </div>
+                  )}
+                </div>
 
                 {/* Additional Metrics */}
                 <div className="grid grid-cols-2 gap-2 mt-auto">
@@ -257,7 +167,14 @@ export default function RealTimePricesWidget() {
               </>
             ) : (
               <div className="flex-1 flex items-center justify-center">
-                <div className="text-white/60">Connecting...</div>
+                {connected ? (
+                  <div className="text-white/60">Loading...</div>
+                ) : (
+                  <div className="text-center">
+                    <div className="text-white/60 mb-2">Reconnecting...</div>
+                    <div className="text-xs text-white/40">Please wait...</div>
+                  </div>
+                )}
               </div>
             )}
           </div>
