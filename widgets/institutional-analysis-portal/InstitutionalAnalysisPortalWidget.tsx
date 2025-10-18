@@ -14,7 +14,7 @@ export default function InstitutionalAnalysisPortalWidget() {
   return (
     <div
       onClick={handleNavigate}
-      className="relative overflow-hidden rounded-2xl cursor-pointer h-full group transition-all duration-500 hover:scale-[1.02]"
+      className="relative overflow-hidden rounded-2xl cursor-pointer h-full min-h-[400px] group transition-all duration-500 hover:scale-[1.02]"
       style={{
         background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(59, 130, 246, 0.2) 50%, rgba(16, 185, 129, 0.15) 100%)',
         backdropFilter: 'blur(16px)',
@@ -23,7 +23,7 @@ export default function InstitutionalAnalysisPortalWidget() {
         boxShadow: '0 0 20px rgba(139, 92, 246, 0.2), inset 0 0 60px rgba(255, 255, 255, 0.05)',
       }}
     >
-      {/* Animated background gradient */}
+      {/* Animated background gradient - FULL HEIGHT */}
       <div
         className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700"
         style={{
@@ -31,7 +31,7 @@ export default function InstitutionalAnalysisPortalWidget() {
         }}
       />
 
-      {/* Grid pattern overlay */}
+      {/* Grid pattern overlay - FULL HEIGHT */}
       <div
         className="absolute inset-0 opacity-20 pointer-events-none"
         style={{
@@ -39,7 +39,7 @@ export default function InstitutionalAnalysisPortalWidget() {
         }}
       />
 
-      {/* Inner glow on hover */}
+      {/* Inner glow on hover - FULL HEIGHT */}
       <div
         className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
         style={{

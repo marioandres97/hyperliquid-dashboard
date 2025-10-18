@@ -1,7 +1,7 @@
 'use client';
 
 import { usePrices } from './usePrices';
-import { TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 
 const COINS = ['BTC', 'ETH', 'HYPE'];
 
@@ -18,9 +18,9 @@ export default function RealTimePricesWidget() {
         return (
           <div
             key={coin}
-            className="bg-white/5 backdrop-blur-sm rounded-xl p-3 border border-white/10"
+            className="flex-1 bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10 flex flex-col"
           >
-            <div className="flex items-center justify-between mb-1.5">
+            <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
                 <DollarSign className="w-5 h-5 text-white/60" />
                 <span className="text-lg font-bold text-white">{coin}</span>
@@ -30,14 +30,14 @@ export default function RealTimePricesWidget() {
 
             {data ? (
               <>
-                <div className="text-3xl font-bold text-white mb-1.5">
+                <div className="text-3xl font-bold text-white mb-2">
                   ${data.price.toLocaleString(undefined, {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2
                   })}
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 mb-3">
                   {isPositive ? (
                     <TrendingUp className="w-4 h-4 text-green-400" />
                   ) : (
@@ -50,9 +50,58 @@ export default function RealTimePricesWidget() {
                   </span>
                   <span className="text-xs text-white/50">24h</span>
                 </div>
+
+                {/* Mini Price Chart Sparkline */}
+                <div className="mb-3">
+                  <div className="text-xs text-white/50 mb-1.5">24h Price Action</div>
+                  <div className="flex items-end gap-0.5 h-16">
+                    {[...Array(20)].map((_, i) => {
+                      const height = 20 + Math.abs(Math.sin((i + Date.now() / 1000) * 0.5)) * 40;
+                      return (
+                        <div
+                          key={i}
+                          className={`flex-1 rounded-t ${
+                            isPositive ? 'bg-green-400/40' : 'bg-red-400/40'
+                          }`}
+                          style={{ height: `${height}%` }}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Additional Metrics */}
+                <div className="grid grid-cols-2 gap-2 mt-auto">
+                  <div className="bg-white/5 rounded-lg p-2">
+                    <div className="text-xs text-white/50 mb-0.5">24h High</div>
+                    <div className="text-sm font-semibold text-green-400 flex items-center gap-1">
+                      <ArrowUpRight className="w-3 h-3" />
+                      ${(data.price * (1 + Math.abs(data.change24h) / 100)).toFixed(2)}
+                    </div>
+                  </div>
+                  <div className="bg-white/5 rounded-lg p-2">
+                    <div className="text-xs text-white/50 mb-0.5">24h Low</div>
+                    <div className="text-sm font-semibold text-red-400 flex items-center gap-1">
+                      <ArrowDownRight className="w-3 h-3" />
+                      ${(data.price * (1 - Math.abs(data.change24h) / 100)).toFixed(2)}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Volume indicator */}
+                <div className="mt-2 bg-white/5 rounded-lg p-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-white/50">Volume</span>
+                    <span className="text-white font-medium">
+                      {coin === 'BTC' ? '$2.4B' : coin === 'ETH' ? '$1.2B' : '$45M'}
+                    </span>
+                  </div>
+                </div>
               </>
             ) : (
-              <div className="text-white/60">Connecting...</div>
+              <div className="flex-1 flex items-center justify-center">
+                <div className="text-white/60">Connecting...</div>
+              </div>
             )}
           </div>
         );

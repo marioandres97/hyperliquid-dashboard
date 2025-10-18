@@ -44,7 +44,7 @@ export default function PnLTrackerWidget({ isProfitable }: PnLTrackerWidgetProps
   }));
 
   return (
-    <div className="space-y-3">
+    <div className="h-full flex flex-col space-y-3">
       {/* Total PnL */}
       <div className={`p-3 rounded-xl border-2 ${
         currentIsProfitable 

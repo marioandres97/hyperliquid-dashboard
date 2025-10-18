@@ -17,6 +17,122 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
+/* Dashboard animated background */
+.dashboard-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.dashboard-background::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
+    linear-gradient(135deg, var(--color-bg-dark-start) 0%, var(--color-bg-dark-mid) 50%, var(--color-bg-dark-end) 100%);
+  animation: pulse-gradient 8s ease-in-out infinite;
+}
+
+.dashboard-background::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: 
+    repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(139, 92, 246, 0.03) 40px, rgba(139, 92, 246, 0.03) 41px),
+    repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(59, 130, 246, 0.03) 40px, rgba(59, 130, 246, 0.03) 41px);
+  opacity: 0.5;
+}
+
+/* Floating particles */
+.dashboard-particles {
+  position: absolute;
+  inset: 0;
+}
+
+.particle {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: rgba(139, 92, 246, 0.4);
+  border-radius: 50%;
+  animation: float 20s infinite ease-in-out;
+}
+
+.particle:nth-child(1) { left: 10%; top: 20%; animation-delay: 0s; animation-duration: 15s; }
+.particle:nth-child(2) { left: 20%; top: 60%; animation-delay: 2s; animation-duration: 18s; }
+.particle:nth-child(3) { left: 30%; top: 40%; animation-delay: 4s; animation-duration: 20s; }
+.particle:nth-child(4) { left: 40%; top: 80%; animation-delay: 1s; animation-duration: 16s; }
+.particle:nth-child(5) { left: 50%; top: 30%; animation-delay: 3s; animation-duration: 19s; }
+.particle:nth-child(6) { left: 60%; top: 70%; animation-delay: 5s; animation-duration: 17s; }
+.particle:nth-child(7) { left: 70%; top: 50%; animation-delay: 2.5s; animation-duration: 21s; }
+.particle:nth-child(8) { left: 80%; top: 25%; animation-delay: 4.5s; animation-duration: 15s; }
+.particle:nth-child(9) { left: 90%; top: 65%; animation-delay: 1.5s; animation-duration: 18s; }
+.particle:nth-child(10) { left: 15%; top: 85%; animation-delay: 3.5s; animation-duration: 16s; }
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+    opacity: 0.3;
+  }
+  25% {
+    transform: translateY(-20px) translateX(10px);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(-40px) translateX(-10px);
+    opacity: 0.8;
+  }
+  75% {
+    transform: translateY(-20px) translateX(-20px);
+    opacity: 0.6;
+  }
+}
+
+@keyframes pulse-gradient {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* Candlestick background elements */
+.candlestick-bg {
+  position: absolute;
+  width: 4px;
+  background: rgba(139, 92, 246, 0.05);
+  animation: candlestick-pulse 4s infinite ease-in-out;
+}
+
+.candlestick-bg:nth-child(1) { left: 5%; top: 30%; height: 60px; animation-delay: 0s; }
+.candlestick-bg:nth-child(2) { left: 15%; top: 40%; height: 80px; animation-delay: 0.5s; }
+.candlestick-bg:nth-child(3) { left: 25%; top: 25%; height: 70px; animation-delay: 1s; }
+.candlestick-bg:nth-child(4) { left: 35%; top: 50%; height: 90px; animation-delay: 1.5s; }
+.candlestick-bg:nth-child(5) { left: 45%; top: 35%; height: 65px; animation-delay: 2s; }
+.candlestick-bg:nth-child(6) { left: 55%; top: 45%; height: 75px; animation-delay: 2.5s; }
+.candlestick-bg:nth-child(7) { left: 65%; top: 30%; height: 85px; animation-delay: 3s; }
+.candlestick-bg:nth-child(8) { left: 75%; top: 55%; height: 70px; animation-delay: 3.5s; }
+.candlestick-bg:nth-child(9) { left: 85%; top: 40%; height: 80px; animation-delay: 4s; }
+.candlestick-bg:nth-child(10) { left: 95%; top: 35%; height: 75px; animation-delay: 4.5s; }
+
+@keyframes candlestick-pulse {
+  0%, 100% {
+    opacity: 0.05;
+    transform: scaleY(1);
+  }
+  50% {
+    opacity: 0.1;
+    transform: scaleY(1.2);
+  }
+}
+
 .glass {
   background: rgba(15, 20, 25, 0.7);
   backdrop-filter: blur(12px) saturate(180%);
