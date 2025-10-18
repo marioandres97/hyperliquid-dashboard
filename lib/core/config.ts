@@ -9,7 +9,7 @@ import { z } from 'zod';
 
 // Configuration schema
 const configSchema = z.object({
-  env: z.enum(['development', 'staging', 'production']).default('development'),
+  env: z.enum(['development', 'staging', 'production', 'test']).default('development'),
   port: z.coerce.number().int().positive().default(3000),
   
   redis: z.object({
@@ -30,6 +30,19 @@ const configSchema = z.object({
     tradesRetentionDays: z.coerce.number().int().positive().default(7),
     positionsRetentionDays: z.coerce.number().int().positive().default(30),
     alertsRetentionDays: z.coerce.number().int().positive().default(30),
+    memoryEnabled: z.coerce.boolean().default(true),
+    memoryMaxSize: z.coerce.number().int().positive().default(50), // MB
+    memoryTTL: z.coerce.number().int().positive().default(10), // seconds
+    redisTTL: z.coerce.number().int().positive().default(30), // seconds
+    warmOnStartup: z.coerce.boolean().default(true),
+  }),
+  
+  rateLimit: z.object({
+    enabled: z.coerce.boolean().default(true),
+    freeRequests: z.coerce.number().int().positive().default(60),
+    proRequests: z.coerce.number().int().positive().default(300),
+    apiRequests: z.coerce.number().int().positive().default(1000),
+    windowSeconds: z.coerce.number().int().positive().default(60),
   }),
   
   logging: z.object({
@@ -71,6 +84,19 @@ function parseConfig(): Config {
       tradesRetentionDays: process.env.REDIS_TRADES_RETENTION || '7',
       positionsRetentionDays: process.env.REDIS_POSITIONS_RETENTION || '30',
       alertsRetentionDays: process.env.REDIS_ALERTS_RETENTION || '30',
+      memoryEnabled: process.env.CACHE_MEMORY_ENABLED || 'true',
+      memoryMaxSize: process.env.CACHE_MEMORY_MAX_SIZE || '50',
+      memoryTTL: process.env.CACHE_MEMORY_TTL || '10',
+      redisTTL: process.env.CACHE_REDIS_TTL || '30',
+      warmOnStartup: process.env.CACHE_WARM_ON_STARTUP || 'true',
+    },
+    
+    rateLimit: {
+      enabled: process.env.RATE_LIMIT_ENABLED || 'true',
+      freeRequests: process.env.RATE_LIMIT_FREE_REQUESTS || '60',
+      proRequests: process.env.RATE_LIMIT_PRO_REQUESTS || '300',
+      apiRequests: process.env.RATE_LIMIT_API_REQUESTS || '1000',
+      windowSeconds: process.env.RATE_LIMIT_WINDOW_SECONDS || '60',
     },
     
     logging: {
