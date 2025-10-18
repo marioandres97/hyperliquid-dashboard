@@ -1,8 +1,15 @@
-import redis from '@/lib/redis';
+import redis, { isRedisAvailable } from '@/lib/redis';
 import { NextResponse } from 'next/server';
 
 export async function DELETE() {
   try {
+    if (!isRedisAvailable() || !redis) {
+      return NextResponse.json(
+        { error: 'Redis not available' },
+        { status: 503 }
+      );
+    }
+
     // Obtener todos los IDs de señales
     const signalIds = (await redis.smembers('signals:active')) || [];
     

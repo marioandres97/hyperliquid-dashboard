@@ -1,8 +1,15 @@
-import redis from '@/lib/redis';
+import redis, { isRedisAvailable } from '@/lib/redis';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
+    if (!isRedisAvailable() || !redis) {
+      return NextResponse.json(
+        { error: 'Redis not available' },
+        { status: 503 }
+      );
+    }
+
     const signal = await request.json();
     
     if (!signal || !signal.id) {
