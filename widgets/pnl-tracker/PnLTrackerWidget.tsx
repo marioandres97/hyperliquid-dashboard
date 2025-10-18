@@ -1,6 +1,8 @@
 'use client';
 
 import { usePnLTracking } from './usePnLTracking';
+import PnLBackground from '@/components/layout/backgrounds/PnLBackground';
+import WidgetContainer from '@/components/layout/WidgetContainer';
 import { TrendingUp, TrendingDown, DollarSign, Target, Award, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
@@ -234,5 +236,20 @@ export default function PnLTrackerWidget() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Wrapper component for PnL widget with dynamic background
+export function PnLTrackerWidgetWithBackground() {
+  const { stats, isLoading } = usePnLTracking();
+  const isProfitable = stats ? stats.totalPnL >= 0 : true;
+
+  return (
+    <WidgetContainer 
+      title="PnL Tracker"
+      background={<PnLBackground isPositive={isProfitable} />}
+    >
+      <PnLTrackerWidget />
+    </WidgetContainer>
   );
 }

@@ -3,12 +3,11 @@ import WidgetContainer from '@/components/layout/WidgetContainer';
 import OrderFlowSignalsWidget from '@/widgets/order-flow-signals/OrderFlowSignalsWidget';
 import { SignalPerformanceWidget } from '@/widgets/signal-performance/SignalPerformanceWidget';
 import RealTimePricesWidget from '@/widgets/real-time-prices/RealTimePricesWidget';
-import PnLTrackerWidget from '@/widgets/pnl-tracker/PnLTrackerWidget';
+import { PnLTrackerWidgetWithBackground } from '@/widgets/pnl-tracker/PnLTrackerWidget';
 import InstitutionalAnalysisPortalWidget from '@/widgets/institutional-analysis-portal/InstitutionalAnalysisPortalWidget';
 import OrderFlowBackground from '@/components/layout/backgrounds/OrderFlowBackground';
 import SignalPerformanceBackground from '@/components/layout/backgrounds/SignalPerformanceBackground';
 import PricesBackground from '@/components/layout/backgrounds/PricesBackground';
-import PnLBackground from '@/components/layout/backgrounds/PnLBackground';
 
 export default function Home() {
   return (
@@ -37,12 +36,7 @@ export default function Home() {
           <RealTimePricesWidget />
         </WidgetContainer>
 
-        <WidgetContainer 
-          title="PnL Tracker"
-          background={<PnLBackground isPositive={true} />}
-        >
-          <PnLTrackerWidget />
-        </WidgetContainer>
+        <PnLTrackerWidgetWithBackground />
 
         <WidgetContainer title="">
           <InstitutionalAnalysisPortalWidget />
