@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { formatInTimeZone } from 'date-fns-tz';
-import { Clock, Activity } from 'lucide-react';
+import { Activity } from 'lucide-react';
 
 export default function Header() {
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
@@ -51,9 +51,30 @@ export default function Header() {
               <p className="text-xs sm:text-sm text-gray-400">Advanced signal detection system</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 text-xs sm:text-sm font-financial text-gray-300">
-            <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
-            <span>{timeUTC} UTC</span>
+          
+          {/* Apple-style UTC Clock */}
+          <div className="relative group">
+            {/* Glassmorphism background with subtle glow */}
+            <div className="absolute -inset-[1px] rounded-xl bg-gradient-to-br from-white/10 via-white/5 to-transparent opacity-50" />
+            <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-gray-900/40 to-gray-900/60 backdrop-blur-sm" />
+            
+            {/* Subtle glow effect on hover */}
+            <div className="absolute -inset-[2px] rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-lg bg-purple-500/10" />
+            
+            {/* Clock content */}
+            <div className="relative px-4 sm:px-5 py-2 sm:py-2.5">
+              <div className="flex items-center gap-2">
+                <span 
+                  className="text-base sm:text-lg lg:text-xl font-light text-white/90 tracking-wide font-mono"
+                  style={{ fontFeatureSettings: '"tnum"' }}
+                >
+                  {timeUTC}
+                </span>
+                <span className="text-xs sm:text-sm font-light text-white/40 tracking-widest">
+                  UTC
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
