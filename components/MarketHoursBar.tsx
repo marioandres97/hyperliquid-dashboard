@@ -204,8 +204,15 @@ export default function MarketHoursBar() {
   // Auto-rotate slides on mobile/tablet
   useEffect(() => {
     if (screenSize !== 'desktop' && !isPaused && !prefersReducedMotion) {
+      // Group markets into pairs for mobile carousel
+      const marketPairs = [
+        [markets[0], markets[1]], // Tokyo, London
+        [markets[2], markets[3]], // New York, CME
+      ];
+      const totalSlides = marketPairs.length;
+      
       const autoRotate = setInterval(() => {
-        setCurrentSlide((prev) => (prev + 1) % 2); // Rotate between 0 and 1 (2 slides)
+        setCurrentSlide((prev) => (prev + 1) % totalSlides);
       }, 4000); // Change every 4 seconds
       
       return () => clearInterval(autoRotate);
@@ -261,6 +268,7 @@ export default function MarketHoursBar() {
     ];
     
     const currentPair = marketPairs[currentSlide];
+    const totalSlides = marketPairs.length;
     
     return (
       <div 
@@ -311,7 +319,7 @@ export default function MarketHoursBar() {
           
           {/* Dot indicators */}
           <div className="flex items-center justify-center gap-2 mt-1">
-            {[0, 1].map((index) => (
+            {Array.from({ length: totalSlides }, (_, index) => (
               <button
                 key={index}
                 onClick={() => setCurrentSlide(index)}
