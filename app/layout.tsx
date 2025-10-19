@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { QueryProvider } from "@/lib/query/QueryProvider";
 import { ErrorBoundary } from "@/lib/monitoring/errorBoundary";
+import { ToastProvider } from "@/lib/hooks/ToastContext";
 
 export const metadata: Metadata = {
   title: "Hyperliquid Institutional Analysis Dashboard",
@@ -18,7 +19,9 @@ export default function RootLayout({
       <body className="antialiased">
         <ErrorBoundary>
           <QueryProvider>
-            {children}
+            <ToastProvider>
+              {children}
+            </ToastProvider>
           </QueryProvider>
         </ErrorBoundary>
       </body>

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useTrades } from '@/lib/hooks/trades/useTrades';
+import { useToastContext } from '@/lib/hooks/ToastContext';
 import PnLBackground from '@/components/layout/backgrounds/PnLBackground';
 import WidgetContainer from '@/components/layout/WidgetContainer';
 import { TradeEntryModal } from '@/components/trades/TradeEntryModal';
@@ -14,8 +15,9 @@ interface PnLTrackerWidgetProps {
 }
 
 export default function PnLTrackerWidget({ isProfitable }: PnLTrackerWidgetProps) {
-  const { trades, loading, createTrade, deleteTrade, exportToCSV } = useTrades();
+  const { trades, loading, error, createTrade, deleteTrade, exportToCSV } = useTrades();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const toast = useToastContext();
 
   // Calculate stats from trades
   const stats = calculateStatsFromTrades(trades);
@@ -38,7 +40,17 @@ export default function PnLTrackerWidget({ isProfitable }: PnLTrackerWidgetProps
   }));
 
   const handleCreateTrade = async (input: any) => {
-    await createTrade(input);
+    try {
+      const result = await createTrade(input);
+      if (result) {
+        toast.success('Trade saved successfully!');
+        setIsModalOpen(false);
+      } else {
+        toast.error(error || 'Failed to save trade. Please try again.');
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to save trade');
+    }
   };
 
   return (

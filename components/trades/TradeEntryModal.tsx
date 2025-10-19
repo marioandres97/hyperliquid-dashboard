@@ -76,7 +76,7 @@ export function TradeEntryModal({ isOpen, onClose, onCreate }: TradeEntryModalPr
     setSubmitting(true);
     try {
       await onCreate(formData);
-      // Reset form
+      // Reset form only if successful (onCreate will handle closing modal)
       setFormData({
         coin: 'BTC',
         side: 'LONG',
@@ -89,7 +89,6 @@ export function TradeEntryModal({ isOpen, onClose, onCreate }: TradeEntryModalPr
         tags: [],
       });
       setTagInput('');
-      onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create trade');
     } finally {
