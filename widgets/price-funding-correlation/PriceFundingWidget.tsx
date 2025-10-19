@@ -131,8 +131,13 @@ export default function OIPriceWidget() {
 
       {/* Loading/Error */}
       {loading && (
-        <div className="flex items-center justify-center py-8">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="skeleton h-20 rounded-lg" />
+            ))}
+          </div>
+          <div className="skeleton h-64 rounded-lg" />
         </div>
       )}
       {error && (

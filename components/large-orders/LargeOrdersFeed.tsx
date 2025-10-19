@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useMultiCoinLargeOrders } from '@/lib/hooks/large-orders/useLargeOrders';
 import type { CoinFilter, SizeFilter, SideFilter } from '@/lib/large-orders/types';
 import { formatUsdValue, getRelativeTime, downloadCSV } from '@/lib/large-orders/types';
-import { Download } from 'lucide-react';
+import { Download, TrendingUp } from 'lucide-react';
 
 export function LargeOrdersFeed() {
   const [coinFilter, setCoinFilter] = useState<CoinFilter>('ALL');
@@ -29,10 +29,13 @@ export function LargeOrdersFeed() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <h2 className="text-lg font-bold text-white">🐋 Large Orders Feed</h2>
+          <TrendingUp className="w-5 h-5 text-blue-400" />
+          <h2 className="text-lg font-bold text-white">Large Orders Feed</h2>
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-            <span className="text-xs text-green-400 font-medium">LIVE</span>
+            <div className="relative w-2 h-2">
+              <div className="absolute inset-0 rounded-full bg-green-400 status-pulse" />
+            </div>
+            <span className="text-xs text-green-400 font-financial">LIVE</span>
           </div>
         </div>
         <button
