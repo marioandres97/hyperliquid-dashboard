@@ -7,7 +7,7 @@ export default function EconomicCalendarBackground() {
     <>
       {/* Base gradient - professional blue/gray for financial data */}
       <div 
-        className="absolute inset-0 opacity-8"
+        className="absolute inset-0 opacity-10"
         style={{
           background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.12) 0%, rgba(71, 85, 105, 0.15) 100%)'
         }}
@@ -15,7 +15,7 @@ export default function EconomicCalendarBackground() {
       
       {/* Calendar grid pattern */}
       <div 
-        className="absolute inset-0 opacity-4"
+        className="absolute inset-0 opacity-5"
         style={{
           backgroundImage: `
             linear-gradient(rgba(59, 130, 246, 0.15) 1px, transparent 1px),
@@ -33,7 +33,7 @@ export default function EconomicCalendarBackground() {
       
       {/* Subtle institutional glow */}
       <div 
-        className="absolute inset-0 opacity-6"
+        className="absolute inset-0 opacity-10"
         style={{
           background: 'radial-gradient(circle at 30% 40%, rgba(59, 130, 246, 0.15) 0%, transparent 60%)'
         }}

@@ -7,7 +7,7 @@ export default function AlertBackground() {
     <>
       {/* Base gradient - amber/yellow theme for alerts */}
       <div 
-        className="absolute inset-0 opacity-8"
+        className="absolute inset-0 opacity-10"
         style={{
           background: 'linear-gradient(135deg, rgba(251, 191, 36, 0.1) 0%, rgba(245, 158, 11, 0.15) 100%)'
         }}
