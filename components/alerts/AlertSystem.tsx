@@ -1,15 +1,38 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAlerts } from '@/lib/hooks/alerts/useAlerts';
+import { useAlertMonitoring } from '@/lib/hooks/alerts/useAlertMonitoring';
 import { CreateAlertModal } from './CreateAlertModal';
 import { getAlertDescription } from '@/lib/alerts/types';
 import { Plus, Trash2, Bell, BellOff } from 'lucide-react';
 import type { CreateAlertInput } from '@/lib/alerts/types';
 
 export function AlertSystem() {
-  const { alerts, loading, error, createAlert, updateAlert, deleteAlert } = useAlerts();
+  const { alerts, loading, error, createAlert, updateAlert, deleteAlert, refetch } = useAlerts();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+  // Set up alert monitoring
+  useAlertMonitoring({
+    alerts,
+    onAlertTriggered: (alert) => {
+      // Refetch alerts to update triggered count
+      refetch();
+    },
+    enabled: true,
+  });
+
+  // Request notification permission on mount if there are alerts with browserNotif enabled
+  useEffect(() => {
+    const hasNotificationAlerts = alerts.some(a => a.enabled && a.browserNotif);
+    if (hasNotificationAlerts && 'Notification' in window) {
+      if (Notification.permission === 'default') {
+        Notification.requestPermission().catch(err => {
+          console.error('Error requesting notification permission:', err);
+        });
+      }
+    }
+  }, [alerts]);
 
   const handleCreate = async (input: CreateAlertInput) => {
     const result = await createAlert(input);
