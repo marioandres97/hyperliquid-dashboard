@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import type { EconomicEventWithReleases } from '@/lib/economic-calendar/types';
 import { getCategoryIcon, getImpactBadge } from '@/lib/economic-calendar/events-data';
 import { formatEventDate } from '@/lib/economic-calendar/api';
@@ -11,13 +12,47 @@ interface EventModalProps {
 }
 
 export function EventModal({ event, onClose }: EventModalProps) {
+  // Add escape key handler and cleanup
+  useEffect(() => {
+    if (!event) return;
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    // Add event listener
+    document.addEventListener('keydown', handleEscape);
+    
+    // Prevent body scroll when modal is open (store original value)
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    // Cleanup
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [event, onClose]);
+
   if (!event) return null;
 
   const icon = getCategoryIcon(event.category);
   const impactBadge = getImpactBadge(event.impact);
 
+  // Handle backdrop click
+  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-0 md:p-4">
+    <div 
+      className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-0 md:p-4"
+      onClick={handleBackdropClick}
+    >
       <div className="bg-gray-900 border-0 md:border border-gray-800 rounded-none md:rounded-xl max-w-full md:max-w-2xl w-full max-h-screen md:max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="sticky top-0 bg-gray-900 border-b border-gray-800 p-4 sm:p-5 md:p-6 flex items-start justify-between z-10">
@@ -111,29 +146,6 @@ export function EventModal({ event, onClose }: EventModalProps) {
               )}
             </div>
           </div>
-
-          {/* Volatility Window */}
-          {event.primaryWindowStart && event.primaryWindowEnd && (
-            <div className="space-y-2 sm:space-y-3">
-              <h3 className="text-base sm:text-lg font-semibold text-white">Expected Volatility Window</h3>
-              <div className="space-y-2">
-                <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-2.5 sm:p-3">
-                  <div className="text-[10px] sm:text-xs text-yellow-400 mb-1">Primary Window</div>
-                  <div className="text-white font-medium text-xs sm:text-sm">
-                    {event.primaryWindowStart} - {event.primaryWindowEnd} UTC
-                  </div>
-                </div>
-                {event.extendedWindowStart && event.extendedWindowEnd && (
-                  <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-2.5 sm:p-3">
-                    <div className="text-[10px] sm:text-xs text-gray-400 mb-1">Extended Window</div>
-                    <div className="text-white font-medium text-xs sm:text-sm">
-                      {event.extendedWindowStart} - {event.extendedWindowEnd} UTC
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
 
           {/* Disclaimer */}
           <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3 sm:p-4">
