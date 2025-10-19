@@ -89,11 +89,27 @@ export function useTrades(filters?: TradeFilters) {
         setError(null);
         return data.data;
       } else {
-        const errorMsg = data.error || 'Failed to create trade';
+        // Use the detailed error message from the API
+        const errorMsg = data.message || data.error || 'Failed to create trade';
         setError(errorMsg);
-        throw new Error(errorMsg);
+        
+        // Include code and details if available for better debugging
+        const detailedError = new Error(errorMsg);
+        (detailedError as any).code = data.code;
+        (detailedError as any).details = data.details;
+        
+        throw detailedError;
       }
     } catch (err) {
+      // If it's a network error or fetch error
+      if (err instanceof TypeError && err.message.includes('fetch')) {
+        const networkError = new Error('Network error: Unable to reach the server. Please check your connection.');
+        setError(networkError.message);
+        console.error('Network error creating trade:', err);
+        throw networkError;
+      }
+      
+      // Re-throw the error with its message
       const errorMsg = err instanceof Error ? err.message : 'Unknown error';
       setError(errorMsg);
       console.error('Error creating trade:', err);

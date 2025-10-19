@@ -9,6 +9,11 @@ import { log } from '@/lib/core/logger';
 import { config } from '@/lib/core/config';
 import { connectDatabase, isDatabaseAvailable } from '@/lib/database/client';
 import { setupShutdownListeners } from '@/lib/core/shutdown';
+import { 
+  performDatabaseHealthCheck, 
+  retryDatabaseConnection,
+  verifyDatabaseConfig 
+} from '@/lib/database/healthCheck';
 
 /**
  * Initialize application services
@@ -21,10 +26,29 @@ export async function initializeApp(): Promise<void> {
     // Setup graceful shutdown handlers
     setupShutdownListeners();
 
-    // Connect to database
+    // Verify database configuration
+    const configCheck = verifyDatabaseConfig();
+    if (!configCheck.valid) {
+      log.warn('Database configuration issues detected', { errors: configCheck.errors });
+      configCheck.errors.forEach(error => log.warn(`  - ${error}`));
+    }
+
+    // Connect to database with retry logic
     if (isDatabaseAvailable()) {
       log.info('Connecting to database');
-      await connectDatabase();
+      
+      const connected = await retryDatabaseConnection(3, 2000);
+      
+      if (connected) {
+        const health = await performDatabaseHealthCheck();
+        log.info('Database health check completed', { 
+          connected: health.connected,
+          latency: health.latency 
+        });
+      } else {
+        log.error('Failed to connect to database after retries');
+        log.warn('Application will start but database features will be unavailable');
+      }
     } else {
       log.warn('Database not configured, skipping connection');
     }
