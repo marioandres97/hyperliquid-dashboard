@@ -33,7 +33,12 @@ export function EventModal({ event, onClose }: EventModalProps) {
     // Cleanup
     return () => {
       document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = originalOverflow;
+      // Restore original overflow or remove the property if it was empty
+      if (originalOverflow) {
+        document.body.style.overflow = originalOverflow;
+      } else {
+        document.body.style.removeProperty('overflow');
+      }
     };
   }, [event, onClose]);
 
