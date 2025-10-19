@@ -137,6 +137,9 @@ function getMarketStatus(currentTime: Date, market: Market): MarketStatus {
   }
 }
 
+// Animation duration constant (outside component for true immutability)
+const ANIMATION_DURATION = 40;
+
 export default function MarketHoursBar() {
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
   const [isPaused, setIsPaused] = useState(false);
@@ -168,6 +171,7 @@ export default function MarketHoursBar() {
       };
     }
     
+    // Always return cleanup function for interval
     return () => clearInterval(interval);
   }, []);
 
@@ -230,9 +234,6 @@ export default function MarketHoursBar() {
     );
   }
 
-  // Animation duration - using a readable speed of ~40s for smooth scrolling
-  const animationDuration = 40;
-
   // Memoize animation props to prevent unnecessary re-renders
   const animateProps = useMemo(() => ({
     x: isPaused ? undefined : [0, '-50%'],
@@ -242,10 +243,10 @@ export default function MarketHoursBar() {
     x: {
       repeat: Infinity,
       repeatType: "loop" as const,
-      duration: animationDuration,
+      duration: ANIMATION_DURATION,
       ease: "linear" as const,
     },
-  }), []); // Empty deps since animationDuration is constant
+  }), []); // Empty deps since ANIMATION_DURATION is a module constant
 
   return (
     <div 
