@@ -36,15 +36,17 @@ export default function Home() {
       </div>
 
       <DashboardGrid>
-        {/* Row 1: Real-Time Prices, Economic Calendar */}
-        <WidgetContainer 
-          title="Real-Time Prices"
-          background={<PricesBackground />}
-        >
-          <RealTimePricesWidget />
-        </WidgetContainer>
+        {/* Row 1: Real-Time Prices (1 col), Economic Calendar (1 col tablet, 2 cols desktop) */}
+        <div className="col-span-1">
+          <WidgetContainer 
+            title="Real-Time Prices"
+            background={<PricesBackground />}
+          >
+            <RealTimePricesWidget />
+          </WidgetContainer>
+        </div>
 
-        <div className="md:col-span-1 xl:col-span-2">
+        <div className="col-span-1 xl:col-span-2">
           <WidgetContainer 
             title=""
             background={<EconomicCalendarBackground />}
@@ -53,8 +55,8 @@ export default function Home() {
           </WidgetContainer>
         </div>
 
-        {/* Row 2: Large Orders Feed - full width */}
-        <div className="md:col-span-2 xl:col-span-3">
+        {/* Row 2: Large Orders Feed - full width on all breakpoints */}
+        <div className="col-span-1 md:col-span-2 xl:col-span-3">
           <WidgetContainer 
             title=""
             background={<OrderFlowBackground />}
@@ -63,8 +65,8 @@ export default function Home() {
           </WidgetContainer>
         </div>
 
-        {/* Row 3: Alert System, PnL Tracker */}
-        <div className="md:col-span-1 xl:col-span-1">
+        {/* Row 3: Alert System (1 col), PnL Tracker (1 col tablet, 2 cols desktop) */}
+        <div className="col-span-1">
           <WidgetContainer 
             title=""
             background={<AlertBackground />}
@@ -73,7 +75,7 @@ export default function Home() {
           </WidgetContainer>
         </div>
 
-        <div className="md:col-span-1 xl:col-span-2">
+        <div className="col-span-1 xl:col-span-2">
           <PnLTrackerWidgetWithBackground />
         </div>
       </DashboardGrid>
