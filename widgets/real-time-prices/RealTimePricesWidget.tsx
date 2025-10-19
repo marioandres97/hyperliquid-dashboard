@@ -69,19 +69,8 @@ export default function RealTimePricesWidget() {
                 <span className="text-lg font-bold text-white">{coin}</span>
               </div>
               
-              {/* Live indicator with last update */}
-              <div className="flex items-center gap-2 text-xs">
-                <div className="flex items-center gap-1.5">
-                  <div className={`w-2 h-2 rounded-full ${connected ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`} />
-                  <span className="text-white/60">
-                    {connected ? '🟢 Live' : '🔴 Disconnected'}
-                  </span>
-                </div>
-                <span className="text-white/40">|</span>
-                <span className="text-white/50">
-                  Updated: {formatTimeSince(lastUpdate)}
-                </span>
-              </div>
+              {/* Connection status indicator */}
+              <div className={`w-2 h-2 rounded-full ${connected ? 'bg-green-400' : 'bg-red-400'}`} />
             </div>
 
             {data ? (
@@ -109,9 +98,8 @@ export default function RealTimePricesWidget() {
 
                 {/* Candlestick Chart */}
                 <div className="mb-3">
-                  <div className="text-xs text-white/50 mb-1.5 flex items-center justify-between">
-                    <span>Price Action (1H, 24h)</span>
-                    {errorMsg && (
+                  {errorMsg && (
+                    <div className="text-xs text-white/50 mb-1.5 flex items-center justify-end">
                       <button
                         onClick={() => retry(coin)}
                         className="text-blue-400 hover:text-blue-300 flex items-center gap-1"
@@ -119,8 +107,8 @@ export default function RealTimePricesWidget() {
                         <RefreshCw className="w-3 h-3" />
                         Retry
                       </button>
-                    )}
-                  </div>
+                    </div>
+                  )}
                   
                   {loading && candleData.length === 0 ? (
                     <div className="h-[120px] flex items-center justify-center bg-white/5 rounded-lg animate-pulse">

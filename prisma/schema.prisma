@@ -193,3 +193,32 @@ model HealthMetric {
   @@index([timestamp])
   @@map("health_metrics")
 }
+
+// Trade model for PnL tracking
+model Trade {
+  id          String   @id @default(cuid())
+  userId      String?  // null for now (no auth)
+  
+  coin        String   // "BTC" | "ETH" | "HYPE"
+  side        String   // "LONG" | "SHORT"
+  entryPrice  Float
+  exitPrice   Float
+  size        Float    // amount in coin
+  
+  entryTime   DateTime
+  exitTime    DateTime
+  
+  pnl         Float    // calculated: (exitPrice - entryPrice) * size for LONG
+  pnlPercent  Float    // calculated: (pnl / (entryPrice * size)) * 100
+  
+  notes       String?
+  tags        String[] // ["#WhaleFollowing", "#Scalping"]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([userId])
+  @@index([coin])
+  @@index([entryTime])
+  @@map("trades")
+}

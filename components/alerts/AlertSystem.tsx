@@ -71,66 +71,55 @@ export function AlertSystem() {
       {!loading && !error && (
         <>
           {alerts.length === 0 ? (
-            <div className="bg-gray-900/50 border border-gray-800 rounded-lg p-12 text-center">
-              <Bell className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-              <p className="text-gray-400 mb-2">No alerts created yet</p>
-              <p className="text-sm text-gray-500">
-                Create your first alert to get notified about market events
-              </p>
+            <div className="bg-gray-900/50 border border-gray-800 rounded-lg p-4 text-center">
+              <Bell className="w-8 h-8 text-gray-600 mx-auto mb-2" />
+              <p className="text-sm text-gray-400">No alerts yet</p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2">
               {alerts.map((alert) => (
                 <div
                   key={alert.id}
-                  className="bg-gray-900/50 border border-gray-800 rounded-lg p-4 hover:border-gray-700 transition-colors"
+                  className="bg-gray-900/50 border border-gray-800 rounded-lg p-3 hover:border-gray-700 transition-colors"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
+                      <div className="flex items-center gap-2 mb-1">
                         <button
                           onClick={() => handleToggle(alert.id, alert.enabled)}
-                          className={`p-1 rounded transition-colors ${
+                          className={`p-0.5 rounded transition-colors ${
                             alert.enabled
                               ? 'text-green-400 hover:text-green-300'
                               : 'text-gray-600 hover:text-gray-500'
                           }`}
                         >
                           {alert.enabled ? (
-                            <Bell className="w-5 h-5" />
+                            <Bell className="w-4 h-4" />
                           ) : (
-                            <BellOff className="w-5 h-5" />
+                            <BellOff className="w-4 h-4" />
                           )}
                         </button>
                         <div>
-                          <h3 className="text-white font-medium">
+                          <h3 className="text-sm text-white font-medium">
                             {getAlertDescription(alert)}
                           </h3>
-                          <div className="flex items-center gap-3 mt-1 text-xs text-gray-400">
-                            <span>
-                              Created {alert.createdAt.toLocaleDateString()}
-                            </span>
+                          <div className="flex items-center gap-2 mt-0.5 text-xs text-gray-400">
                             {alert.triggered > 0 && (
-                              <span>• Triggered {alert.triggered}x</span>
-                            )}
-                            {alert.lastTriggered && (
-                              <span>
-                                • Last: {alert.lastTriggered.toLocaleString()}
-                              </span>
+                              <span>Triggered {alert.triggered}x</span>
                             )}
                           </div>
                         </div>
                       </div>
 
                       {/* Notification Methods */}
-                      <div className="flex gap-2 ml-11">
+                      <div className="flex gap-1.5 ml-6">
                         {alert.browserNotif && (
-                          <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded text-xs">
+                          <span className="px-1.5 py-0.5 bg-blue-500/20 text-blue-400 rounded text-xs">
                             Browser
                           </span>
                         )}
                         {alert.emailNotif && (
-                          <span className="px-2 py-0.5 bg-purple-500/20 text-purple-400 rounded text-xs">
+                          <span className="px-1.5 py-0.5 bg-purple-500/20 text-purple-400 rounded text-xs">
                             Email
                           </span>
                         )}
@@ -140,9 +129,9 @@ export function AlertSystem() {
                     {/* Actions */}
                     <button
                       onClick={() => handleDelete(alert.id)}
-                      className="p-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded transition-colors"
+                      className="p-1.5 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded transition-colors"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>
