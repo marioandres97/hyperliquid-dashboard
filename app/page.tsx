@@ -46,7 +46,7 @@ export default function Home() {
           </WidgetContainer>
         </div>
 
-        <div className="col-span-1 md:col-span-1 xl:col-span-2">
+        <div className="col-span-1 xl:col-span-2">
           <WidgetContainer 
             title=""
             background={<EconomicCalendarBackground />}
