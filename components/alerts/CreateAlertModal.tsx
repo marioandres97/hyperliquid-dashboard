@@ -63,8 +63,8 @@ export function CreateAlertModal({ isOpen, onClose, onCreate }: CreateAlertModal
   };
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-0 md:p-4">
-      <div className="bg-gray-900 border-0 md:border border-gray-800 rounded-none md:rounded-xl max-w-full md:max-w-md w-full max-h-screen md:max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-0 md:p-4">
+      <div className="bg-gray-900 border-0 md:border border-gray-800 rounded-none md:rounded-xl max-w-full md:max-w-[600px] w-full max-h-screen md:max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="border-b border-gray-800 p-4 sm:p-5 md:p-6 flex items-center justify-between sticky top-0 bg-gray-900 z-10">
           <h2 className="text-lg sm:text-xl font-bold text-white">Create Alert</h2>

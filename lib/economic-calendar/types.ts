@@ -20,6 +20,8 @@ export interface EconomicEvent {
   source?: string;
   sourceUrl?: string;
   frequency?: string;
+  description?: string;
+  cryptoImpact?: string;
   
   // Historical impact data
   btcAvgImpact?: number;

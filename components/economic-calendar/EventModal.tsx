@@ -50,10 +50,10 @@ export function EventModal({ event, onClose }: EventModalProps) {
 
   return (
     <div 
-      className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-0 md:p-4"
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-0 md:p-4"
       onClick={handleBackdropClick}
     >
-      <div className="bg-gray-900 border-0 md:border border-gray-800 rounded-none md:rounded-xl max-w-full md:max-w-2xl w-full max-h-screen md:max-h-[90vh] overflow-y-auto">
+      <div className="bg-gray-900 border-0 md:border border-gray-800 rounded-none md:rounded-xl max-w-full md:max-w-[600px] w-full max-h-screen md:max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="sticky top-0 bg-gray-900 border-b border-gray-800 p-4 sm:p-5 md:p-6 flex items-start justify-between z-10">
           <div className="flex-1 min-w-0 pr-2">
@@ -75,17 +75,60 @@ export function EventModal({ event, onClose }: EventModalProps) {
         </div>
 
         {/* Content */}
-        <div className="p-4 sm:p-5 md:p-6 space-y-4 sm:space-y-5 md:space-y-6">
-          {/* Overview Section */}
-          <div className="space-y-2 sm:space-y-3">
-            <h3 className="text-base sm:text-lg font-semibold text-white">Overview</h3>
-            <div className="bg-gray-800/50 rounded-lg p-3 sm:p-4 space-y-2 text-xs sm:text-sm">
-              <div>
-                <span className="text-gray-400">Event: </span>
-                <span className="text-white">{event.name}</span>
+        <div className="p-4 sm:p-5 space-y-4">
+          {/* Description Section */}
+          {event.description && (
+            <div className="space-y-2">
+              <h3 className="text-sm sm:text-base font-semibold text-white">What It Is</h3>
+              <div className="bg-gray-800/50 rounded-lg p-3 text-xs sm:text-sm text-gray-300 leading-relaxed">
+                {event.description}
               </div>
-              <div>
-                <span className="text-gray-400">Impact Level: </span>
+            </div>
+          )}
+
+          {/* Economic Data Metrics */}
+          {(event.btcAvgImpact || event.ethAvgImpact || event.volumeSpike) && (
+            <div className="space-y-2">
+              <h3 className="text-sm sm:text-base font-semibold text-white">Historical Market Impact</h3>
+              <div className="grid grid-cols-3 gap-2">
+                {event.btcAvgImpact && (
+                  <div className="bg-gray-800/50 rounded-lg p-2.5 sm:p-3">
+                    <div className="text-[10px] sm:text-xs text-gray-400 mb-1">BTC Avg Move</div>
+                    <div className="text-sm sm:text-base font-bold text-orange-400">±{event.btcAvgImpact}%</div>
+                  </div>
+                )}
+                {event.ethAvgImpact && (
+                  <div className="bg-gray-800/50 rounded-lg p-2.5 sm:p-3">
+                    <div className="text-[10px] sm:text-xs text-gray-400 mb-1">ETH Avg Move</div>
+                    <div className="text-sm sm:text-base font-bold text-blue-400">±{event.ethAvgImpact}%</div>
+                  </div>
+                )}
+                {event.volumeSpike && (
+                  <div className="bg-gray-800/50 rounded-lg p-2.5 sm:p-3">
+                    <div className="text-[10px] sm:text-xs text-gray-400 mb-1">Volume Spike</div>
+                    <div className="text-sm sm:text-base font-bold text-green-400">+{event.volumeSpike}%</div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Crypto Impact */}
+          {event.cryptoImpact && (
+            <div className="space-y-2">
+              <h3 className="text-sm sm:text-base font-semibold text-white">Crypto Market Impact</h3>
+              <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 text-xs sm:text-sm text-blue-200 leading-relaxed">
+                {event.cryptoImpact}
+              </div>
+            </div>
+          )}
+
+          {/* Overview Section - Compact */}
+          <div className="space-y-2">
+            <h3 className="text-sm sm:text-base font-semibold text-white">Details</h3>
+            <div className="bg-gray-800/50 rounded-lg p-3 space-y-1.5 text-xs sm:text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-400">Impact Level:</span>
                 <span className={`font-semibold ${
                   event.impact === 'HIGH' ? 'text-red-400' :
                   event.impact === 'MEDIUM' ? 'text-yellow-400' :
@@ -94,67 +137,39 @@ export function EventModal({ event, onClose }: EventModalProps) {
                   {event.impact}
                 </span>
               </div>
-              <div>
-                <span className="text-gray-400">Category: </span>
-                <span className="text-white">{event.category}</span>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Category:</span>
+                <span className="text-white">{event.category.replace('_', ' ')}</span>
               </div>
               {event.frequency && (
-                <div>
-                  <span className="text-gray-400">Frequency: </span>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Frequency:</span>
                   <span className="text-white">{event.frequency}</span>
                 </div>
               )}
               {event.sourceUrl && (
-                <div>
-                  <span className="text-gray-400">Source: </span>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-400">Source:</span>
                   <a
                     href={event.sourceUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-400 hover:text-blue-300 underline"
+                    className="text-blue-400 hover:text-blue-300 underline text-right"
                   >
-                    {event.source || 'Official Source'}
+                    {event.source || 'Official'}
                   </a>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Impact Description */}
-          <div className="space-y-2 sm:space-y-3">
-            <h3 className="text-base sm:text-lg font-semibold text-white">What to Expect</h3>
-            <div className="bg-gray-800/50 rounded-lg p-3 sm:p-4 text-xs sm:text-sm text-gray-300">
-              {event.impact === 'HIGH' && (
-                <p>
-                  This is a <strong className="text-red-400">high-impact event</strong> that typically
-                  causes significant market volatility. Traders should exercise caution and consider
-                  risk management strategies during this period.
-                </p>
-              )}
-              {event.impact === 'MEDIUM' && (
-                <p>
-                  This is a <strong className="text-yellow-400">medium-impact event</strong> that may
-                  cause moderate market movements. Stay informed and monitor price action around the
-                  event time.
-                </p>
-              )}
-              {event.impact === 'LOW' && (
-                <p>
-                  This is a <strong className="text-green-400">low-impact event</strong> with minimal
-                  expected market effect. However, it's still worth tracking for broader market context.
-                </p>
-              )}
-            </div>
-          </div>
-
           {/* Disclaimer */}
-          <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3 sm:p-4">
+          <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-2.5 sm:p-3">
             <div className="flex items-start gap-2">
-              <AlertTriangle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-yellow-400 flex-shrink-0 mt-0.5" />
+              <AlertTriangle className="w-3.5 h-3.5 text-yellow-400 flex-shrink-0 mt-0.5" />
               <p className="text-[10px] sm:text-xs text-yellow-400/80">
-                <strong>Disclaimer:</strong> This information is for educational purposes only.
+                <strong>Disclaimer:</strong> Historical data for educational purposes only.
                 Not financial advice. Past performance does not guarantee future results.
-                Always conduct your own research and consider your risk tolerance.
               </p>
             </div>
           </div>
