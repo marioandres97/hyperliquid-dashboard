@@ -13,9 +13,9 @@ export default function PnLBackground({ isPositive }: PnLBackgroundProps) {
     
   return (
     <>
-      {/* Ledger grid lines */}
+      {/* Subtle ledger grid lines */}
       <div 
-        className="absolute inset-0 opacity-5"
+        className="absolute inset-0 opacity-3"
         style={{
           backgroundImage: `
             linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
@@ -25,49 +25,13 @@ export default function PnLBackground({ isPositive }: PnLBackgroundProps) {
         }}
       />
       
-      {/* Dynamic glow based on PnL */}
+      {/* Dynamic glow based on PnL - subtle */}
       <div 
-        className="absolute inset-0 opacity-10 transition-all duration-1000"
+        className="absolute inset-0 opacity-5 transition-all duration-1000"
         style={{
           background: `radial-gradient(circle at 50% 50%, ${glowColor}, transparent 70%)`
         }}
       />
-      
-      {/* Accounting paper aesthetic */}
-      <div 
-        className="absolute inset-0 opacity-3"
-        style={{
-          backgroundImage: 'repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.05) 0px, transparent 1px, transparent 20px)',
-        }}
-      />
-      
-      {/* Subtle gradient overlay */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div 
-          className="ledger-gradient"
-          style={{
-            background: `linear-gradient(135deg, ${glowColor}, transparent)`
-          }}
-        />
-      </div>
-      
-      <style jsx>{`
-        .ledger-gradient {
-          position: absolute;
-          inset: 0;
-          opacity: 0.5;
-          animation: ledgerPulse 4s ease-in-out infinite;
-        }
-        
-        @keyframes ledgerPulse {
-          0%, 100% {
-            opacity: 0.3;
-          }
-          50% {
-            opacity: 0.6;
-          }
-        }
-      `}</style>
     </>
   );
 }

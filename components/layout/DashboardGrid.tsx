@@ -9,17 +9,8 @@ interface DashboardGridProps {
 export default function DashboardGrid({ children }: DashboardGridProps) {
   return (
     <div className="min-h-screen px-4 py-6 sm:px-6 lg:px-8">
-      {/* Dashboard animated background */}
-      <div className="dashboard-background">
-        <div className="dashboard-particles">
-          {[...Array(10)].map((_, i) => (
-            <div key={i} className="particle" />
-          ))}
-        </div>
-        {[...Array(10)].map((_, i) => (
-          <div key={`candlestick-${i}`} className="candlestick-bg" />
-        ))}
-      </div>
+      {/* Simplified background - subtle grid only */}
+      <div className="dashboard-background" />
 
       <div className="relative z-10 w-full max-w-[95%] mx-auto">
         {/* Responsive grid: 1 col mobile, 2 col tablet, 3 col desktop */}
