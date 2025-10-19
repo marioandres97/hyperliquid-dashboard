@@ -3,7 +3,7 @@
 import type { EconomicEventWithReleases } from '@/lib/economic-calendar/types';
 import { getCategoryIcon, getImpactBadge } from '@/lib/economic-calendar/events-data';
 import { formatEventDate } from '@/lib/economic-calendar/api';
-import { X } from 'lucide-react';
+import { X, AlertTriangle } from 'lucide-react';
 
 interface EventModalProps {
   event: EconomicEventWithReleases | null;
@@ -137,11 +137,14 @@ export function EventModal({ event, onClose }: EventModalProps) {
 
           {/* Disclaimer */}
           <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4">
-            <p className="text-xs text-yellow-400/80">
-              ⚠️ <strong>Disclaimer:</strong> This information is for educational purposes only.
-              Not financial advice. Past performance does not guarantee future results.
-              Always conduct your own research and consider your risk tolerance.
-            </p>
+            <div className="flex items-start gap-2">
+              <AlertTriangle className="w-4 h-4 text-yellow-400 flex-shrink-0 mt-0.5" />
+              <p className="text-xs text-yellow-400/80">
+                <strong>Disclaimer:</strong> This information is for educational purposes only.
+                Not financial advice. Past performance does not guarantee future results.
+                Always conduct your own research and consider your risk tolerance.
+              </p>
+            </div>
           </div>
         </div>
       </div>

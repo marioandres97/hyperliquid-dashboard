@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useOrderBook } from '@/lib/hooks/order-flow/useOrderBook';
 import { formatPrice, formatSize, getBarWidth } from '@/lib/order-flow/types';
 import type { OrderBookLevel } from '@/lib/order-flow/types';
+import { BarChart3, Activity } from 'lucide-react';
 
 interface OrderBookRowProps {
   level: OrderBookLevel;
@@ -45,10 +46,15 @@ export function OrderFlowAnalysis() {
   if (!orderBook) {
     return (
       <div className="space-y-4">
-        <h2 className="text-lg font-bold text-white">Order Flow Analysis 📊</h2>
-        <div className="text-center py-12">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-500 border-r-transparent"></div>
-          <p className="mt-2 text-sm text-gray-400">Loading order book...</p>
+        <div className="flex items-center gap-2">
+          <BarChart3 className="w-5 h-5 text-blue-400" />
+          <h2 className="text-lg font-bold text-white">Order Flow Analysis</h2>
+        </div>
+        {/* Skeleton Loader */}
+        <div className="space-y-2">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="skeleton h-10 rounded" />
+          ))}
         </div>
       </div>
     );
@@ -64,11 +70,14 @@ export function OrderFlowAnalysis() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <h2 className="text-lg font-bold text-white">Order Flow Analysis 📊</h2>
+          <BarChart3 className="w-5 h-5 text-blue-400" />
+          <h2 className="text-lg font-bold text-white">Order Flow Analysis</h2>
           {connected && (
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              <span className="text-xs text-green-400">Live</span>
+              <div className="relative w-2 h-2">
+                <div className="absolute inset-0 rounded-full bg-green-400 status-pulse" />
+              </div>
+              <span className="text-xs text-green-400 font-financial">Live</span>
             </div>
           )}
         </div>
