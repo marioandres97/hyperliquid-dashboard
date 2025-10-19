@@ -10,10 +10,18 @@ import EconomicCalendarBackground from '@/components/layout/backgrounds/Economic
 import { EconomicCalendar } from '@/components/economic-calendar/EconomicCalendar';
 import { LargeOrdersFeed } from '@/components/large-orders/LargeOrdersFeed';
 import { AlertSystem } from '@/components/alerts/AlertSystem';
+import Header from '@/components/Header';
+import MarketHoursBar from '@/components/MarketHoursBar';
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-r from-purple-900/20 via-blue-900/20 to-green-900/20">
+      {/* Header with UTC Clock */}
+      <Header />
+      
+      {/* Market Hours Bar */}
+      <MarketHoursBar />
+      
       {/* Live indicator banner */}
       <div className="bg-blue-500/10 border-b border-blue-500/20 py-2">
         <div className="container mx-auto px-4 flex items-center justify-center gap-2">
