@@ -46,7 +46,7 @@ export default function Home() {
           </WidgetContainer>
         </div>
 
-        <div className="col-span-1 xl:col-span-2">
+        <div className="col-span-1 md:col-span-1 xl:col-span-2">
           <WidgetContainer 
             title=""
             background={<EconomicCalendarBackground />}
@@ -55,8 +55,8 @@ export default function Home() {
           </WidgetContainer>
         </div>
 
-        {/* Row 2: Large Orders Feed - full width on all breakpoints */}
-        <div className="col-span-1 md:col-span-2 xl:col-span-3">
+        {/* Row 2: Large Orders Feed - full width on mobile/tablet, 2 cols on XL with Alert System beside it */}
+        <div className="col-span-1 md:col-span-2 xl:col-span-2">
           <WidgetContainer 
             title=""
             background={<OrderFlowBackground />}
@@ -65,19 +65,19 @@ export default function Home() {
           </WidgetContainer>
         </div>
 
-        {/* Row 3: PnL Tracker - full width for better space utilization */}
-        <div className="col-span-1 md:col-span-2 xl:col-span-3">
-          <PnLTrackerWidgetWithBackground />
-        </div>
-
-        {/* Row 4: Alert System - full width for better space utilization */}
-        <div className="col-span-1 md:col-span-2 xl:col-span-3">
+        {/* Alert System - full width on mobile/tablet, 1 col on XL (beside Large Orders) */}
+        <div className="col-span-1 md:col-span-2 xl:col-span-1">
           <WidgetContainer 
             title=""
             background={<AlertBackground />}
           >
             <AlertSystem />
           </WidgetContainer>
+        </div>
+
+        {/* Row 3: PnL Tracker - full width on all breakpoints */}
+        <div className="col-span-1 md:col-span-2 xl:col-span-3">
+          <PnLTrackerWidgetWithBackground />
         </div>
       </DashboardGrid>
 
