@@ -4,6 +4,8 @@ import RealTimePricesWidget from '@/widgets/real-time-prices/RealTimePricesWidge
 import { PnLTrackerWidgetWithBackground } from '@/widgets/pnl-tracker/PnLTrackerWidget';
 import OrderFlowBackground from '@/components/layout/backgrounds/OrderFlowBackground';
 import PricesBackground from '@/components/layout/backgrounds/PricesBackground';
+import AlertBackground from '@/components/layout/backgrounds/AlertBackground';
+import EconomicCalendarBackground from '@/components/layout/backgrounds/EconomicCalendarBackground';
 import { EconomicCalendar } from '@/components/economic-calendar/EconomicCalendar';
 import { LargeOrdersFeed } from '@/components/large-orders/LargeOrdersFeed';
 import { AlertSystem } from '@/components/alerts/AlertSystem';
@@ -32,7 +34,7 @@ export default function Home() {
 
         <WidgetContainer 
           title=""
-          background={<PricesBackground />}
+          background={<EconomicCalendarBackground />}
         >
           <EconomicCalendar />
         </WidgetContainer>
@@ -50,7 +52,7 @@ export default function Home() {
         {/* Row 3: Alert System, PnL Tracker */}
         <WidgetContainer 
           title=""
-          background={<PricesBackground />}
+          background={<AlertBackground />}
         >
           <AlertSystem />
         </WidgetContainer>
