@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
 interface MarketStatus {
@@ -155,8 +155,11 @@ export default function MarketHoursBar() {
     }, 60000); // Update every minute
     
     // Check for reduced motion preference (only in browser)
-    if (typeof window !== 'undefined') {
-      const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const mediaQuery = typeof window !== 'undefined' 
+      ? window.matchMedia('(prefers-reduced-motion: reduce)')
+      : null;
+    
+    if (mediaQuery) {
       setPrefersReducedMotion(mediaQuery.matches);
       
       const handleChange = (e: MediaQueryListEvent) => {
@@ -165,13 +168,14 @@ export default function MarketHoursBar() {
       
       mediaQuery.addEventListener('change', handleChange);
       
+      // Single cleanup function for both interval and media query listener
       return () => {
         clearInterval(interval);
         mediaQuery.removeEventListener('change', handleChange);
       };
     }
     
-    // Always return cleanup function for interval
+    // If no media query (SSR), just clean up interval
     return () => clearInterval(interval);
   }, []);
 
@@ -234,20 +238,6 @@ export default function MarketHoursBar() {
     );
   }
 
-  // Memoize animation props to prevent unnecessary re-renders
-  const animateProps = useMemo(() => ({
-    x: isPaused ? undefined : [0, '-50%'],
-  }), [isPaused]);
-
-  const transitionProps = useMemo(() => ({
-    x: {
-      repeat: Infinity,
-      repeatType: "loop" as const,
-      duration: ANIMATION_DURATION,
-      ease: "linear" as const,
-    },
-  }), []); // Empty deps since ANIMATION_DURATION is a module constant
-
   return (
     <div 
       className="sticky top-14 sm:top-16 lg:top-[72px] z-40 bg-gray-900/85 backdrop-blur-md border-b border-gray-800/30 py-2 sm:py-2.5"
@@ -260,8 +250,17 @@ export default function MarketHoursBar() {
       >
         <motion.div
           className="flex items-center text-xs sm:text-sm font-medium tracking-wide"
-          animate={animateProps}
-          transition={transitionProps}
+          animate={{
+            x: isPaused ? undefined : [0, '-50%'],
+          }}
+          transition={{
+            x: {
+              repeat: Infinity,
+              repeatType: "loop" as const,
+              duration: ANIMATION_DURATION,
+              ease: "linear" as const,
+            },
+          }}
         >
           {/* First copy of content */}
           {marketElements}
