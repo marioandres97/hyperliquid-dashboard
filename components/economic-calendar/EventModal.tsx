@@ -17,34 +17,34 @@ export function EventModal({ event, onClose }: EventModalProps) {
   const impactBadge = getImpactBadge(event.impact);
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-gray-900 border border-gray-800 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-0 md:p-4">
+      <div className="bg-gray-900 border-0 md:border border-gray-800 rounded-none md:rounded-xl max-w-full md:max-w-2xl w-full max-h-screen md:max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="sticky top-0 bg-gray-900 border-b border-gray-800 p-6 flex items-start justify-between">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <span className="text-3xl">{icon}</span>
-              <h2 className="text-2xl font-bold text-white">{event.name}</h2>
-              <span className="text-2xl">{impactBadge}</span>
+        <div className="sticky top-0 bg-gray-900 border-b border-gray-800 p-4 sm:p-5 md:p-6 flex items-start justify-between z-10">
+          <div className="flex-1 min-w-0 pr-2">
+            <div className="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
+              <span className="text-xl sm:text-2xl md:text-3xl flex-shrink-0">{icon}</span>
+              <h2 className="text-base sm:text-xl md:text-2xl font-bold text-white line-clamp-2">{event.name}</h2>
+              <span className="text-xl sm:text-2xl flex-shrink-0">{impactBadge}</span>
             </div>
-            <div className="text-sm text-gray-400">
+            <div className="text-xs sm:text-sm text-gray-400">
               {formatEventDate(event.eventDate)}
             </div>
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-white transition-colors"
+            className="text-gray-400 hover:text-white transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center flex-shrink-0"
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-6">
+        <div className="p-4 sm:p-5 md:p-6 space-y-4 sm:space-y-5 md:space-y-6">
           {/* Overview Section */}
-          <div className="space-y-3">
-            <h3 className="text-lg font-semibold text-white">Overview</h3>
-            <div className="bg-gray-800/50 rounded-lg p-4 space-y-2 text-sm">
+          <div className="space-y-2 sm:space-y-3">
+            <h3 className="text-base sm:text-lg font-semibold text-white">Overview</h3>
+            <div className="bg-gray-800/50 rounded-lg p-3 sm:p-4 space-y-2 text-xs sm:text-sm">
               <div>
                 <span className="text-gray-400">Event: </span>
                 <span className="text-white">{event.name}</span>
@@ -86,9 +86,9 @@ export function EventModal({ event, onClose }: EventModalProps) {
           </div>
 
           {/* Impact Description */}
-          <div className="space-y-3">
-            <h3 className="text-lg font-semibold text-white">What to Expect</h3>
-            <div className="bg-gray-800/50 rounded-lg p-4 text-sm text-gray-300">
+          <div className="space-y-2 sm:space-y-3">
+            <h3 className="text-base sm:text-lg font-semibold text-white">What to Expect</h3>
+            <div className="bg-gray-800/50 rounded-lg p-3 sm:p-4 text-xs sm:text-sm text-gray-300">
               {event.impact === 'HIGH' && (
                 <p>
                   This is a <strong className="text-red-400">high-impact event</strong> that typically
@@ -114,19 +114,19 @@ export function EventModal({ event, onClose }: EventModalProps) {
 
           {/* Volatility Window */}
           {event.primaryWindowStart && event.primaryWindowEnd && (
-            <div className="space-y-3">
-              <h3 className="text-lg font-semibold text-white">Expected Volatility Window</h3>
+            <div className="space-y-2 sm:space-y-3">
+              <h3 className="text-base sm:text-lg font-semibold text-white">Expected Volatility Window</h3>
               <div className="space-y-2">
-                <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3">
-                  <div className="text-xs text-yellow-400 mb-1">Primary Window</div>
-                  <div className="text-white font-medium">
+                <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-2.5 sm:p-3">
+                  <div className="text-[10px] sm:text-xs text-yellow-400 mb-1">Primary Window</div>
+                  <div className="text-white font-medium text-xs sm:text-sm">
                     {event.primaryWindowStart} - {event.primaryWindowEnd} UTC
                   </div>
                 </div>
                 {event.extendedWindowStart && event.extendedWindowEnd && (
-                  <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-3">
-                    <div className="text-xs text-gray-400 mb-1">Extended Window</div>
-                    <div className="text-white font-medium">
+                  <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-2.5 sm:p-3">
+                    <div className="text-[10px] sm:text-xs text-gray-400 mb-1">Extended Window</div>
+                    <div className="text-white font-medium text-xs sm:text-sm">
                       {event.extendedWindowStart} - {event.extendedWindowEnd} UTC
                     </div>
                   </div>
@@ -136,10 +136,10 @@ export function EventModal({ event, onClose }: EventModalProps) {
           )}
 
           {/* Disclaimer */}
-          <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4">
+          <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3 sm:p-4">
             <div className="flex items-start gap-2">
-              <AlertTriangle className="w-4 h-4 text-yellow-400 flex-shrink-0 mt-0.5" />
-              <p className="text-xs text-yellow-400/80">
+              <AlertTriangle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-yellow-400 flex-shrink-0 mt-0.5" />
+              <p className="text-[10px] sm:text-xs text-yellow-400/80">
                 <strong>Disclaimer:</strong> This information is for educational purposes only.
                 Not financial advice. Past performance does not guarantee future results.
                 Always conduct your own research and consider your risk tolerance.

@@ -63,33 +63,33 @@ export function CreateAlertModal({ isOpen, onClose, onCreate }: CreateAlertModal
   };
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-gray-900 border border-gray-800 rounded-xl max-w-md w-full">
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-0 md:p-4">
+      <div className="bg-gray-900 border-0 md:border border-gray-800 rounded-none md:rounded-xl max-w-full md:max-w-md w-full max-h-screen md:max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="border-b border-gray-800 p-6 flex items-center justify-between">
-          <h2 className="text-xl font-bold text-white">Create Alert</h2>
+        <div className="border-b border-gray-800 p-4 sm:p-5 md:p-6 flex items-center justify-between sticky top-0 bg-gray-900 z-10">
+          <h2 className="text-lg sm:text-xl font-bold text-white">Create Alert</h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-white transition-colors"
+            className="text-gray-400 hover:text-white transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center -mr-2"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-5 md:p-6 space-y-3 sm:space-y-4">
           {/* Alert Type */}
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">
               Alert Type
             </label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
               {(['price', 'large_order', 'volume'] as AlertType[]).map((t) => (
                 <button
                   key={t}
                   type="button"
                   onClick={() => setType(t)}
-                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                  className={`px-2 sm:px-3 py-2.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all min-h-[44px] ${
                     type === t
                       ? 'bg-blue-500 text-white'
                       : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
@@ -103,13 +103,13 @@ export function CreateAlertModal({ isOpen, onClose, onCreate }: CreateAlertModal
 
           {/* Coin Selection */}
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">
               Coin
             </label>
             <select
               value={coin}
               onChange={(e) => setCoin(e.target.value as AlertCoin)}
-              className="w-full px-3 py-2 bg-gray-800 text-white rounded-lg border border-gray-700 focus:border-blue-500 focus:outline-none"
+              className="w-full px-3 py-2.5 sm:py-2 bg-gray-800 text-white rounded-lg border border-gray-700 focus:border-blue-500 focus:outline-none text-sm min-h-[44px]"
             >
               <option value="BTC">BTC</option>
               <option value="ETH">ETH</option>
@@ -121,16 +121,16 @@ export function CreateAlertModal({ isOpen, onClose, onCreate }: CreateAlertModal
           {/* Price Alert Fields */}
           {type === 'price' && (
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">
                 Condition
               </label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
                 {(['above', 'below'] as AlertCondition[]).map((c) => (
                   <button
                     key={c}
                     type="button"
                     onClick={() => setCondition(c)}
-                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                    className={`px-2 sm:px-3 py-2.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all min-h-[44px] ${
                       condition === c
                         ? 'bg-blue-500 text-white'
                         : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
@@ -146,16 +146,16 @@ export function CreateAlertModal({ isOpen, onClose, onCreate }: CreateAlertModal
           {/* Large Order Alert Fields */}
           {type === 'large_order' && (
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">
                 Side
               </label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
                 {(['BUY', 'SELL', 'BOTH'] as AlertSide[]).map((s) => (
                   <button
                     key={s}
                     type="button"
                     onClick={() => setSide(s)}
-                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                    className={`px-2 sm:px-3 py-2.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all min-h-[44px] ${
                       side === s
                         ? 'bg-blue-500 text-white'
                         : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
@@ -170,7 +170,7 @@ export function CreateAlertModal({ isOpen, onClose, onCreate }: CreateAlertModal
 
           {/* Value */}
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">
               {type === 'price' ? 'Target Price ($)' :
                type === 'large_order' ? 'Minimum Size ($)' :
                'Volume Spike (%)'}
@@ -185,52 +185,52 @@ export function CreateAlertModal({ isOpen, onClose, onCreate }: CreateAlertModal
                 type === 'large_order' ? '100000' :
                 '200'
               }
-              className="w-full px-3 py-2 bg-gray-800 text-white rounded-lg border border-gray-700 focus:border-blue-500 focus:outline-none"
+              className="w-full px-3 py-2.5 sm:py-2 bg-gray-800 text-white rounded-lg border border-gray-700 focus:border-blue-500 focus:outline-none text-sm min-h-[44px]"
               required
             />
           </div>
 
           {/* Notification Preferences */}
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-300">
+            <label className="block text-xs sm:text-sm font-medium text-gray-300">
               Notification Methods
             </label>
             <div className="space-y-2">
-              <label className="flex items-center gap-2 cursor-pointer">
+              <label className="flex items-center gap-2 cursor-pointer min-h-[44px] py-2">
                 <input
                   type="checkbox"
                   checked={browserNotif}
                   onChange={(e) => setBrowserNotif(e.target.checked)}
-                  className="w-4 h-4 rounded bg-gray-800 border-gray-700"
+                  className="w-5 h-5 rounded bg-gray-800 border-gray-700"
                 />
-                <span className="text-sm text-gray-300">Browser Notification</span>
+                <span className="text-xs sm:text-sm text-gray-300">Browser Notification</span>
               </label>
-              <label className="flex items-center gap-2 cursor-not-allowed opacity-50">
+              <label className="flex items-center gap-2 cursor-not-allowed opacity-50 min-h-[44px] py-2">
                 <input
                   type="checkbox"
                   checked={emailNotif}
                   onChange={(e) => setEmailNotif(e.target.checked)}
                   disabled
-                  className="w-4 h-4 rounded bg-gray-800 border-gray-700"
+                  className="w-5 h-5 rounded bg-gray-800 border-gray-700"
                 />
-                <span className="text-sm text-gray-300">Email Notification (PRO)</span>
+                <span className="text-xs sm:text-sm text-gray-300">Email Notification (PRO)</span>
               </label>
             </div>
           </div>
 
           {/* Actions */}
-          <div className="flex gap-3 pt-4">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-3 sm:pt-4">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors"
+              className="w-full sm:w-auto sm:flex-1 px-4 py-2.5 sm:py-2 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors min-h-[44px] text-sm sm:text-base"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={creating}
-              className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full sm:w-auto sm:flex-1 px-4 py-2.5 sm:py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] text-sm sm:text-base"
             >
               {creating ? 'Creating...' : 'Create Alert'}
             </button>

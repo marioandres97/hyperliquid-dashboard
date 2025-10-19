@@ -56,7 +56,7 @@ export default function RealTimePricesWidget() {
         return (
           <div
             key={coin}
-            className="relative flex-1 bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10 flex flex-col group"
+            className="relative flex-1 bg-white/5 backdrop-blur-sm rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-5 border border-white/10 flex flex-col group"
           >
             {/* Fullscreen button */}
             <ChartFullscreen coin={coin}>
@@ -64,9 +64,9 @@ export default function RealTimePricesWidget() {
             </ChartFullscreen>
 
             <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                <DollarSign className="w-5 h-5 text-white/60" />
-                <span className="text-lg font-bold text-white">{coin}</span>
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 text-white/60" />
+                <span className="text-base sm:text-lg font-bold text-white">{coin}</span>
               </div>
               
               {/* Connection status indicator */}
@@ -75,24 +75,26 @@ export default function RealTimePricesWidget() {
 
             {data ? (
               <>
-                <div className="text-3xl font-bold text-white mb-2">
+                <div className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-2">
                   ${data.price.toLocaleString(undefined, {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2
                   })}
                 </div>
 
-                <div className="flex items-center gap-2 mb-3">
-                  {isPositive ? (
-                    <TrendingUp className="w-4 h-4 text-green-400" />
-                  ) : (
-                    <TrendingDown className="w-4 h-4 text-red-400" />
-                  )}
-                  <span className={`text-sm font-medium ${
-                    isPositive ? 'text-green-400' : 'text-red-400'
-                  }`}>
-                    {isPositive ? '+' : ''}{data.change24h.toFixed(2)}%
-                  </span>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-2 mb-3">
+                  <div className="flex items-center gap-1.5">
+                    {isPositive ? (
+                      <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-400" />
+                    ) : (
+                      <TrendingDown className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-400" />
+                    )}
+                    <span className={`text-sm sm:text-base font-medium ${
+                      isPositive ? 'text-green-400' : 'text-red-400'
+                    }`}>
+                      {isPositive ? '+' : ''}{data.change24h.toFixed(2)}%
+                    </span>
+                  </div>
                   <span className="text-xs text-white/50">24h</span>
                 </div>
 
@@ -105,17 +107,17 @@ export default function RealTimePricesWidget() {
                         className="text-blue-400 hover:text-blue-300 flex items-center gap-1"
                       >
                         <RefreshCw className="w-3 h-3" />
-                        Retry
+                        <span className="hidden sm:inline">Retry</span>
                       </button>
                     </div>
                   )}
                   
                   {loading && candleData.length === 0 ? (
-                    <div className="h-[120px] flex items-center justify-center bg-white/5 rounded-lg animate-pulse">
+                    <div className="h-48 sm:h-56 md:h-64 flex items-center justify-center bg-white/5 rounded-lg animate-pulse">
                       <div className="text-xs text-white/40">Loading chart data...</div>
                     </div>
                   ) : errorMsg ? (
-                    <div className="h-[120px] flex items-center justify-center bg-red-500/10 border border-red-500/30 rounded-lg">
+                    <div className="h-48 sm:h-56 md:h-64 flex items-center justify-center bg-red-500/10 border border-red-500/30 rounded-lg">
                       <div className="text-xs text-red-400 text-center px-4">
                         <div className="mb-2">Failed to load chart</div>
                         <button
@@ -127,9 +129,11 @@ export default function RealTimePricesWidget() {
                       </div>
                     </div>
                   ) : candleData.length > 0 ? (
-                    <CandlestickChart data={candleData} height={120} />
+                    <div className="h-48 sm:h-56 md:h-64">
+                      <CandlestickChart data={candleData} height={120} />
+                    </div>
                   ) : (
-                    <div className="h-[120px] flex items-center justify-center bg-white/5 rounded-lg">
+                    <div className="h-48 sm:h-56 md:h-64 flex items-center justify-center bg-white/5 rounded-lg">
                       <div className="text-xs text-white/40">No data available</div>
                     </div>
                   )}
@@ -138,17 +142,17 @@ export default function RealTimePricesWidget() {
                 {/* Additional Metrics */}
                 <div className="grid grid-cols-2 gap-2 mt-auto">
                   <div className="bg-white/5 rounded-lg p-2">
-                    <div className="text-xs text-white/50 mb-0.5">24h High</div>
-                    <div className="text-sm font-semibold text-green-400 flex items-center gap-1">
+                    <div className="text-[10px] sm:text-xs text-white/50 mb-0.5">24h High</div>
+                    <div className="text-xs sm:text-sm font-semibold text-green-400 flex items-center gap-1">
                       <ArrowUpRight className="w-3 h-3" />
-                      ${(data.price * (1 + Math.abs(data.change24h) / 100)).toFixed(2)}
+                      <span className="truncate">${(data.price * (1 + Math.abs(data.change24h) / 100)).toFixed(2)}</span>
                     </div>
                   </div>
                   <div className="bg-white/5 rounded-lg p-2">
-                    <div className="text-xs text-white/50 mb-0.5">24h Low</div>
-                    <div className="text-sm font-semibold text-red-400 flex items-center gap-1">
+                    <div className="text-[10px] sm:text-xs text-white/50 mb-0.5">24h Low</div>
+                    <div className="text-xs sm:text-sm font-semibold text-red-400 flex items-center gap-1">
                       <ArrowDownRight className="w-3 h-3" />
-                      ${(data.price * (1 - Math.abs(data.change24h) / 100)).toFixed(2)}
+                      <span className="truncate">${(data.price * (1 - Math.abs(data.change24h) / 100)).toFixed(2)}</span>
                     </div>
                   </div>
                 </div>
@@ -156,10 +160,10 @@ export default function RealTimePricesWidget() {
             ) : (
               <div className="flex-1 flex items-center justify-center">
                 {connected ? (
-                  <div className="text-white/60">Loading...</div>
+                  <div className="text-white/60 text-sm">Loading...</div>
                 ) : (
                   <div className="text-center">
-                    <div className="text-white/60 mb-2">Reconnecting...</div>
+                    <div className="text-white/60 mb-2 text-sm">Reconnecting...</div>
                     <div className="text-xs text-white/40">Please wait...</div>
                   </div>
                 )}

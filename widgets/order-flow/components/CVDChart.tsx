@@ -22,26 +22,33 @@ export default function CVDChart({ data }: CVDChartProps) {
     return acc;
   }, [] as { time: string; cvd: number; delta: number }[]);
 
+  // Determine if mobile for responsive tick sizes
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
+  
   return (
-    <div className="h-64">
+    <div className="h-48 sm:h-56 md:h-64 lg:h-72">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={chartData}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+          <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={isMobile ? 0.3 : 0.5} />
           <XAxis 
             dataKey="time" 
             stroke="#9CA3AF"
-            tick={{ fill: '#9CA3AF', fontSize: 12 }}
+            tick={{ fill: '#9CA3AF', fontSize: isMobile ? 10 : 12 }}
+            angle={isMobile ? -45 : 0}
+            textAnchor={isMobile ? 'end' : 'middle'}
+            height={isMobile ? 60 : 30}
           />
           <YAxis 
             stroke="#9CA3AF"
-            tick={{ fill: '#9CA3AF', fontSize: 12 }}
+            tick={{ fill: '#9CA3AF', fontSize: isMobile ? 10 : 12 }}
           />
           <Tooltip 
             contentStyle={{ 
               backgroundColor: '#1F2937', 
               border: '1px solid #374151',
               borderRadius: '8px',
-              color: '#fff'
+              color: '#fff',
+              fontSize: isMobile ? '11px' : '12px'
             }}
             formatter={(value: number) => value.toFixed(2)}
           />
@@ -50,7 +57,7 @@ export default function CVDChart({ data }: CVDChartProps) {
             type="monotone" 
             dataKey="cvd" 
             stroke="#10B981" 
-            strokeWidth={2}
+            strokeWidth={isMobile ? 1.5 : 2}
             dot={false}
           />
         </LineChart>
