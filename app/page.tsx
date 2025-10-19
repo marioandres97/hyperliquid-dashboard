@@ -1,46 +1,30 @@
 import DashboardGrid from '@/components/layout/DashboardGrid';
 import WidgetContainer from '@/components/layout/WidgetContainer';
-import OrderFlowSignalsWidget from '@/widgets/order-flow-signals/OrderFlowSignalsWidget';
 import RealTimePricesWidget from '@/widgets/real-time-prices/RealTimePricesWidget';
 import { PnLTrackerWidgetWithBackground } from '@/widgets/pnl-tracker/PnLTrackerWidget';
-import InstitutionalAnalysisPortalWidget from '@/widgets/institutional-analysis-portal/InstitutionalAnalysisPortalWidget';
-import MarketTimeWidget from '@/widgets/market-time/MarketTimeWidget';
-import GlobalMarketsWidget from '@/widgets/global-markets/GlobalMarketsWidget';
 import OrderFlowBackground from '@/components/layout/backgrounds/OrderFlowBackground';
 import PricesBackground from '@/components/layout/backgrounds/PricesBackground';
-import MarketTimeBackground from '@/components/layout/backgrounds/MarketTimeBackground';
-import GlobalMarketsBackground from '@/components/layout/backgrounds/GlobalMarketsBackground';
-import MarketOverview from '@/components/shared/MarketOverview';
+import AlertBackground from '@/components/layout/backgrounds/AlertBackground';
+import EconomicCalendarBackground from '@/components/layout/backgrounds/EconomicCalendarBackground';
 import { EconomicCalendar } from '@/components/economic-calendar/EconomicCalendar';
 import { LargeOrdersFeed } from '@/components/large-orders/LargeOrdersFeed';
-import { OrderFlowAnalysis } from '@/components/order-flow/OrderFlowAnalysis';
 import { AlertSystem } from '@/components/alerts/AlertSystem';
 
 export default function Home() {
   return (
-    <div className="min-h-screen">
-      <DashboardGrid>
-        {/* Market Overview Bar - full width */}
-        <div className="md:col-span-2">
-          <MarketOverview />
+    <div className="min-h-screen bg-gradient-to-r from-purple-900/20 via-blue-900/20 to-green-900/20">
+      {/* Live indicator banner */}
+      <div className="bg-blue-500/10 border-b border-blue-500/20 py-2">
+        <div className="container mx-auto px-4 flex items-center justify-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+          <span className="text-sm text-blue-300">
+            ℹ️ Live prices • 1H charts (24h rolling window)
+          </span>
         </div>
+      </div>
 
-        {/* Row 1: Order Flow Signals, Economic Calendar */}
-        <WidgetContainer 
-          title="Order Flow Signals"
-          background={<OrderFlowBackground />}
-        >
-          <OrderFlowSignalsWidget />
-        </WidgetContainer>
-
-        <WidgetContainer 
-          title=""
-          background={<PricesBackground />}
-        >
-          <EconomicCalendar />
-        </WidgetContainer>
-
-        {/* Row 2: Real-Time Prices, Market Time */}
+      <DashboardGrid>
+        {/* Row 1: Real-Time Prices, Economic Calendar */}
         <WidgetContainer 
           title="Real-Time Prices"
           background={<PricesBackground />}
@@ -49,13 +33,13 @@ export default function Home() {
         </WidgetContainer>
 
         <WidgetContainer 
-          title="Market Time"
-          background={<MarketTimeBackground />}
+          title=""
+          background={<EconomicCalendarBackground />}
         >
-          <MarketTimeWidget />
+          <EconomicCalendar />
         </WidgetContainer>
 
-        {/* Row 3: Large Orders Feed - full width */}
+        {/* Row 2: Large Orders Feed - full width */}
         <div className="md:col-span-2">
           <WidgetContainer 
             title=""
@@ -65,41 +49,16 @@ export default function Home() {
           </WidgetContainer>
         </div>
 
-        {/* Row 4: Order Flow Analysis, Alert System */}
+        {/* Row 3: Alert System, PnL Tracker */}
         <WidgetContainer 
           title=""
-          background={<OrderFlowBackground />}
-        >
-          <OrderFlowAnalysis />
-        </WidgetContainer>
-
-        <WidgetContainer 
-          title=""
-          background={<PricesBackground />}
+          background={<AlertBackground />}
         >
           <AlertSystem />
         </WidgetContainer>
 
-        {/* Row 5: Global Markets - full width */}
-        <div className="md:col-span-2">
-          <WidgetContainer 
-            title="Global Markets"
-            background={<GlobalMarketsBackground />}
-          >
-            <GlobalMarketsWidget />
-          </WidgetContainer>
-        </div>
-
-        {/* Row 6: PnL Tracker - full width */}
-        <div className="md:col-span-2">
+        <div className="md:col-span-1">
           <PnLTrackerWidgetWithBackground />
-        </div>
-
-        {/* Row 7: Institutional Analysis - full width */}
-        <div className="md:col-span-2">
-          <WidgetContainer title="" transparent>
-            <InstitutionalAnalysisPortalWidget />
-          </WidgetContainer>
         </div>
       </DashboardGrid>
 

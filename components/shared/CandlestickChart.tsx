@@ -86,31 +86,54 @@ export default function CandlestickChart({ data, height = 200 }: CandlestickChar
             const data = payload[0].payload;
             const isGreen = data.close >= data.open;
             
+            // Format full date/time
+            const date = new Date(data.time);
+            const fullDateTime = date.toLocaleString('en-US', {
+              month: 'short',
+              day: 'numeric',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
+              timeZone: 'UTC',
+              timeZoneName: 'short'
+            });
+            
+            // Calculate volume in USD (volume * average price)
+            const avgPrice = (data.high + data.low) / 2;
+            const volumeUSD = data.volume * avgPrice;
+            const volumeStr = volumeUSD >= 1e6 
+              ? `$${(volumeUSD / 1e6).toFixed(2)}M` 
+              : volumeUSD >= 1e3 
+              ? `$${(volumeUSD / 1e3).toFixed(1)}K` 
+              : `$${volumeUSD.toFixed(0)}`;
+            
             return (
-              <div className="bg-black/90 border border-white/20 rounded-lg p-3 text-xs">
-                <div className="text-white/60 mb-2">{data.timeStr}</div>
+              <div className="bg-black/95 border border-white/30 rounded-lg p-3 text-xs shadow-xl">
+                <div className="text-white/70 mb-2 font-medium">{fullDateTime}</div>
                 <div className="space-y-1">
-                  <div className="flex justify-between gap-4">
+                  <div className="flex justify-between gap-6">
                     <span className="text-white/50">Open:</span>
                     <span className="text-white font-medium">{formatPrice(data.open)}</span>
                   </div>
-                  <div className="flex justify-between gap-4">
+                  <div className="flex justify-between gap-6">
                     <span className="text-white/50">High:</span>
                     <span className="text-green-400 font-medium">{formatPrice(data.high)}</span>
                   </div>
-                  <div className="flex justify-between gap-4">
+                  <div className="flex justify-between gap-6">
                     <span className="text-white/50">Low:</span>
                     <span className="text-red-400 font-medium">{formatPrice(data.low)}</span>
                   </div>
-                  <div className="flex justify-between gap-4">
+                  <div className="flex justify-between gap-6">
                     <span className="text-white/50">Close:</span>
                     <span className={`font-medium ${isGreen ? 'text-green-400' : 'text-red-400'}`}>
                       {formatPrice(data.close)}
                     </span>
                   </div>
-                  <div className="flex justify-between gap-4 pt-1 border-t border-white/10">
+                  <div className="flex justify-between gap-6 pt-1 border-t border-white/10">
                     <span className="text-white/50">Volume:</span>
-                    <span className="text-white/80 font-medium">{data.volume.toFixed(2)}</span>
+                    <span className="text-white/80 font-medium">
+                      {data.volume.toFixed(2)} ({volumeStr})
+                    </span>
                   </div>
                 </div>
               </div>

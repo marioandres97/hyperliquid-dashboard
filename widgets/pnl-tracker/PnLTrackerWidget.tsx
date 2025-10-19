@@ -1,9 +1,12 @@
 'use client';
 
-import { usePnLTracking } from './usePnLTracking';
+import { useState } from 'react';
+import { useTrades } from '@/lib/hooks/trades/useTrades';
 import PnLBackground from '@/components/layout/backgrounds/PnLBackground';
 import WidgetContainer from '@/components/layout/WidgetContainer';
-import { TrendingUp, TrendingDown, DollarSign, Target, Award, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { TradeEntryModal } from '@/components/trades/TradeEntryModal';
+import { TradeHistoryTable } from '@/components/trades/TradeHistoryTable';
+import { TrendingUp, TrendingDown, DollarSign, Target, Award, ArrowUpRight, ArrowDownRight, Plus } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
 interface PnLTrackerWidgetProps {
@@ -11,9 +14,13 @@ interface PnLTrackerWidgetProps {
 }
 
 export default function PnLTrackerWidget({ isProfitable }: PnLTrackerWidgetProps) {
-  const { stats, isLoading } = usePnLTracking();
+  const { trades, loading, createTrade, deleteTrade, exportToCSV } = useTrades();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  if (isLoading) {
+  // Calculate stats from trades
+  const stats = calculateStatsFromTrades(trades);
+  
+  if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
         <p className="text-white/60">Loading PnL...</p>
@@ -21,30 +28,33 @@ export default function PnLTrackerWidget({ isProfitable }: PnLTrackerWidgetProps
     );
   }
 
-  if (!stats) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <p className="text-white/60">No trading data yet</p>
-      </div>
-    );
-  }
-
   const currentIsProfitable = isProfitable ?? stats.totalPnL >= 0;
 
   // Format equity curve data for chart
-  const chartData = (stats.equityCurve || []).map(point => ({
-    time: new Date(point.timestamp).toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    }),
+  const chartData = (stats.equityCurve || []).map((point, idx) => ({
+    time: `Trade ${idx + 1}`,
     equity: point.equity,
     pnl: point.pnl
   }));
 
+  const handleCreateTrade = async (input: any) => {
+    await createTrade(input);
+  };
+
   return (
     <div className="h-full flex flex-col space-y-3">
+      {/* Header with Add Trade Button */}
+      <div className="flex items-center justify-between flex-shrink-0">
+        <h2 className="text-lg font-bold text-white">💰 PnL Tracker</h2>
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="flex items-center gap-2 px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors"
+        >
+          <Plus className="w-4 h-4" />
+          Add Trade
+        </button>
+      </div>
+
       {/* Total PnL */}
       <div className={`p-3 rounded-xl border-2 flex-shrink-0 ${
         currentIsProfitable 
@@ -240,46 +250,144 @@ export default function PnLTrackerWidget({ isProfitable }: PnLTrackerWidgetProps
         </div>
       </div>
       
-      {/* Additional sections for large screens */}
-      <div className="hidden xl:block flex-1 min-h-0 overflow-y-auto">
-        <div className="bg-white/5 backdrop-blur-sm rounded-xl p-3 border border-white/10">
-          <h3 className="text-sm font-medium text-white/70 mb-3">Trading Summary</h3>
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            <div className="bg-white/5 rounded-lg p-2">
-              <div className="text-white/50 mb-1">Total Trades</div>
-              <div className="text-white font-medium text-lg">{stats.totalTrades}</div>
-            </div>
-            <div className="bg-white/5 rounded-lg p-2">
-              <div className="text-white/50 mb-1">Win Streak</div>
-              <div className="text-green-400 font-medium text-lg">{stats.winningTrades}</div>
-            </div>
-            <div className="bg-white/5 rounded-lg p-2">
-              <div className="text-white/50 mb-1">Avg Trade PnL</div>
-              <div className={`font-medium text-lg ${(stats.totalPnL / stats.totalTrades) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                {stats.totalTrades > 0 ? `$${(stats.totalPnL / stats.totalTrades).toFixed(2)}` : '$0.00'}
-              </div>
-            </div>
-            <div className="bg-white/5 rounded-lg p-2">
-              <div className="text-white/50 mb-1">Risk/Reward</div>
-              <div className="text-white font-medium text-lg">
-                {stats.avgLoss > 0 ? `1:${(stats.avgWin / stats.avgLoss).toFixed(2)}` : 'N/A'}
-              </div>
-            </div>
-          </div>
-        </div>
+      {/* Trade History Table */}
+      <div className="flex-1 min-h-0 overflow-y-auto">
+        <TradeHistoryTable
+          trades={trades.slice(0, 10)}
+          onDelete={deleteTrade}
+          onExport={exportToCSV}
+        />
       </div>
+
+      {/* Trade Entry Modal */}
+      <TradeEntryModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onCreate={handleCreateTrade}
+      />
     </div>
   );
 }
 
+// Helper function to calculate stats from trades
+function calculateStatsFromTrades(trades: any[]) {
+  if (trades.length === 0) {
+    return {
+      totalPnL: 0,
+      totalTrades: 0,
+      winningTrades: 0,
+      losingTrades: 0,
+      winRate: 0,
+      avgWin: 0,
+      avgLoss: 0,
+      profitFactor: 0,
+      largestWin: 0,
+      largestLoss: 0,
+      byTimeframe: { today: 0, week: 0, month: 0 },
+      bySignalType: {
+        LONG: { totalTrades: 0, winningTrades: 0, losingTrades: 0, winRate: 0, totalPnL: 0 },
+        SHORT: { totalTrades: 0, winningTrades: 0, losingTrades: 0, winRate: 0, totalPnL: 0 }
+      },
+      equityCurve: []
+    };
+  }
+
+  const now = Date.now();
+  const dayMs = 24 * 60 * 60 * 1000;
+  let totalPnL = 0;
+  let winningTrades = 0;
+  let losingTrades = 0;
+  let totalWins = 0;
+  let totalLosses = 0;
+  let largestWin = 0;
+  let largestLoss = 0;
+  let todayPnL = 0;
+  let weekPnL = 0;
+  let monthPnL = 0;
+
+  const longStats = { totalTrades: 0, winningTrades: 0, losingTrades: 0, totalPnL: 0 };
+  const shortStats = { totalTrades: 0, winningTrades: 0, losingTrades: 0, totalPnL: 0 };
+
+  const sortedTrades = [...trades].sort((a, b) => 
+    new Date(a.entryTime).getTime() - new Date(b.entryTime).getTime()
+  );
+
+  const equityCurve: any[] = [];
+  let cumulativeEquity = 0;
+
+  sortedTrades.forEach(trade => {
+    totalPnL += trade.pnl;
+    
+    if (trade.pnl > 0) {
+      winningTrades++;
+      totalWins += trade.pnl;
+      largestWin = Math.max(largestWin, trade.pnl);
+    } else {
+      losingTrades++;
+      totalLosses += Math.abs(trade.pnl);
+      largestLoss = Math.min(largestLoss, trade.pnl);
+    }
+
+    const tradeTime = new Date(trade.entryTime).getTime();
+    if (tradeTime >= now - dayMs) todayPnL += trade.pnl;
+    if (tradeTime >= now - (7 * dayMs)) weekPnL += trade.pnl;
+    if (tradeTime >= now - (30 * dayMs)) monthPnL += trade.pnl;
+
+    if (trade.side === 'LONG') {
+      longStats.totalTrades++;
+      longStats.totalPnL += trade.pnl;
+      if (trade.pnl > 0) longStats.winningTrades++;
+      else longStats.losingTrades++;
+    } else {
+      shortStats.totalTrades++;
+      shortStats.totalPnL += trade.pnl;
+      if (trade.pnl > 0) shortStats.winningTrades++;
+      else shortStats.losingTrades++;
+    }
+
+    cumulativeEquity += trade.pnl;
+    equityCurve.push({
+      timestamp: tradeTime,
+      equity: cumulativeEquity,
+      pnl: trade.pnl
+    });
+  });
+
+  return {
+    totalPnL,
+    totalTrades: trades.length,
+    winningTrades,
+    losingTrades,
+    winRate: trades.length > 0 ? (winningTrades / trades.length) * 100 : 0,
+    avgWin: winningTrades > 0 ? totalWins / winningTrades : 0,
+    avgLoss: losingTrades > 0 ? totalLosses / losingTrades : 0,
+    profitFactor: totalLosses > 0 ? totalWins / totalLosses : totalWins > 0 ? 999 : 0,
+    largestWin,
+    largestLoss,
+    byTimeframe: { today: todayPnL, week: weekPnL, month: monthPnL },
+    bySignalType: {
+      LONG: {
+        ...longStats,
+        winRate: longStats.totalTrades > 0 ? (longStats.winningTrades / longStats.totalTrades) * 100 : 0
+      },
+      SHORT: {
+        ...shortStats,
+        winRate: shortStats.totalTrades > 0 ? (shortStats.winningTrades / shortStats.totalTrades) * 100 : 0
+      }
+    },
+    equityCurve
+  };
+}
+
 // Wrapper component for PnL widget with dynamic background
 export function PnLTrackerWidgetWithBackground() {
-  const { stats } = usePnLTracking();
-  const isProfitable = stats ? stats.totalPnL >= 0 : false;
+  const { trades } = useTrades();
+  const stats = calculateStatsFromTrades(trades);
+  const isProfitable = stats.totalPnL >= 0;
 
   return (
     <WidgetContainer 
-      title="PnL Tracker"
+      title=""
       background={<PnLBackground isPositive={isProfitable} />}
     >
       <PnLTrackerWidget isProfitable={isProfitable} />
