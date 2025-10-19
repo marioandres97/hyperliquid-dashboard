@@ -79,9 +79,9 @@ export default function Home() {
       </DashboardGrid>
 
       {/* Reduced footer disclaimer */}
-      <footer className="border-t border-gray-800/50 mt-12 py-4">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-xs text-gray-600">
+      <footer className="border-t border-gray-800/50 mt-8 sm:mt-12 py-3 sm:py-4 md:py-6">
+        <div className="container mx-auto px-3 sm:px-4 text-center">
+          <p className="text-[10px] sm:text-xs text-gray-600">
             Information platform only. Not financial advice. DYOR. Trading involves substantial risk.
           </p>
         </div>

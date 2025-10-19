@@ -152,9 +152,9 @@ export default function MarketHoursBar() {
   // Return early if not yet hydrated
   if (!currentTime) {
     return (
-      <div className="sticky top-[73px] z-40 bg-gray-900/50 backdrop-blur-sm border-b border-gray-800 py-2">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-wrap items-center justify-center gap-3 text-xs sm:text-sm text-gray-400">
+      <div className="sticky top-[73px] z-40 bg-gray-900/50 backdrop-blur-sm border-b border-gray-800 py-1.5 sm:py-2">
+        <div className="container mx-auto px-3 sm:px-4">
+          <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-[10px] sm:text-xs md:text-sm text-gray-400">
             Loading market hours...
           </div>
         </div>
@@ -162,15 +162,20 @@ export default function MarketHoursBar() {
     );
   }
 
+  // On mobile, show only US and Europe (most relevant)
+  const displayMarkets = typeof window !== 'undefined' && window.innerWidth < 640 
+    ? markets.filter(m => m.name === 'US' || m.name === 'Europe')
+    : markets;
+
   return (
-    <div className="sticky top-[73px] z-40 bg-gray-900/50 backdrop-blur-sm border-b border-gray-800 py-2">
-      <div className="container mx-auto px-4">
-        <div className="flex flex-wrap items-center justify-center gap-3 text-xs sm:text-sm">
-          {markets.map((market, index) => {
+    <div className="sticky top-[73px] z-40 bg-gray-900/50 backdrop-blur-sm border-b border-gray-800 py-1.5 sm:py-2">
+      <div className="container mx-auto px-3 sm:px-4">
+        <div className="flex flex-wrap items-center justify-center gap-x-2 sm:gap-x-3 gap-y-1 text-[10px] sm:text-xs md:text-sm">
+          {displayMarkets.map((market, index) => {
             const status = getMarketStatus(currentTime, market);
             return (
               <div key={market.name} className="flex items-center gap-1">
-                {index > 0 && <span className="text-gray-600 mx-1 hidden sm:inline">|</span>}
+                {index > 0 && <span className="text-gray-600 mx-1 hidden md:inline">|</span>}
                 <span>{market.emoji}</span>
                 <span className="text-gray-300">{market.name}:</span>
                 <span>{status.icon}</span>
@@ -183,7 +188,7 @@ export default function MarketHoursBar() {
                   {status.status}
                 </span>
                 {status.message && (
-                  <span className="text-gray-400">({status.message})</span>
+                  <span className="text-gray-400 hidden sm:inline">({status.message})</span>
                 )}
               </div>
             );

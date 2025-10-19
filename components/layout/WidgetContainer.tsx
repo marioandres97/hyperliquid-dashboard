@@ -12,7 +12,7 @@ interface WidgetContainerProps {
 export default function WidgetContainer({ title, children, background, transparent = false }: WidgetContainerProps) {
   return (
     <div 
-      className={`group relative ${transparent ? 'bg-transparent' : 'premium-glass'} rounded-2xl p-4 shadow-2xl transition-all duration-300 hover:shadow-purple-500/20 overflow-hidden`}
+      className={`group relative ${transparent ? 'bg-transparent' : 'premium-glass'} rounded-lg sm:rounded-xl lg:rounded-2xl p-3 sm:p-4 lg:p-5 xl:p-6 shadow-2xl transition-all duration-300 hover:shadow-purple-500/20 overflow-hidden`}
     >
       {/* Background layer */}
       {background && (
@@ -25,7 +25,7 @@ export default function WidgetContainer({ title, children, background, transpare
       <div className="relative z-10">
         {title && (
           <h2 
-            className="text-2xl font-semibold mb-3 gradient-text"
+            className="text-base sm:text-lg lg:text-xl font-semibold mb-3 gradient-text"
           >
             {title}
           </h2>
