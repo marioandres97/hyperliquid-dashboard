@@ -90,12 +90,24 @@ export function TradeEntryModal({ isOpen, onClose, onCreate }: TradeEntryModalPr
       });
       setTagInput('');
     } catch (err) {
-      // Show error in modal AND as inline error message
-      const errorMessage = err instanceof Error ? err.message : 'Failed to create trade';
+      // Show detailed error message from API response if available
+      let errorMessage = 'Failed to create trade';
+      
+      if (err instanceof Error) {
+        errorMessage = err.message;
+      } else if (typeof err === 'object' && err !== null) {
+        const apiError = err as any;
+        if (apiError.message) {
+          errorMessage = apiError.message;
+        } else if (apiError.error) {
+          errorMessage = apiError.error;
+        }
+      }
+      
+      // Show inline error in modal
       setError(errorMessage);
       
       // The error toast will be shown by the PnL tracker widget
-      // We keep the inline error for immediate feedback
     } finally {
       setSubmitting(false);
     }
