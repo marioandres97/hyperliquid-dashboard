@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 
 interface MarketStatus {
   status: 'OPEN' | 'CLOSED' | 'OPENS SOON' | 'CLOSES SOON';
@@ -20,10 +21,10 @@ interface Market {
 }
 
 const markets: Market[] = [
-  { name: 'Asia', emoji: '🇯🇵', openHour: 0, openMinute: 0, closeHour: 9, closeMinute: 0, isWeekdayOnly: true },
-  { name: 'Europe', emoji: '🇪🇺', openHour: 8, openMinute: 0, closeHour: 16, closeMinute: 30, isWeekdayOnly: true },
-  { name: 'US', emoji: '🇺🇸', openHour: 13, openMinute: 30, closeHour: 20, closeMinute: 0, isWeekdayOnly: true },
-  { name: 'CME', emoji: '📊', openHour: 23, openMinute: 0, closeHour: 22, closeMinute: 0, isWeekdayOnly: false, isCME: true },
+  { name: 'Tokyo', emoji: '', openHour: 0, openMinute: 0, closeHour: 9, closeMinute: 0, isWeekdayOnly: true },
+  { name: 'London', emoji: '', openHour: 8, openMinute: 0, closeHour: 16, closeMinute: 30, isWeekdayOnly: true },
+  { name: 'New York', emoji: '', openHour: 13, openMinute: 30, closeHour: 20, closeMinute: 0, isWeekdayOnly: true },
+  { name: 'CME', emoji: '', openHour: 23, openMinute: 0, closeHour: 22, closeMinute: 0, isWeekdayOnly: false, isCME: true },
 ];
 
 function getMarketStatus(currentTime: Date, market: Market): MarketStatus {
@@ -138,23 +139,42 @@ function getMarketStatus(currentTime: Date, market: Market): MarketStatus {
 
 export default function MarketHoursBar() {
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
+  const [isPaused, setIsPaused] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   useEffect(() => {
     // Set initial time on client
     setCurrentTime(new Date());
     
+    // Check for reduced motion preference
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setPrefersReducedMotion(mediaQuery.matches);
+    
+    const handleChange = (e: MediaQueryListEvent) => {
+      setPrefersReducedMotion(e.matches);
+    };
+    
+    mediaQuery.addEventListener('change', handleChange);
+    
     const interval = setInterval(() => {
       setCurrentTime(new Date());
     }, 60000); // Update every minute
-    return () => clearInterval(interval);
+    
+    return () => {
+      clearInterval(interval);
+      mediaQuery.removeEventListener('change', handleChange);
+    };
   }, []);
 
   // Return early if not yet hydrated
   if (!currentTime) {
     return (
-      <div className="sticky top-[73px] z-40 bg-gray-900/50 backdrop-blur-sm border-b border-gray-800 py-1.5 sm:py-2">
-        <div className="container mx-auto px-3 sm:px-4">
-          <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-[10px] sm:text-xs md:text-sm text-gray-400">
+      <div 
+        className="sticky top-14 sm:top-16 lg:top-[72px] z-40 bg-gray-900/85 backdrop-blur-md border-b border-gray-800/30 py-2 sm:py-2.5"
+        style={{ boxShadow: '0 2px 8px rgba(0, 0, 0, 0.4)' }}
+      >
+        <div className="overflow-hidden">
+          <div className="text-xs sm:text-sm font-medium tracking-wide text-gray-200 text-center">
             Loading market hours...
           </div>
         </div>
@@ -162,38 +182,83 @@ export default function MarketHoursBar() {
     );
   }
 
-  // On mobile, show only US and Europe (most relevant)
-  const displayMarkets = typeof window !== 'undefined' && window.innerWidth < 640 
-    ? markets.filter(m => m.name === 'US' || m.name === 'Europe')
-    : markets;
+  // Build market status content for each market
+  const marketElements = markets.map((market) => {
+    const status = getMarketStatus(currentTime, market);
+    return (
+      <span key={market.name} className="inline-flex items-center gap-1 whitespace-nowrap mx-3">
+        <span className="text-gray-200">{market.name}:</span>
+        <span>{status.icon}</span>
+        <span className={`font-medium ${
+          status.status === 'OPEN' ? 'text-green-400' :
+          status.status === 'CLOSED' ? 'text-red-400' :
+          status.status === 'OPENS SOON' ? 'text-yellow-400' :
+          'text-orange-400'
+        }`}>
+          {status.status}
+        </span>
+        {status.message && (
+          <span className="text-gray-400">({status.message})</span>
+        )}
+      </span>
+    );
+  });
+
+  // If reduced motion is preferred, show static content
+  if (prefersReducedMotion) {
+    return (
+      <div 
+        className="sticky top-14 sm:top-16 lg:top-[72px] z-40 bg-gray-900/85 backdrop-blur-md border-b border-gray-800/30 py-2 sm:py-2.5"
+        style={{ boxShadow: '0 2px 8px rgba(0, 0, 0, 0.4)' }}
+      >
+        <div className="overflow-x-auto">
+          <div className="flex items-center justify-center text-xs sm:text-sm font-medium tracking-wide whitespace-nowrap px-4">
+            {marketElements.map((element, index) => (
+              <span key={index} className="inline-flex items-center">
+                {element}
+                {index < marketElements.length - 1 && <span className="text-gray-600 mx-3">•</span>}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Animation duration: 30s for mobile, 35s for tablet, 45s for desktop
+  // We'll use a single duration and let CSS handle responsiveness if needed
+  const animationDuration = 40;
 
   return (
-    <div className="sticky top-[73px] z-40 bg-gray-900/50 backdrop-blur-sm border-b border-gray-800 py-1.5 sm:py-2">
-      <div className="container mx-auto px-3 sm:px-4">
-        <div className="flex flex-wrap items-center justify-center gap-x-2 sm:gap-x-3 gap-y-1 text-[10px] sm:text-xs md:text-sm">
-          {displayMarkets.map((market, index) => {
-            const status = getMarketStatus(currentTime, market);
-            return (
-              <div key={market.name} className="flex items-center gap-1">
-                {index > 0 && <span className="text-gray-600 mx-1 hidden md:inline">|</span>}
-                <span>{market.emoji}</span>
-                <span className="text-gray-300">{market.name}:</span>
-                <span>{status.icon}</span>
-                <span className={`font-medium ${
-                  status.status === 'OPEN' ? 'text-green-400' :
-                  status.status === 'CLOSED' ? 'text-red-400' :
-                  status.status === 'OPENS SOON' ? 'text-yellow-400' :
-                  'text-orange-400'
-                }`}>
-                  {status.status}
-                </span>
-                {status.message && (
-                  <span className="text-gray-400 hidden sm:inline">({status.message})</span>
-                )}
-              </div>
-            );
-          })}
-        </div>
+    <div 
+      className="sticky top-14 sm:top-16 lg:top-[72px] z-40 bg-gray-900/85 backdrop-blur-md border-b border-gray-800/30 py-2 sm:py-2.5"
+      style={{ boxShadow: '0 2px 8px rgba(0, 0, 0, 0.4)' }}
+    >
+      <div 
+        className="overflow-hidden relative"
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+      >
+        <motion.div
+          className="flex items-center text-xs sm:text-sm font-medium tracking-wide"
+          animate={{
+            x: isPaused ? undefined : [0, '-50%'],
+          }}
+          transition={{
+            x: {
+              repeat: Infinity,
+              repeatType: "loop",
+              duration: animationDuration,
+              ease: "linear",
+            },
+          }}
+        >
+          {/* First copy of content */}
+          {marketElements}
+          <span className="text-gray-600 mx-3">•</span>
+          {/* Second copy for seamless loop */}
+          {marketElements}
+        </motion.div>
       </div>
     </div>
   );
