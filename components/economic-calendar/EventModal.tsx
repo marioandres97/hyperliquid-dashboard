@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { EconomicEventWithReleases } from '@/lib/economic-calendar/types';
 import { getCategoryIcon, getImpactBadge } from '@/lib/economic-calendar/events-data';
@@ -45,7 +46,12 @@ export function EventModal({ event, onClose }: EventModalProps) {
   const icon = event ? getCategoryIcon(event.category) : null;
   const impactBadge = event ? getImpactBadge(event.impact) : null;
 
-  return (
+  // Use portal to render modal outside parent DOM hierarchy
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  return createPortal(
     <AnimatePresence>
       {event && (
         <>
@@ -94,33 +100,6 @@ export function EventModal({ event, onClose }: EventModalProps) {
               <h3 className="text-sm sm:text-base font-semibold text-white">What It Is</h3>
               <div className="bg-gray-800/50 rounded-lg p-3 text-xs sm:text-sm text-gray-300 leading-relaxed">
                 {event.description}
-              </div>
-            </div>
-          )}
-
-          {/* Economic Data Metrics */}
-          {(event.btcAvgImpact || event.ethAvgImpact || event.volumeSpike) && (
-            <div className="space-y-2">
-              <h3 className="text-sm sm:text-base font-semibold text-white">Historical Market Impact</h3>
-              <div className="grid grid-cols-3 gap-2">
-                {event.btcAvgImpact && (
-                  <div className="bg-gray-800/50 rounded-lg p-2.5 sm:p-3">
-                    <div className="text-[10px] sm:text-xs text-gray-400 mb-1">BTC Avg Move</div>
-                    <div className="text-sm sm:text-base font-bold text-orange-400">±{event.btcAvgImpact}%</div>
-                  </div>
-                )}
-                {event.ethAvgImpact && (
-                  <div className="bg-gray-800/50 rounded-lg p-2.5 sm:p-3">
-                    <div className="text-[10px] sm:text-xs text-gray-400 mb-1">ETH Avg Move</div>
-                    <div className="text-sm sm:text-base font-bold text-blue-400">±{event.ethAvgImpact}%</div>
-                  </div>
-                )}
-                {event.volumeSpike && (
-                  <div className="bg-gray-800/50 rounded-lg p-2.5 sm:p-3">
-                    <div className="text-[10px] sm:text-xs text-gray-400 mb-1">Volume Spike</div>
-                    <div className="text-sm sm:text-base font-bold text-green-400">+{event.volumeSpike}%</div>
-                  </div>
-                )}
               </div>
             </div>
           )}
@@ -189,6 +168,7 @@ export function EventModal({ event, onClose }: EventModalProps) {
           </motion.div>
         </>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 }

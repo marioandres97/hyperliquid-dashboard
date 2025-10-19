@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { CreateAlertInput, AlertType, AlertCoin, AlertCondition, AlertSide } from '@/lib/alerts/types';
 import { X } from 'lucide-react';
@@ -88,7 +89,12 @@ export function CreateAlertModal({ isOpen, onClose, onCreate }: CreateAlertModal
     }
   };
 
-  return (
+  // Use portal to render modal outside parent DOM hierarchy
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  return createPortal(
     <AnimatePresence>
       {isOpen && (
         <>
@@ -283,6 +289,7 @@ export function CreateAlertModal({ isOpen, onClose, onCreate }: CreateAlertModal
           </motion.div>
         </>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 }
