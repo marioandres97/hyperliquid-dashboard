@@ -2,22 +2,19 @@
 
 import { useState, useEffect } from 'react';
 import { useMultiCoinLargeOrders } from '@/lib/hooks/large-orders/useLargeOrders';
-import type { CoinFilter, SizeFilter, SideFilter } from '@/lib/large-orders/types';
 import { formatUsdValue, getRelativeTime, downloadCSV } from '@/lib/large-orders/types';
 import { Download, TrendingUp } from 'lucide-react';
 
 export function LargeOrdersFeed() {
-  const [coinFilter, setCoinFilter] = useState<CoinFilter>('ALL');
-  const [sizeFilter, setSizeFilter] = useState<SizeFilter>(100000);
-  const [sideFilter, setSideFilter] = useState<SideFilter>('BOTH');
   const [isMobile, setIsMobile] = useState(false);
 
+  // Show all orders for BTC, ETH, and HYPE without any filtering
   const { largeOrders, allOrders } = useMultiCoinLargeOrders(
     ['BTC', 'ETH', 'HYPE'],
     {
-      coin: coinFilter,
-      minSize: sizeFilter,
-      side: sideFilter,
+      coin: 'ALL',
+      // minSize is not provided - show all orders regardless of size
+      side: 'BOTH',
     }
   );
 
@@ -57,74 +54,6 @@ export function LargeOrdersFeed() {
           <Download className="w-3.5 h-3.5" />
           <span>Export CSV</span>
         </button>
-      </div>
-
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-3">
-        {/* Coin Filter */}
-        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
-          <span className="text-[10px] sm:text-xs text-gray-400">Coin:</span>
-          <div className="flex gap-1.5 sm:gap-2 flex-1 sm:flex-initial">
-            {(['BTC', 'ETH', 'HYPE', 'ALL'] as CoinFilter[]).map((coin) => (
-              <button
-                key={coin}
-                onClick={() => setCoinFilter(coin)}
-                className={`flex-1 sm:flex-initial px-2 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-all ${
-                  coinFilter === coin
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
-                }`}
-              >
-                {coin}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Size Filter */}
-        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
-          <span className="text-[10px] sm:text-xs text-gray-400 whitespace-nowrap">Min Size:</span>
-          <div className="flex gap-1.5 sm:gap-2 flex-1 sm:flex-initial overflow-x-auto">
-            {[
-              { value: 100000, label: '>$100K' },
-              { value: 250000, label: '>$250K' },
-              { value: 500000, label: '>$500K' },
-              { value: 1000000, label: '>$1M' },
-            ].map((size) => (
-              <button
-                key={size.value}
-                onClick={() => setSizeFilter(size.value as SizeFilter)}
-                className={`px-2 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-all whitespace-nowrap ${
-                  sizeFilter === size.value
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
-                }`}
-              >
-                {size.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Side Filter */}
-        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
-          <span className="text-[10px] sm:text-xs text-gray-400">Side:</span>
-          <div className="flex gap-1.5 sm:gap-2 flex-1 sm:flex-initial">
-            {(['BUY', 'SELL', 'BOTH'] as SideFilter[]).map((side) => (
-              <button
-                key={side}
-                onClick={() => setSideFilter(side)}
-                className={`flex-1 sm:flex-initial px-2 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-all ${
-                  sideFilter === side
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
-                }`}
-              >
-                {side}
-              </button>
-            ))}
-          </div>
-        </div>
       </div>
 
       {/* Orders Display - Responsive: Cards on mobile/tablet, Table on desktop */}

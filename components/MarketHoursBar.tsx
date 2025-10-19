@@ -137,13 +137,15 @@ function getMarketStatus(currentTime: Date, market: Market): MarketStatus {
   }
 }
 
-// Animation duration constant (outside component for true immutability)
-const ANIMATION_DURATION = 40;
+// Animation duration constants based on screen size (outside component for true immutability)
+const ANIMATION_DURATION_MOBILE = 20; // <768px
+const ANIMATION_DURATION_TABLET = 25; // 768-1023px
 
 export default function MarketHoursBar() {
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
   const [isPaused, setIsPaused] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const [screenSize, setScreenSize] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
 
   useEffect(() => {
     // Set initial time on client
@@ -153,6 +155,21 @@ export default function MarketHoursBar() {
     const interval = setInterval(() => {
       setCurrentTime(new Date());
     }, 60000); // Update every minute
+    
+    // Detect screen size for responsive animation
+    const checkScreenSize = () => {
+      const width = window.innerWidth;
+      if (width < 768) {
+        setScreenSize('mobile');
+      } else if (width < 1024) {
+        setScreenSize('tablet');
+      } else {
+        setScreenSize('desktop');
+      }
+    };
+    
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
     
     // Check for reduced motion preference (only in browser)
     const mediaQuery = typeof window !== 'undefined' 
@@ -168,24 +185,27 @@ export default function MarketHoursBar() {
       
       mediaQuery.addEventListener('change', handleChange);
       
-      // Single cleanup function for both interval and media query listener
+      // Cleanup function for interval, resize listener, and media query listener
       return () => {
         clearInterval(interval);
+        window.removeEventListener('resize', checkScreenSize);
         mediaQuery.removeEventListener('change', handleChange);
       };
     }
     
-    // If no media query (SSR), just clean up interval
-    return () => clearInterval(interval);
+    // If no media query (SSR), just clean up interval and resize listener
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('resize', checkScreenSize);
+    };
   }, []);
 
   // Return early if not yet hydrated
   if (!currentTime) {
     return (
       <div 
-        className="sticky z-40 bg-gray-900/85 backdrop-blur-md border-b border-gray-800/30 py-2 sm:py-2.5"
+        className="z-40 bg-gray-900/85 backdrop-blur-md border-b border-gray-800/30 py-2 sm:py-2.5"
         style={{ 
-          top: 'var(--header-height, 64px)',
           boxShadow: '0 2px 8px rgba(0, 0, 0, 0.4)' 
         }}
       >
@@ -220,13 +240,12 @@ export default function MarketHoursBar() {
     );
   });
 
-  // If reduced motion is preferred, show static content
-  if (prefersReducedMotion) {
+  // If reduced motion is preferred OR desktop, show static content
+  if (prefersReducedMotion || screenSize === 'desktop') {
     return (
       <div 
-        className="sticky z-40 bg-gray-900/85 backdrop-blur-md border-b border-gray-800/30 py-2 sm:py-2.5"
+        className="z-40 bg-gray-900/85 backdrop-blur-md border-b border-gray-800/30 py-2 sm:py-2.5"
         style={{ 
-          top: 'var(--header-height, 64px)',
           boxShadow: '0 2px 8px rgba(0, 0, 0, 0.4)' 
         }}
       >
@@ -244,11 +263,13 @@ export default function MarketHoursBar() {
     );
   }
 
+  // Determine animation duration based on screen size
+  const animationDuration = screenSize === 'mobile' ? ANIMATION_DURATION_MOBILE : ANIMATION_DURATION_TABLET;
+
   return (
     <div 
-      className="sticky z-40 bg-gray-900/85 backdrop-blur-md border-b border-gray-800/30 py-2 sm:py-2.5"
+      className="z-40 bg-gray-900/85 backdrop-blur-md border-b border-gray-800/30 py-2 sm:py-2.5"
       style={{ 
-        top: 'var(--header-height, 64px)',
         boxShadow: '0 2px 8px rgba(0, 0, 0, 0.4)' 
       }}
     >
@@ -266,7 +287,7 @@ export default function MarketHoursBar() {
             x: {
               repeat: Infinity,
               repeatType: "loop" as const,
-              duration: ANIMATION_DURATION,
+              duration: animationDuration,
               ease: "linear" as const,
             },
           }}
