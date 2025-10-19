@@ -1,6 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { CreateTradeInput } from '@/lib/hooks/trades/useTrades';
 
@@ -26,7 +28,32 @@ export function TradeEntryModal({ isOpen, onClose, onCreate }: TradeEntryModalPr
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  if (!isOpen) return null;
+  // Add escape key handler and body scroll prevention
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    
+    // Prevent body scroll when modal is open
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      // Restore original overflow or remove the property if it was empty
+      if (originalOverflow) {
+        document.body.style.overflow = originalOverflow;
+      } else {
+        document.body.style.removeProperty('overflow');
+      }
+    };
+  }, [isOpen, onClose]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,15 +117,39 @@ export function TradeEntryModal({ isOpen, onClose, onCreate }: TradeEntryModalPr
     }));
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-0 md:p-4">
-      <div className="bg-gray-900 border-0 md:border border-gray-700 rounded-none md:rounded-xl p-4 sm:p-5 md:p-6 w-full max-w-full md:max-w-md max-h-screen md:max-h-[90vh] overflow-y-auto">
+  // Use portal to render modal outside parent DOM hierarchy
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  return createPortal(
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          {/* Backdrop - SEPARATE element */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+          />
+
+          {/* Modal - SEPARATE element, floats above */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            onClick={(e) => e.stopPropagation()}
+            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[calc(100%-2rem)] md:max-w-md max-h-[90vh] overflow-y-auto bg-gray-900 border-0 md:border border-gray-700 rounded-none md:rounded-xl shadow-2xl z-50"
+          >
+      <div className="p-4 sm:p-5 md:p-6">
         {/* Header */}
-        <div className="flex items-center justify-between mb-3 sm:mb-4 sticky top-0 bg-gray-900 pb-3 sm:pb-4 border-b border-gray-800 -mx-4 sm:-mx-5 md:-mx-6 px-4 sm:px-5 md:px-6 z-10">
+        <div className="flex items-center justify-between mb-3 sm:mb-4 sticky top-0 bg-gray-900 pb-3 sm:pb-4 border-b border-gray-800 z-10">
           <h2 className="text-lg sm:text-xl font-bold text-white">Add Trade</h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-white transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center -mr-2"
+            className="text-gray-400 hover:text-white transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
           >
             <X className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
@@ -322,6 +373,10 @@ export function TradeEntryModal({ isOpen, onClose, onCreate }: TradeEntryModalPr
           </div>
         </form>
       </div>
-    </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>,
+    document.body
   );
 }
