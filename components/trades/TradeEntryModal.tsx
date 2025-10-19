@@ -91,37 +91,37 @@ export function TradeEntryModal({ isOpen, onClose, onCreate }: TradeEntryModalPr
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="bg-gray-900 border border-gray-700 rounded-xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-0 md:p-4">
+      <div className="bg-gray-900 border-0 md:border border-gray-700 rounded-none md:rounded-xl p-4 sm:p-5 md:p-6 w-full max-w-full md:max-w-md max-h-screen md:max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-white">Add Trade</h2>
+        <div className="flex items-center justify-between mb-3 sm:mb-4 sticky top-0 bg-gray-900 pb-3 sm:pb-4 border-b border-gray-800 -mx-4 sm:-mx-5 md:-mx-6 px-4 sm:px-5 md:px-6 z-10">
+          <h2 className="text-lg sm:text-xl font-bold text-white">Add Trade</h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-white transition-colors"
+            className="text-gray-400 hover:text-white transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center -mr-2"
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
         </div>
 
         {/* Error */}
         {error && (
-          <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 mb-4">
-            <p className="text-sm text-red-400">{error}</p>
+          <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-2.5 sm:p-3 mb-3 sm:mb-4">
+            <p className="text-xs sm:text-sm text-red-400">{error}</p>
           </div>
         )}
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
           {/* Coin */}
           <div>
-            <label className="block text-sm font-medium text-white mb-2">
+            <label className="block text-xs sm:text-sm font-medium text-white mb-1.5 sm:mb-2">
               Coin
             </label>
             <select
               value={formData.coin}
               onChange={(e) => setFormData(prev => ({ ...prev, coin: e.target.value }))}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500"
+              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 sm:py-2 text-sm text-white focus:outline-none focus:border-blue-500 min-h-[44px]"
             >
               <option value="BTC">BTC</option>
               <option value="ETH">ETH</option>
@@ -133,48 +133,48 @@ export function TradeEntryModal({ isOpen, onClose, onCreate }: TradeEntryModalPr
 
           {/* Side */}
           <div>
-            <label className="block text-sm font-medium text-white mb-2">
+            <label className="block text-xs sm:text-sm font-medium text-white mb-1.5 sm:mb-2">
               Side
             </label>
-            <div className="flex gap-3">
-              <label className="flex items-center gap-2 cursor-pointer">
+            <div className="flex gap-2 sm:gap-3">
+              <label className="flex items-center gap-2 cursor-pointer min-h-[44px] py-2">
                 <input
                   type="radio"
                   name="side"
                   value="LONG"
                   checked={formData.side === 'LONG'}
                   onChange={(e) => setFormData(prev => ({ ...prev, side: e.target.value }))}
-                  className="w-4 h-4 text-green-500"
+                  className="w-4 h-4 sm:w-5 sm:h-5 text-green-500"
                 />
-                <span className="text-white">LONG</span>
+                <span className="text-white text-sm sm:text-base">LONG</span>
               </label>
-              <label className="flex items-center gap-2 cursor-pointer">
+              <label className="flex items-center gap-2 cursor-pointer min-h-[44px] py-2">
                 <input
                   type="radio"
                   name="side"
                   value="SHORT"
                   checked={formData.side === 'SHORT'}
                   onChange={(e) => setFormData(prev => ({ ...prev, side: e.target.value }))}
-                  className="w-4 h-4 text-red-500"
+                  className="w-4 h-4 sm:w-5 sm:h-5 text-red-500"
                 />
-                <span className="text-white">SHORT</span>
+                <span className="text-white text-sm sm:text-base">SHORT</span>
               </label>
             </div>
           </div>
 
           {/* Entry Price */}
           <div>
-            <label className="block text-sm font-medium text-white mb-2">
+            <label className="block text-xs sm:text-sm font-medium text-white mb-1.5 sm:mb-2">
               Entry Price
             </label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
               <input
                 type="number"
                 step="0.01"
                 value={formData.entryPrice || ''}
                 onChange={(e) => setFormData(prev => ({ ...prev, entryPrice: parseFloat(e.target.value) || 0 }))}
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg pl-8 pr-3 py-2 text-white focus:outline-none focus:border-blue-500"
+                className="w-full bg-gray-800 border border-gray-700 rounded-lg pl-8 pr-3 py-2.5 sm:py-2 text-sm text-white focus:outline-none focus:border-blue-500 min-h-[44px]"
                 required
               />
             </div>
@@ -182,17 +182,17 @@ export function TradeEntryModal({ isOpen, onClose, onCreate }: TradeEntryModalPr
 
           {/* Exit Price */}
           <div>
-            <label className="block text-sm font-medium text-white mb-2">
+            <label className="block text-xs sm:text-sm font-medium text-white mb-1.5 sm:mb-2">
               Exit Price
             </label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
               <input
                 type="number"
                 step="0.01"
                 value={formData.exitPrice || ''}
                 onChange={(e) => setFormData(prev => ({ ...prev, exitPrice: parseFloat(e.target.value) || 0 }))}
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg pl-8 pr-3 py-2 text-white focus:outline-none focus:border-blue-500"
+                className="w-full bg-gray-800 border border-gray-700 rounded-lg pl-8 pr-3 py-2.5 sm:py-2 text-sm text-white focus:outline-none focus:border-blue-500 min-h-[44px]"
                 required
               />
             </div>
@@ -200,7 +200,7 @@ export function TradeEntryModal({ isOpen, onClose, onCreate }: TradeEntryModalPr
 
           {/* Size */}
           <div>
-            <label className="block text-sm font-medium text-white mb-2">
+            <label className="block text-xs sm:text-sm font-medium text-white mb-1.5 sm:mb-2">
               Size ({formData.coin})
             </label>
             <input
@@ -208,48 +208,48 @@ export function TradeEntryModal({ isOpen, onClose, onCreate }: TradeEntryModalPr
               step="0.001"
               value={formData.size || ''}
               onChange={(e) => setFormData(prev => ({ ...prev, size: parseFloat(e.target.value) || 0 }))}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500"
+              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 sm:py-2 text-sm text-white focus:outline-none focus:border-blue-500 min-h-[44px]"
               required
             />
           </div>
 
           {/* Entry Time */}
           <div>
-            <label className="block text-sm font-medium text-white mb-2">
+            <label className="block text-xs sm:text-sm font-medium text-white mb-1.5 sm:mb-2">
               Entry Time
             </label>
             <input
               type="datetime-local"
               value={formData.entryTime}
               onChange={(e) => setFormData(prev => ({ ...prev, entryTime: e.target.value }))}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500"
+              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 sm:py-2 text-sm text-white focus:outline-none focus:border-blue-500 min-h-[44px]"
               required
             />
           </div>
 
           {/* Exit Time */}
           <div>
-            <label className="block text-sm font-medium text-white mb-2">
+            <label className="block text-xs sm:text-sm font-medium text-white mb-1.5 sm:mb-2">
               Exit Time
             </label>
             <input
               type="datetime-local"
               value={formData.exitTime}
               onChange={(e) => setFormData(prev => ({ ...prev, exitTime: e.target.value }))}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500"
+              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 sm:py-2 text-sm text-white focus:outline-none focus:border-blue-500 min-h-[44px]"
               required
             />
           </div>
 
           {/* Notes */}
           <div>
-            <label className="block text-sm font-medium text-white mb-2">
+            <label className="block text-xs sm:text-sm font-medium text-white mb-1.5 sm:mb-2">
               Notes (optional)
             </label>
             <textarea
               value={formData.notes}
               onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500 resize-none"
+              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 sm:py-2 text-sm text-white focus:outline-none focus:border-blue-500 resize-none"
               rows={3}
               placeholder="Add any notes about this trade..."
             />
@@ -257,10 +257,10 @@ export function TradeEntryModal({ isOpen, onClose, onCreate }: TradeEntryModalPr
 
           {/* Tags */}
           <div>
-            <label className="block text-sm font-medium text-white mb-2">
+            <label className="block text-xs sm:text-sm font-medium text-white mb-1.5 sm:mb-2">
               Tags (optional)
             </label>
-            <div className="flex gap-2 mb-2">
+            <div className="flex gap-1.5 sm:gap-2 mb-2">
               <input
                 type="text"
                 value={tagInput}
@@ -272,28 +272,28 @@ export function TradeEntryModal({ isOpen, onClose, onCreate }: TradeEntryModalPr
                   }
                 }}
                 placeholder="e.g., WhaleFollowing"
-                className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500"
+                className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 sm:py-2 text-sm text-white focus:outline-none focus:border-blue-500 min-h-[44px]"
               />
               <button
                 type="button"
                 onClick={handleAddTag}
-                className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-sm transition-colors"
+                className="px-3 sm:px-4 py-2.5 sm:py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-xs sm:text-sm transition-colors min-h-[44px] whitespace-nowrap"
               >
                 Add
               </button>
             </div>
             {formData.tags && formData.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1.5 sm:gap-2">
                 {formData.tags.map((tag) => (
                   <span
                     key={tag}
-                    className="inline-flex items-center gap-1 px-2 py-1 bg-blue-500/20 text-blue-400 rounded text-sm"
+                    className="inline-flex items-center gap-1 px-2 py-1 bg-blue-500/20 text-blue-400 rounded text-xs sm:text-sm"
                   >
                     {tag}
                     <button
                       type="button"
                       onClick={() => handleRemoveTag(tag)}
-                      className="hover:text-blue-300"
+                      className="hover:text-blue-300 min-w-[20px] min-h-[20px] flex items-center justify-center"
                     >
                       <X className="w-3 h-3" />
                     </button>
@@ -304,18 +304,18 @@ export function TradeEntryModal({ isOpen, onClose, onCreate }: TradeEntryModalPr
           </div>
 
           {/* Actions */}
-          <div className="flex gap-3 pt-2">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-2">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors"
+              className="w-full sm:w-auto sm:flex-1 px-4 py-2.5 sm:py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors min-h-[44px] text-sm sm:text-base"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full sm:w-auto sm:flex-1 px-4 py-2.5 sm:py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] text-sm sm:text-base"
             >
               {submitting ? 'Saving...' : 'Save Trade'}
             </button>
