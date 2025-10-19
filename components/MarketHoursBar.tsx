@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 
 interface MarketStatus {
@@ -146,24 +146,26 @@ export default function MarketHoursBar() {
     // Set initial time on client
     setCurrentTime(new Date());
     
-    // Check for reduced motion preference
-    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    setPrefersReducedMotion(mediaQuery.matches);
-    
-    const handleChange = (e: MediaQueryListEvent) => {
-      setPrefersReducedMotion(e.matches);
-    };
-    
-    mediaQuery.addEventListener('change', handleChange);
-    
-    const interval = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 60000); // Update every minute
-    
-    return () => {
-      clearInterval(interval);
-      mediaQuery.removeEventListener('change', handleChange);
-    };
+    // Check for reduced motion preference (only in browser)
+    if (typeof window !== 'undefined') {
+      const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+      setPrefersReducedMotion(mediaQuery.matches);
+      
+      const handleChange = (e: MediaQueryListEvent) => {
+        setPrefersReducedMotion(e.matches);
+      };
+      
+      mediaQuery.addEventListener('change', handleChange);
+      
+      const interval = setInterval(() => {
+        setCurrentTime(new Date());
+      }, 60000); // Update every minute
+      
+      return () => {
+        clearInterval(interval);
+        mediaQuery.removeEventListener('change', handleChange);
+      };
+    }
   }, []);
 
   // Return early if not yet hydrated
@@ -225,9 +227,22 @@ export default function MarketHoursBar() {
     );
   }
 
-  // Animation duration: 30s for mobile, 35s for tablet, 45s for desktop
-  // We'll use a single duration and let CSS handle responsiveness if needed
+  // Animation duration - using a readable speed of ~40s for smooth scrolling
   const animationDuration = 40;
+
+  // Memoize animation props to prevent unnecessary re-renders
+  const animateProps = useMemo(() => ({
+    x: isPaused ? undefined : [0, '-50%'],
+  }), [isPaused]);
+
+  const transitionProps = useMemo(() => ({
+    x: {
+      repeat: Infinity,
+      repeatType: "loop" as const,
+      duration: animationDuration,
+      ease: "linear" as const,
+    },
+  }), [animationDuration]);
 
   return (
     <div 
@@ -241,17 +256,8 @@ export default function MarketHoursBar() {
       >
         <motion.div
           className="flex items-center text-xs sm:text-sm font-medium tracking-wide"
-          animate={{
-            x: isPaused ? undefined : [0, '-50%'],
-          }}
-          transition={{
-            x: {
-              repeat: Infinity,
-              repeatType: "loop",
-              duration: animationDuration,
-              ease: "linear",
-            },
-          }}
+          animate={animateProps}
+          transition={transitionProps}
         >
           {/* First copy of content */}
           {marketElements}
