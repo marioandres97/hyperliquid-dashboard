@@ -134,6 +134,8 @@ export function getSampleUpcomingEvents(): EconomicEvent[] {
         source: template.source,
         sourceUrl: template.sourceUrl,
         frequency: template.frequency,
+        description: template.description,
+        cryptoImpact: template.cryptoImpact,
         btcAvgImpact: template.btcAvgImpact,
         ethAvgImpact: template.ethAvgImpact,
         spxAvgImpact: template.spxAvgImpact,
