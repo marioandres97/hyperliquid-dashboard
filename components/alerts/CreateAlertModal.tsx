@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { CreateAlertInput, AlertType, AlertCoin, AlertCondition, AlertSide } from '@/lib/alerts/types';
 import { X } from 'lucide-react';
@@ -20,6 +20,28 @@ export function CreateAlertModal({ isOpen, onClose, onCreate }: CreateAlertModal
   const [browserNotif, setBrowserNotif] = useState(true);
   const [emailNotif, setEmailNotif] = useState(false);
   const [creating, setCreating] = useState(false);
+
+  // Add escape key handler
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    
+    // Prevent body scroll when modal is open
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [isOpen, onClose]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
