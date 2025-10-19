@@ -44,7 +44,7 @@ export default function Home() {
           <RealTimePricesWidget />
         </WidgetContainer>
 
-        <div className="md:col-span-2">
+        <div className="md:col-span-1 xl:col-span-2">
           <WidgetContainer 
             title=""
             background={<EconomicCalendarBackground />}
@@ -54,7 +54,7 @@ export default function Home() {
         </div>
 
         {/* Row 2: Large Orders Feed - full width */}
-        <div className="md:col-span-3">
+        <div className="md:col-span-2 xl:col-span-3">
           <WidgetContainer 
             title=""
             background={<OrderFlowBackground />}
@@ -64,7 +64,7 @@ export default function Home() {
         </div>
 
         {/* Row 3: Alert System, PnL Tracker */}
-        <div className="lg:col-span-1">
+        <div className="md:col-span-1 xl:col-span-1">
           <WidgetContainer 
             title=""
             background={<AlertBackground />}
@@ -73,7 +73,7 @@ export default function Home() {
           </WidgetContainer>
         </div>
 
-        <div className="lg:col-span-2">
+        <div className="md:col-span-1 xl:col-span-2">
           <PnLTrackerWidgetWithBackground />
         </div>
       </DashboardGrid>
