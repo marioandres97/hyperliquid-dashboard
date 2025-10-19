@@ -61,8 +61,8 @@ export default function DashboardGrid({ children }: DashboardGridProps) {
           </div>
         </header>
         
-        {/* Responsive grid: 1 col mobile, 2 col tablet/desktop */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
+        {/* Responsive grid: 1 col mobile, 2 col tablet, 3 col desktop */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
           {children}
         </div>
       </div>

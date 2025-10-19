@@ -2,6 +2,7 @@ import DashboardGrid from '@/components/layout/DashboardGrid';
 import WidgetContainer from '@/components/layout/WidgetContainer';
 import RealTimePricesWidget from '@/widgets/real-time-prices/RealTimePricesWidget';
 import { PnLTrackerWidgetWithBackground } from '@/widgets/pnl-tracker/PnLTrackerWidget';
+import MarketTimeWidget from '@/widgets/market-time/MarketTimeWidget';
 import OrderFlowBackground from '@/components/layout/backgrounds/OrderFlowBackground';
 import PricesBackground from '@/components/layout/backgrounds/PricesBackground';
 import AlertBackground from '@/components/layout/backgrounds/AlertBackground';
@@ -24,7 +25,7 @@ export default function Home() {
       </div>
 
       <DashboardGrid>
-        {/* Row 1: Real-Time Prices, Economic Calendar */}
+        {/* Row 1: Real-Time Prices, Economic Calendar, Market Time */}
         <WidgetContainer 
           title="Real-Time Prices"
           background={<PricesBackground />}
@@ -39,8 +40,16 @@ export default function Home() {
           <EconomicCalendar />
         </WidgetContainer>
 
+        {/* Market Time Widget - New Addition */}
+        <WidgetContainer 
+          title="UTC Clock"
+          background={<div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 via-blue-500/10 to-purple-500/10" />}
+        >
+          <MarketTimeWidget />
+        </WidgetContainer>
+
         {/* Row 2: Large Orders Feed - full width */}
-        <div className="md:col-span-2">
+        <div className="md:col-span-3">
           <WidgetContainer 
             title=""
             background={<OrderFlowBackground />}
@@ -50,14 +59,16 @@ export default function Home() {
         </div>
 
         {/* Row 3: Alert System, PnL Tracker */}
-        <WidgetContainer 
-          title=""
-          background={<AlertBackground />}
-        >
-          <AlertSystem />
-        </WidgetContainer>
+        <div className="lg:col-span-1">
+          <WidgetContainer 
+            title=""
+            background={<AlertBackground />}
+          >
+            <AlertSystem />
+          </WidgetContainer>
+        </div>
 
-        <div className="md:col-span-1">
+        <div className="lg:col-span-2">
           <PnLTrackerWidgetWithBackground />
         </div>
       </DashboardGrid>

@@ -98,11 +98,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate coin
-    if (!['BTC', 'ETH', 'HYPE'].includes(body.coin)) {
+    if (!['BTC', 'ETH', 'HYPE', 'USDT', 'USDC'].includes(body.coin)) {
       return NextResponse.json(
         {
           success: false,
-          error: 'Invalid coin. Must be BTC, ETH, or HYPE',
+          error: 'Invalid coin. Must be BTC, ETH, HYPE, USDT, or USDC',
         },
         { status: 400 }
       );
