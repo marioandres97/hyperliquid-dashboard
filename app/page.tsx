@@ -65,18 +65,19 @@ export default function Home() {
           </WidgetContainer>
         </div>
 
-        {/* Row 3: Alert System (1 col), PnL Tracker (1 col tablet, 2 cols desktop) */}
-        <div className="col-span-1">
+        {/* Row 3: PnL Tracker - full width for better space utilization */}
+        <div className="col-span-1 md:col-span-2 xl:col-span-3">
+          <PnLTrackerWidgetWithBackground />
+        </div>
+
+        {/* Row 4: Alert System - full width for better space utilization */}
+        <div className="col-span-1 md:col-span-2 xl:col-span-3">
           <WidgetContainer 
             title=""
             background={<AlertBackground />}
           >
             <AlertSystem />
           </WidgetContainer>
-        </div>
-
-        <div className="col-span-1 xl:col-span-2">
-          <PnLTrackerWidgetWithBackground />
         </div>
       </DashboardGrid>
 
