@@ -183,8 +183,11 @@ export default function MarketHoursBar() {
   if (!currentTime) {
     return (
       <div 
-        className="sticky top-14 sm:top-16 lg:top-[72px] z-40 bg-gray-900/85 backdrop-blur-md border-b border-gray-800/30 py-2 sm:py-2.5"
-        style={{ boxShadow: '0 2px 8px rgba(0, 0, 0, 0.4)' }}
+        className="sticky z-40 bg-gray-900/85 backdrop-blur-md border-b border-gray-800/30 py-2 sm:py-2.5"
+        style={{ 
+          top: 'var(--header-height, 64px)',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.4)' 
+        }}
       >
         <div className="overflow-hidden">
           <div className="text-xs sm:text-sm font-medium tracking-wide text-gray-200 text-center">
@@ -221,8 +224,11 @@ export default function MarketHoursBar() {
   if (prefersReducedMotion) {
     return (
       <div 
-        className="sticky top-14 sm:top-16 lg:top-[72px] z-40 bg-gray-900/85 backdrop-blur-md border-b border-gray-800/30 py-2 sm:py-2.5"
-        style={{ boxShadow: '0 2px 8px rgba(0, 0, 0, 0.4)' }}
+        className="sticky z-40 bg-gray-900/85 backdrop-blur-md border-b border-gray-800/30 py-2 sm:py-2.5"
+        style={{ 
+          top: 'var(--header-height, 64px)',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.4)' 
+        }}
       >
         <div className="overflow-x-auto">
           <div className="flex items-center justify-center text-xs sm:text-sm font-medium tracking-wide whitespace-nowrap px-4">
@@ -240,8 +246,11 @@ export default function MarketHoursBar() {
 
   return (
     <div 
-      className="sticky top-14 sm:top-16 lg:top-[72px] z-40 bg-gray-900/85 backdrop-blur-md border-b border-gray-800/30 py-2 sm:py-2.5"
-      style={{ boxShadow: '0 2px 8px rgba(0, 0, 0, 0.4)' }}
+      className="sticky z-40 bg-gray-900/85 backdrop-blur-md border-b border-gray-800/30 py-2 sm:py-2.5"
+      style={{ 
+        top: 'var(--header-height, 64px)',
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.4)' 
+      }}
     >
       <div 
         className="overflow-hidden relative"
@@ -251,7 +260,7 @@ export default function MarketHoursBar() {
         <motion.div
           className="flex items-center text-xs sm:text-sm font-medium tracking-wide"
           animate={{
-            x: isPaused ? undefined : [0, '-50%'],
+            x: isPaused ? undefined : [0, '-25%'],
           }}
           transition={{
             x: {
@@ -262,11 +271,32 @@ export default function MarketHoursBar() {
             },
           }}
         >
-          {/* First copy of content */}
-          {marketElements}
-          <span className="text-gray-600 mx-3">•</span>
-          {/* Second copy for seamless loop */}
-          {marketElements}
+          {/* Render content 4 times for truly seamless infinite scrolling */}
+          {Array.from({ length: 4 }, (_, copyIndex) => (
+            <div key={`copy-${copyIndex}`} className="inline-flex items-center">
+              {markets.map((market, index) => {
+                const status = getMarketStatus(currentTime, market);
+                return (
+                  <span key={`copy-${copyIndex}-${market.name}-${index}`} className="inline-flex items-center gap-1 whitespace-nowrap mx-3">
+                    <span className="text-gray-200">{market.name}:</span>
+                    <span>{status.icon}</span>
+                    <span className={`font-medium ${
+                      status.status === 'OPEN' ? 'text-green-400' :
+                      status.status === 'CLOSED' ? 'text-red-400' :
+                      status.status === 'OPENS SOON' ? 'text-yellow-400' :
+                      'text-orange-400'
+                    }`}>
+                      {status.status}
+                    </span>
+                    {status.message && (
+                      <span className="text-gray-400">({status.message})</span>
+                    )}
+                  </span>
+                );
+              })}
+              <span className="text-gray-600 mx-3">•</span>
+            </div>
+          ))}
         </motion.div>
       </div>
     </div>
