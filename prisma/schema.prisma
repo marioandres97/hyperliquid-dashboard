@@ -38,23 +38,114 @@ model Session {
   @@map("sessions")
 }
 
-// Alert model for price/funding alerts
+// Alert model for price/funding alerts and new alert types
 model Alert {
-  id          String   @id @default(cuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  asset       String
-  alertType   String   // price_above, price_below, funding_rate
-  threshold   Float
-  isActive    Boolean  @default(true)
+  id            String   @id @default(cuid())
+  userId        String?  // nullable for now (no auth yet)
+  user          User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Alert configuration
+  type          String   // "price" | "large_order" | "volume" | "price_above" | "price_below" | "funding_rate"
+  coin          String   // "BTC" | "ETH" | "HYPE" | "ALL" or specific asset
+  condition     String?  // "above" | "below" | "greater_than"
+  value         Float    // threshold
+  side          String?  // "BUY" | "SELL" | "BOTH" for large order alerts
+  
+  // Legacy fields for backwards compatibility
+  asset         String?
+  alertType     String?  // price_above, price_below, funding_rate
+  threshold     Float?
+  
+  // Status and notifications
+  enabled       Boolean  @default(true)
+  isActive      Boolean  @default(true)
+  browserNotif  Boolean  @default(true)
+  emailNotif    Boolean  @default(false)
+  webhook       String?
+  
+  // Tracking
+  triggered     Int      @default(0)
   lastTriggered DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  history       AlertHistory[]
 
   @@index([userId])
+  @@index([coin])
   @@index([asset])
+  @@index([enabled])
   @@index([isActive])
   @@map("alerts")
+}
+
+// Alert history for tracking triggers
+model AlertHistory {
+  id          String   @id @default(cuid())
+  alertId     String
+  alert       Alert    @relation(fields: [alertId], references: [id], onDelete: Cascade)
+  coin        String
+  price       Float?
+  orderSize   Float?
+  volume      Float?
+  triggeredAt DateTime @default(now())
+  
+  @@index([alertId])
+  @@index([triggeredAt])
+  @@map("alert_history")
+}
+
+// Economic calendar events
+model EconomicEvent {
+  id            String   @id @default(cuid())
+  name          String
+  country       String
+  category      String
+  impact        String   // "HIGH" | "MEDIUM" | "LOW"
+  eventDate     DateTime
+  source        String?
+  sourceUrl     String?
+  frequency     String?  // "Monthly" | "Quarterly" | "Annually"
+  
+  // Historical impact data
+  btcAvgImpact  Float?   // Average BTC % movement
+  ethAvgImpact  Float?   // Average ETH % movement
+  spxAvgImpact  Float?   // Average S&P 500 % movement
+  volumeSpike   Float?   // Average volume spike %
+  
+  // Volatility windows
+  primaryWindowStart  String?  // HH:MM UTC
+  primaryWindowEnd    String?  // HH:MM UTC
+  extendedWindowStart String?  // HH:MM UTC
+  extendedWindowEnd   String?  // HH:MM UTC
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  releases      EventRelease[]
+  
+  @@index([eventDate])
+  @@index([impact])
+  @@index([category])
+  @@map("economic_events")
+}
+
+// Historical releases for economic events
+model EventRelease {
+  id          String   @id @default(cuid())
+  eventId     String
+  event       EconomicEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  releaseDate DateTime
+  sentiment   String?  // "Hawkish" | "Dovish" | "Neutral"
+  btcImpact   Float?   // BTC % movement
+  ethImpact   Float?   // ETH % movement
+  spxImpact   Float?   // S&P 500 % movement
+  
+  createdAt   DateTime @default(now())
+  
+  @@index([eventId])
+  @@index([releaseDate])
+  @@map("event_releases")
 }
 
 // Trade snapshot for historical data
