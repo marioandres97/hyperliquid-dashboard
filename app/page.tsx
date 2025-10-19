@@ -2,7 +2,6 @@ import DashboardGrid from '@/components/layout/DashboardGrid';
 import WidgetContainer from '@/components/layout/WidgetContainer';
 import RealTimePricesWidget from '@/widgets/real-time-prices/RealTimePricesWidget';
 import { PnLTrackerWidgetWithBackground } from '@/widgets/pnl-tracker/PnLTrackerWidget';
-import MarketTimeWidget from '@/widgets/market-time/MarketTimeWidget';
 import OrderFlowBackground from '@/components/layout/backgrounds/OrderFlowBackground';
 import PricesBackground from '@/components/layout/backgrounds/PricesBackground';
 import AlertBackground from '@/components/layout/backgrounds/AlertBackground';
@@ -33,7 +32,7 @@ export default function Home() {
       </div>
 
       <DashboardGrid>
-        {/* Row 1: Real-Time Prices, Economic Calendar, Market Time */}
+        {/* Row 1: Real-Time Prices, Economic Calendar */}
         <WidgetContainer 
           title="Real-Time Prices"
           background={<PricesBackground />}
@@ -41,20 +40,14 @@ export default function Home() {
           <RealTimePricesWidget />
         </WidgetContainer>
 
-        <WidgetContainer 
-          title=""
-          background={<EconomicCalendarBackground />}
-        >
-          <EconomicCalendar />
-        </WidgetContainer>
-
-        {/* Market Time Widget - New Addition */}
-        <WidgetContainer 
-          title="UTC Clock"
-          background={<div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 via-blue-500/10 to-purple-500/10" />}
-        >
-          <MarketTimeWidget />
-        </WidgetContainer>
+        <div className="md:col-span-2">
+          <WidgetContainer 
+            title=""
+            background={<EconomicCalendarBackground />}
+          >
+            <EconomicCalendar />
+          </WidgetContainer>
+        </div>
 
         {/* Row 2: Large Orders Feed - full width */}
         <div className="md:col-span-3">
