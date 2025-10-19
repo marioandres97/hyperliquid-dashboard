@@ -4,6 +4,7 @@ import { OHLCCandle } from '@/lib/hyperliquid/types';
 const COINS = ['BTC', 'ETH', 'HYPE'];
 const REFRESH_INTERVAL = 60 * 60 * 1000; // 1 hour in milliseconds
 const MINUTE_UPDATE_INTERVAL = 60 * 1000; // 1 minute in milliseconds
+const ONE_MINUTE_MS = 60 * 1000; // 1 minute in milliseconds for comparison
 
 export function useCandleData() {
   const [candles, setCandles] = useState<Record<string, OHLCCandle[]>>({});
@@ -95,6 +96,7 @@ export function useCandleData() {
         });
 
         if (!response.ok) {
+          console.debug(`Failed to update candle for ${coin}: ${response.statusText}`);
           return; // Silently fail for minute updates
         }
 
@@ -118,7 +120,7 @@ export function useCandleData() {
 
             // Check if this is an update to the current candle or a new one
             const lastCandle = existing[existing.length - 1];
-            const isSameCandle = Math.abs(lastCandle.time - candleData.time) < 60000; // Within same minute
+            const isSameCandle = Math.abs(lastCandle.time - candleData.time) < ONE_MINUTE_MS; // Within same minute
 
             if (isSameCandle) {
               // Update existing candle
@@ -133,7 +135,8 @@ export function useCandleData() {
           });
         }
       } catch (err) {
-        // Silently fail for minute updates
+        // Log debug info for minute update failures
+        console.debug(`Failed to update current candle for ${coin}:`, err instanceof Error ? err.message : 'Unknown error');
       }
     }));
   };
