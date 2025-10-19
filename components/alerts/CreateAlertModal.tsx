@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import type { CreateAlertInput, AlertType, AlertCoin, AlertCondition, AlertSide } from '@/lib/alerts/types';
 import { X } from 'lucide-react';
 
@@ -20,7 +21,32 @@ export function CreateAlertModal({ isOpen, onClose, onCreate }: CreateAlertModal
   const [emailNotif, setEmailNotif] = useState(false);
   const [creating, setCreating] = useState(false);
 
-  if (!isOpen) return null;
+  // Add escape key handler
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    
+    // Prevent body scroll when modal is open
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      // Restore original overflow or remove the property if it was empty
+      if (originalOverflow) {
+        document.body.style.overflow = originalOverflow;
+      } else {
+        document.body.style.removeProperty('overflow');
+      }
+    };
+  }, [isOpen, onClose]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,8 +89,26 @@ export function CreateAlertModal({ isOpen, onClose, onCreate }: CreateAlertModal
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-0 md:p-4">
-      <div className="bg-gray-900 border-0 md:border border-gray-800 rounded-none md:rounded-xl max-w-full md:max-w-[600px] w-full max-h-screen md:max-h-[90vh] overflow-y-auto">
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          {/* Backdrop - SEPARATE element */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+          />
+
+          {/* Modal - SEPARATE element, floats above */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            onClick={(e) => e.stopPropagation()}
+            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[calc(100%-2rem)] md:max-w-[600px] max-h-[90vh] overflow-y-auto bg-gray-900 border-0 md:border border-gray-800 rounded-none md:rounded-xl shadow-2xl z-50"
+          >
         {/* Header */}
         <div className="border-b border-gray-800 p-4 sm:p-5 md:p-6 flex items-center justify-between sticky top-0 bg-gray-900 z-10">
           <h2 className="text-lg sm:text-xl font-bold text-white">Create Alert</h2>
@@ -236,7 +280,9 @@ export function CreateAlertModal({ isOpen, onClose, onCreate }: CreateAlertModal
             </button>
           </div>
         </form>
-      </div>
-    </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
   );
 }

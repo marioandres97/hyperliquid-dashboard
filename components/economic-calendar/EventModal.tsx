@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import type { EconomicEventWithReleases } from '@/lib/economic-calendar/types';
 import { getCategoryIcon, getImpactBadge } from '@/lib/economic-calendar/events-data';
 import { formatEventDate } from '@/lib/economic-calendar/api';
@@ -32,28 +33,39 @@ export function EventModal({ event, onClose }: EventModalProps) {
     // Cleanup
     return () => {
       document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = originalOverflow;
+      // Restore original overflow or remove the property if it was empty
+      if (originalOverflow) {
+        document.body.style.overflow = originalOverflow;
+      } else {
+        document.body.style.removeProperty('overflow');
+      }
     };
   }, [event, onClose]);
 
-  if (!event) return null;
-
-  const icon = getCategoryIcon(event.category);
-  const impactBadge = getImpactBadge(event.impact);
-
-  // Handle backdrop click
-  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
+  const icon = event ? getCategoryIcon(event.category) : null;
+  const impactBadge = event ? getImpactBadge(event.impact) : null;
 
   return (
-    <div 
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-0 md:p-4"
-      onClick={handleBackdropClick}
-    >
-      <div className="bg-gray-900 border-0 md:border border-gray-800 rounded-none md:rounded-xl max-w-full md:max-w-[600px] w-full max-h-screen md:max-h-[90vh] overflow-y-auto">
+    <AnimatePresence>
+      {event && (
+        <>
+          {/* Backdrop - SEPARATE element, covers full screen */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+          />
+
+          {/* Modal Content - SEPARATE element, floats above */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            onClick={(e) => e.stopPropagation()}
+            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[calc(100%-2rem)] md:max-w-[600px] max-h-[90vh] overflow-y-auto bg-gray-900 border-0 md:border border-gray-800 rounded-none md:rounded-xl shadow-2xl z-50"
+          >
         {/* Header */}
         <div className="sticky top-0 bg-gray-900 border-b border-gray-800 p-4 sm:p-5 md:p-6 flex items-start justify-between z-10">
           <div className="flex-1 min-w-0 pr-2">
@@ -174,7 +186,9 @@ export function EventModal({ event, onClose }: EventModalProps) {
             </div>
           </div>
         </div>
-      </div>
-    </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
   );
 }
