@@ -1,5 +1,5 @@
 export type AlertType = 'price' | 'large_order' | 'volume';
-export type AlertCondition = 'above' | 'below' | 'greater_than';
+export type AlertCondition = 'above' | 'below';
 export type AlertSide = 'BUY' | 'SELL' | 'BOTH';
 export type AlertCoin = 'BTC' | 'ETH' | 'HYPE' | 'ALL';
 

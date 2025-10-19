@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     const enabled = searchParams.get('enabled');
 
     // Build where clause
-    const where: any = {};
+    const where: { enabled?: boolean } = {};
     if (enabled !== null) {
       where.enabled = enabled === 'true';
     }
