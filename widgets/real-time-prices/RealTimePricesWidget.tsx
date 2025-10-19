@@ -58,34 +58,48 @@ export default function RealTimePricesWidget() {
   // Mobile: Carousel view
   if (isMobile) {
     return (
-      <div className="h-full min-h-[400px]">
-        <MobileCarousel>
-          {COINS.map(coin => (
-            <PremiumPriceCard
-              key={coin}
-              coin={coin}
-              data={prices[coin]}
-              isConnected={isConnected[coin]}
-              sparklineData={sparklineData[coin] || []}
-            />
-          ))}
-        </MobileCarousel>
+      <div className="h-full min-h-[400px] flex flex-col">
+        <div className="flex-1">
+          <MobileCarousel>
+            {COINS.map(coin => (
+              <PremiumPriceCard
+                key={coin}
+                coin={coin}
+                data={prices[coin]}
+                isConnected={isConnected[coin]}
+                sparklineData={sparklineData[coin] || []}
+              />
+            ))}
+          </MobileCarousel>
+        </div>
+        <div className="mt-3 text-center">
+          <p className="text-xs text-gray-400/60 font-medium">
+            Prices from Hyperliquid exchange • Updates hourly
+          </p>
+        </div>
       </div>
     );
   }
 
   // Desktop/Tablet: 3-card grid
   return (
-    <div className="h-full grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
-      {COINS.map(coin => (
-        <PremiumPriceCard
-          key={coin}
-          coin={coin}
-          data={prices[coin]}
-          isConnected={isConnected[coin]}
-          sparklineData={sparklineData[coin] || []}
-        />
-      ))}
+    <div className="h-full flex flex-col">
+      <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
+        {COINS.map(coin => (
+          <PremiumPriceCard
+            key={coin}
+            coin={coin}
+            data={prices[coin]}
+            isConnected={isConnected[coin]}
+            sparklineData={sparklineData[coin] || []}
+          />
+        ))}
+      </div>
+      <div className="mt-4 text-center">
+        <p className="text-xs text-gray-400/60 font-medium">
+          Prices from Hyperliquid exchange • Updates hourly
+        </p>
+      </div>
     </div>
   );
 }

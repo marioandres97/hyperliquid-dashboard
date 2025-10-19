@@ -146,6 +146,7 @@ export default function MarketHoursBar() {
   const [isPaused, setIsPaused] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const [screenSize, setScreenSize] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
+  const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
     // Set initial time on client
@@ -200,6 +201,17 @@ export default function MarketHoursBar() {
     };
   }, []);
 
+  // Auto-rotate slides on mobile/tablet
+  useEffect(() => {
+    if (screenSize !== 'desktop' && !isPaused && !prefersReducedMotion) {
+      const autoRotate = setInterval(() => {
+        setCurrentSlide((prev) => (prev + 1) % 2); // Rotate between 0 and 1 (2 slides)
+      }, 4000); // Change every 4 seconds
+      
+      return () => clearInterval(autoRotate);
+    }
+  }, [screenSize, isPaused, prefersReducedMotion]);
+
   // Return early if not yet hydrated
   if (!currentTime) {
     return (
@@ -240,8 +252,85 @@ export default function MarketHoursBar() {
     );
   });
 
-  // If reduced motion is preferred OR desktop, show static content
-  if (prefersReducedMotion || screenSize === 'desktop') {
+  // Mobile/Tablet: Show 2 markets at a time with auto-rotation
+  if (screenSize !== 'desktop' && !prefersReducedMotion) {
+    // Group markets into pairs for mobile carousel
+    const marketPairs = [
+      [markets[0], markets[1]], // Tokyo, London
+      [markets[2], markets[3]], // New York, CME
+    ];
+    
+    const currentPair = marketPairs[currentSlide];
+    
+    return (
+      <div 
+        className="z-40 bg-gray-900/85 backdrop-blur-md border-b border-gray-800/30 py-2 sm:py-2.5"
+        style={{ 
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.4)' 
+        }}
+      >
+        <div 
+          className="overflow-hidden relative"
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+          onTouchStart={() => setIsPaused(true)}
+          onTouchEnd={() => setIsPaused(false)}
+        >
+          <motion.div
+            key={currentSlide}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.5 }}
+            className="flex items-center justify-center text-xs sm:text-sm font-medium tracking-wide"
+          >
+            {currentPair.map((market, index) => {
+              const status = getMarketStatus(currentTime, market);
+              return (
+                <span key={market.name} className="inline-flex items-center">
+                  <span className="inline-flex items-center gap-1 whitespace-nowrap mx-2 sm:mx-3">
+                    <span className="text-gray-200">{market.name}:</span>
+                    <span>{status.icon}</span>
+                    <span className={`font-medium ${
+                      status.status === 'OPEN' ? 'text-green-400' :
+                      status.status === 'CLOSED' ? 'text-red-400' :
+                      status.status === 'OPENS SOON' ? 'text-yellow-400' :
+                      'text-orange-400'
+                    }`}>
+                      {status.status}
+                    </span>
+                    {status.message && (
+                      <span className="text-gray-400 hidden sm:inline">({status.message})</span>
+                    )}
+                  </span>
+                  {index === 0 && <span className="text-gray-600 mx-2 sm:mx-3">•</span>}
+                </span>
+              );
+            })}
+          </motion.div>
+          
+          {/* Dot indicators */}
+          <div className="flex items-center justify-center gap-2 mt-1">
+            {[0, 1].map((index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentSlide(index)}
+                className={`w-1.5 h-1.5 rounded-full transition-all ${
+                  currentSlide === index 
+                    ? 'bg-purple-400 w-4' 
+                    : 'bg-gray-600 hover:bg-gray-500'
+                }`}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // If reduced motion is preferred, show static content
+  if (prefersReducedMotion) {
     return (
       <div 
         className="z-40 bg-gray-900/85 backdrop-blur-md border-b border-gray-800/30 py-2 sm:py-2.5"
@@ -263,8 +352,8 @@ export default function MarketHoursBar() {
     );
   }
 
-  // Determine animation duration based on screen size
-  const animationDuration = screenSize === 'mobile' ? ANIMATION_DURATION_MOBILE : ANIMATION_DURATION_TABLET;
+  // Desktop: Show infinite scrolling animation with all markets
+  const animationDuration = ANIMATION_DURATION_TABLET;
 
   return (
     <div 
