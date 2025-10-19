@@ -146,6 +146,11 @@ export default function MarketHoursBar() {
     // Set initial time on client
     setCurrentTime(new Date());
     
+    // Setup update interval
+    const interval = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60000); // Update every minute
+    
     // Check for reduced motion preference (only in browser)
     if (typeof window !== 'undefined') {
       const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -157,15 +162,13 @@ export default function MarketHoursBar() {
       
       mediaQuery.addEventListener('change', handleChange);
       
-      const interval = setInterval(() => {
-        setCurrentTime(new Date());
-      }, 60000); // Update every minute
-      
       return () => {
         clearInterval(interval);
         mediaQuery.removeEventListener('change', handleChange);
       };
     }
+    
+    return () => clearInterval(interval);
   }, []);
 
   // Return early if not yet hydrated
@@ -242,7 +245,7 @@ export default function MarketHoursBar() {
       duration: animationDuration,
       ease: "linear" as const,
     },
-  }), [animationDuration]);
+  }), []); // Empty deps since animationDuration is constant
 
   return (
     <div 
