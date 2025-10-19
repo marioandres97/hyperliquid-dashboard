@@ -76,7 +76,7 @@ export function TradeEntryModal({ isOpen, onClose, onCreate }: TradeEntryModalPr
     setSubmitting(true);
     try {
       await onCreate(formData);
-      // Reset form only if successful (onCreate will handle closing modal)
+      // Reset form only if successful (onCreate will handle closing modal and showing success toast)
       setFormData({
         coin: 'BTC',
         side: 'LONG',
@@ -90,7 +90,12 @@ export function TradeEntryModal({ isOpen, onClose, onCreate }: TradeEntryModalPr
       });
       setTagInput('');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create trade');
+      // Show error in modal AND as inline error message
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create trade';
+      setError(errorMessage);
+      
+      // The error toast will be shown by the PnL tracker widget
+      // We keep the inline error for immediate feedback
     } finally {
       setSubmitting(false);
     }

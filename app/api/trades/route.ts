@@ -76,7 +76,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: 'Database not configured. Please contact administrator.',
+          error: 'Database not available',
+          message: 'The database is not configured. Please ensure DATABASE_URL is set in your environment variables.',
+          code: 'DB_NOT_CONFIGURED',
         },
         { status: 503 }
       );
@@ -93,6 +95,8 @@ export async function POST(request: NextRequest) {
           {
             success: false,
             error: `Missing required field: ${field}`,
+            message: `The field "${field}" is required to create a trade.`,
+            code: 'VALIDATION_ERROR',
           },
           { status: 400 }
         );
@@ -105,7 +109,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: 'Invalid coin. Must be BTC, ETH, HYPE, USDT, or USDC',
+          error: 'Invalid coin',
+          message: 'Coin must be one of: BTC, ETH, HYPE, USDT, or USDC',
+          code: 'VALIDATION_ERROR',
         },
         { status: 400 }
       );
@@ -117,7 +123,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: 'Invalid side. Must be LONG or SHORT',
+          error: 'Invalid side',
+          message: 'Side must be either LONG or SHORT',
+          code: 'VALIDATION_ERROR',
         },
         { status: 400 }
       );
@@ -144,35 +152,71 @@ export async function POST(request: NextRequest) {
       pnlPercent: pnlPercent.toFixed(2)
     });
 
-    // Create trade
-    const trade = await prisma.trade.create({
-      data: {
-        coin: body.coin,
-        side: body.side,
-        entryPrice,
-        exitPrice,
-        size,
-        entryTime: new Date(body.entryTime),
-        exitTime: new Date(body.exitTime),
-        pnl,
-        pnlPercent,
-        notes: body.notes || null,
-        tags: body.tags || [],
-      },
-    });
+    // Create trade with better error handling
+    let trade;
+    try {
+      trade = await prisma.trade.create({
+        data: {
+          coin: body.coin,
+          side: body.side,
+          entryPrice,
+          exitPrice,
+          size,
+          entryTime: new Date(body.entryTime),
+          exitTime: new Date(body.exitTime),
+          pnl,
+          pnlPercent,
+          notes: body.notes || null,
+          tags: body.tags || [],
+        },
+      });
+    } catch (dbError) {
+      console.error('Database error creating trade:', dbError);
+      
+      // Check if it's a connection error
+      if (dbError instanceof Error) {
+        if (dbError.message.includes('connect') || dbError.message.includes('ECONNREFUSED')) {
+          return NextResponse.json(
+            {
+              success: false,
+              error: 'Database connection failed',
+              message: 'Unable to connect to the database. Please try again or contact support if the issue persists.',
+              code: 'DB_CONNECTION_ERROR',
+              details: dbError.message,
+            },
+            { status: 503 }
+          );
+        }
+      }
+      
+      // Generic database error
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Database error',
+          message: 'An error occurred while saving the trade. Please try again.',
+          code: 'DB_ERROR',
+          details: dbError instanceof Error ? dbError.message : 'Unknown database error',
+        },
+        { status: 500 }
+      );
+    }
 
     console.log('Trade created successfully', { tradeId: trade.id });
 
     return NextResponse.json({
       success: true,
       data: trade,
+      message: 'Trade created successfully',
     });
   } catch (error) {
     console.error('Error creating trade:', error);
     return NextResponse.json(
       {
         success: false,
-        error: 'Failed to create trade',
+        error: 'Internal server error',
+        message: 'An unexpected error occurred. Please try again.',
+        code: 'INTERNAL_ERROR',
         details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }

@@ -25,8 +25,23 @@ vi.mock('@/lib/core/config', () => ({
 }));
 
 vi.mock('@/lib/database/client', () => ({
+  prisma: {
+    $queryRaw: vi.fn(),
+    $connect: vi.fn(),
+    $disconnect: vi.fn(),
+  },
   connectDatabase: vi.fn(),
   isDatabaseAvailable: vi.fn(() => true),
+}));
+
+vi.mock('@/lib/database/healthCheck', () => ({
+  performDatabaseHealthCheck: vi.fn().mockResolvedValue({
+    available: true,
+    connected: true,
+    latency: 10,
+  }),
+  retryDatabaseConnection: vi.fn().mockResolvedValue(true),
+  verifyDatabaseConfig: vi.fn(() => ({ valid: true, errors: [] })),
 }));
 
 vi.mock('@/lib/core/shutdown', () => ({
@@ -50,11 +65,11 @@ describe('Application Initialization', () => {
 
     it('should connect to database when available', async () => {
       const { initializeApp } = await import('@/lib/init');
-      const { connectDatabase } = await import('@/lib/database/client');
+      const { retryDatabaseConnection } = await import('@/lib/database/healthCheck');
 
       await initializeApp();
 
-      expect(connectDatabase).toHaveBeenCalled();
+      expect(retryDatabaseConnection).toHaveBeenCalled();
     });
 
     it('should schedule cache warming when enabled', async () => {

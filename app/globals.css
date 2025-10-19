@@ -46,6 +46,12 @@
   --transition-slow: 300ms;
 }
 
+/* Ensure html and body maintain dark background on all devices */
+html {
+  background: var(--color-bg-dark-start);
+  min-height: 100vh;
+}
+
 body {
   background: linear-gradient(135deg, var(--color-bg-dark-start) 0%, var(--color-bg-dark-mid) 50%, var(--color-bg-dark-end) 100%);
   background-attachment: fixed;
@@ -53,6 +59,8 @@ body {
   color: #ffffff;
   font-family: var(--font-sans);
   overflow-x: hidden;
+  /* Prevent white background from showing on mobile scroll */
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Financial data typography */

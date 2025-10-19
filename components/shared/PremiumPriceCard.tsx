@@ -114,7 +114,7 @@ export function PremiumPriceCard({
                 initial={{ scale: 1 }}
                 animate={{ scale: [1, 1.02, 1] }}
                 transition={{ duration: 0.3 }}
-                className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-white mb-3 tracking-tight leading-none"
+                className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-3 tracking-tight leading-none"
                 style={{ fontFeatureSettings: '"tnum"' }}
               >
                 ${data.price.toLocaleString(undefined, {

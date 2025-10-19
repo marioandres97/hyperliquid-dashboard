@@ -7,6 +7,9 @@ import { CreateAlertModal } from './CreateAlertModal';
 import { getAlertDescription } from '@/lib/alerts/types';
 import { Plus, Trash2, Bell, BellOff } from 'lucide-react';
 import type { CreateAlertInput } from '@/lib/alerts/types';
+import { PremiumCard } from '@/components/shared/PremiumCard';
+import { PremiumButton } from '@/components/shared/PremiumButton';
+import { PremiumBadge } from '@/components/shared/PremiumBadge';
 
 export function AlertSystem() {
   const { alerts, loading, error, createAlert, updateAlert, deleteAlert, refetch } = useAlerts();
@@ -60,31 +63,31 @@ export function AlertSystem() {
     <div className="space-y-4">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <Bell className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
+        <div className="flex items-center gap-3">
+          <Bell className="w-5 h-5 text-blue-400" />
           <div>
-            <h2 className="text-base sm:text-lg font-bold text-white">Alert System</h2>
-            <p className="text-[10px] sm:text-xs text-gray-400 mt-0.5 sm:mt-1">
+            <h2 className="text-lg font-bold text-white">Alert System</h2>
+            <p className="text-xs text-gray-400 mt-1">
               Get notified about important market events
             </p>
           </div>
         </div>
-        <button
+        <PremiumButton
           onClick={() => setIsCreateModalOpen(true)}
-          className="flex items-center justify-center gap-2 px-4 py-2.5 sm:py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors min-h-[44px] w-full sm:w-auto"
+          icon={<Plus className="w-4 h-4" />}
+          size="md"
         >
-          <Plus className="w-4 h-4" />
-          <span>Create Alert</span>
-        </button>
+          Create Alert
+        </PremiumButton>
       </div>
 
       {/* Loading State - Skeleton */}
       {loading && (
-        <div className="space-y-2">
+        <div className="space-y-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="bg-gray-900/50 border border-gray-800 rounded-lg p-3">
-              <div className="flex items-start gap-2">
-                <div className="skeleton w-4 h-4 rounded" />
+            <div key={i} className="bg-white/5 border border-white/10 rounded-xl p-4">
+              <div className="flex items-start gap-3">
+                <div className="skeleton w-10 h-10 rounded-lg" />
                 <div className="flex-1 space-y-2">
                   <div className="skeleton h-4 w-3/4 rounded" />
                   <div className="skeleton h-3 w-1/2 rounded" />
@@ -97,35 +100,40 @@ export function AlertSystem() {
 
       {/* Error State */}
       {error && (
-        <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
+        <PremiumCard glow="red" hover={false} className="p-4">
           <p className="text-sm text-red-400">Error: {error}</p>
-        </div>
+        </PremiumCard>
       )}
 
       {/* Active Alerts */}
       {!loading && !error && (
         <>
           {alerts.length === 0 ? (
-            <div className="bg-gray-900/50 border border-gray-800 rounded-lg p-4 text-center">
-              <Bell className="w-8 h-8 text-gray-600 mx-auto mb-2" />
-              <p className="text-sm text-gray-400">No alerts yet</p>
-            </div>
+            <PremiumCard hover={false} className="p-8 text-center">
+              <Bell className="w-12 h-12 text-white/20 mx-auto mb-3" />
+              <p className="text-sm text-white/40">No alerts yet</p>
+              <p className="text-xs text-white/20 mt-2">
+                Create your first alert to get started
+              </p>
+            </PremiumCard>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-3">
               {alerts.map((alert) => (
-                <div
-                  key={alert.id}
-                  className="bg-gray-900/50 border border-gray-800 rounded-lg p-2.5 sm:p-3 lg:p-4 hover:border-gray-700 transition-colors"
+                <PremiumCard 
+                  key={alert.id} 
+                  hover={true}
+                  glow={alert.enabled ? 'blue' : 'none'}
+                  className="p-4"
                 >
-                  <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
+                      <div className="flex items-start gap-3 mb-3">
                         <button
                           onClick={() => handleToggle(alert.id, alert.enabled)}
-                          className={`p-2 rounded transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center ${
+                          className={`p-2 rounded-lg transition-all min-w-[40px] min-h-[40px] flex items-center justify-center ${
                             alert.enabled
-                              ? 'text-green-400 hover:text-green-300'
-                              : 'text-gray-600 hover:text-gray-500'
+                              ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30'
+                              : 'bg-white/5 text-white/40 hover:bg-white/10'
                           }`}
                         >
                           {alert.enabled ? (
@@ -135,41 +143,41 @@ export function AlertSystem() {
                           )}
                         </button>
                         <div className="flex-1 min-w-0">
-                          <h3 className="text-xs sm:text-sm text-white font-medium line-clamp-2">
+                          <h3 className="text-sm text-white font-semibold mb-1 line-clamp-2">
                             {getAlertDescription(alert)}
                           </h3>
-                          <div className="flex items-center gap-2 mt-0.5 text-[10px] sm:text-xs text-gray-400">
-                            {alert.triggered > 0 && (
-                              <span>Triggered {alert.triggered}x</span>
-                            )}
-                          </div>
+                          {alert.triggered > 0 && (
+                            <p className="text-xs text-white/50">
+                              Triggered {alert.triggered} time{alert.triggered !== 1 ? 's' : ''}
+                            </p>
+                          )}
                         </div>
                       </div>
 
                       {/* Notification Methods */}
-                      <div className="flex gap-1.5 ml-[52px]">
+                      <div className="flex gap-2 ml-[52px]">
                         {alert.browserNotif && (
-                          <span className="px-1.5 py-0.5 bg-blue-500/20 text-blue-400 rounded text-[10px] sm:text-xs">
+                          <PremiumBadge variant="info" size="sm">
                             Browser
-                          </span>
+                          </PremiumBadge>
                         )}
                         {alert.emailNotif && (
-                          <span className="px-1.5 py-0.5 bg-purple-500/20 text-purple-400 rounded text-[10px] sm:text-xs">
+                          <PremiumBadge variant="neutral" size="sm">
                             Email
-                          </span>
+                          </PremiumBadge>
                         )}
                       </div>
                     </div>
 
-                    {/* Actions */}
+                    {/* Delete Button */}
                     <button
                       onClick={() => handleDelete(alert.id)}
-                      className="p-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center flex-shrink-0"
+                      className="p-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-all min-w-[40px] min-h-[40px] flex items-center justify-center flex-shrink-0"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
-                </div>
+                </PremiumCard>
               ))}
             </div>
           )}
@@ -177,8 +185,8 @@ export function AlertSystem() {
       )}
 
       {/* Info Box */}
-      <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-2.5 sm:p-3">
-        <p className="text-[10px] sm:text-xs text-blue-400/80">
+      <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-3 backdrop-blur-sm">
+        <p className="text-xs text-blue-400/80">
           💡 Alerts are checked every 5 seconds. Browser notifications require permission.
         </p>
       </div>
