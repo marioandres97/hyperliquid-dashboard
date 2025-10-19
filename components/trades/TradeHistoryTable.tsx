@@ -41,9 +41,16 @@ export function TradeHistoryTable({ trades, onDelete, onExport, loading }: Trade
 
   if (loading) {
     return (
-      <div className="text-center py-8">
-        <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-500 border-r-transparent"></div>
-        <p className="mt-2 text-sm text-gray-400">Loading trades...</p>
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="skeleton h-6 w-32 rounded" />
+          <div className="skeleton h-8 w-28 rounded" />
+        </div>
+        <div className="space-y-2">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="skeleton h-12 rounded" />
+          ))}
+        </div>
       </div>
     );
   }

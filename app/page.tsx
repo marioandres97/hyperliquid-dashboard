@@ -11,6 +11,7 @@ import { LargeOrdersFeed } from '@/components/large-orders/LargeOrdersFeed';
 import { AlertSystem } from '@/components/alerts/AlertSystem';
 import Header from '@/components/Header';
 import MarketHoursBar from '@/components/MarketHoursBar';
+import { Info } from 'lucide-react';
 
 export default function Home() {
   return (
@@ -21,12 +22,15 @@ export default function Home() {
       {/* Market Hours Bar */}
       <MarketHoursBar />
       
-      {/* Live indicator banner */}
-      <div className="bg-blue-500/10 border-b border-blue-500/20 py-2">
+      {/* Simplified info banner */}
+      <div className="bg-blue-500/5 border-b border-blue-500/10 py-2">
         <div className="container mx-auto px-4 flex items-center justify-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-          <span className="text-sm text-blue-300">
-            ℹ️ Live prices • 1H charts (24h rolling window)
+          <div className="relative w-2 h-2">
+            <div className="absolute inset-0 rounded-full bg-green-400 status-pulse" />
+          </div>
+          <Info className="w-3.5 h-3.5 text-blue-400" />
+          <span className="text-xs text-gray-400 font-financial">
+            Live prices • 1H charts (24h rolling window)
           </span>
         </div>
       </div>
@@ -74,14 +78,11 @@ export default function Home() {
         </div>
       </DashboardGrid>
 
-      {/* Footer Disclaimer */}
-      <footer className="border-t border-gray-800 mt-12 py-6">
+      {/* Reduced footer disclaimer */}
+      <footer className="border-t border-gray-800/50 mt-12 py-4">
         <div className="container mx-auto px-4 text-center">
-          <p className="text-xs text-gray-500">
-            ⚠️ This is an information platform. Not financial advice. Do your own research.
-          </p>
-          <p className="text-xs text-gray-600 mt-1">
-            Historical data does not guarantee future results. Trading cryptocurrency involves substantial risk.
+          <p className="text-xs text-gray-600">
+            Information platform only. Not financial advice. DYOR. Trading involves substantial risk.
           </p>
         </div>
       </footer>

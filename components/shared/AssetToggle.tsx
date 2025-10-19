@@ -8,9 +8,9 @@ import { ASSET_COLORS } from '@/lib/theme/colors';
 const ASSETS: Asset[] = ['BTC', 'ETH', 'HYPE'];
 
 const ASSET_INFO = {
-  BTC: { name: 'Bitcoin', symbol: '₿' },
-  ETH: { name: 'Ethereum', symbol: 'Ξ' },
-  HYPE: { name: 'Hyperliquid', symbol: 'H' },
+  BTC: { name: 'Bitcoin' },
+  ETH: { name: 'Ethereum' },
+  HYPE: { name: 'Hyperliquid' },
 };
 
 export const AssetToggle: React.FC = () => {
@@ -59,9 +59,8 @@ export const AssetToggle: React.FC = () => {
                 transition={{ type: 'spring', stiffness: 500, damping: 30 }}
               />
             )}
-            <span className="relative z-10 flex items-center gap-1.5">
-              <span className="text-lg">{ASSET_INFO[asset].symbol}</span>
-              <span>{asset}</span>
+            <span className="relative z-10 font-financial">
+              {asset}
             </span>
           </motion.button>
         );

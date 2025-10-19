@@ -5,6 +5,7 @@ import { Signal } from './types';
 import { TrendingUp, TrendingDown, CheckCircle2, XCircle, Wifi, WifiOff, X } from 'lucide-react';
 
 const COINS = ['BTC', 'ETH', 'HYPE'];
+const NEW_SIGNAL_THRESHOLD_MINUTES = 5;
 
 export default function OrderFlowSignalsWidget() {
   const { coinStates, isConnected, dismissSignal } = useSignalDetection();
@@ -27,10 +28,10 @@ export default function OrderFlowSignalsWidget() {
           ) : (
             <WifiOff className="w-4 h-4 text-red-400" />
           )}
-          <span className="text-sm font-medium text-white">
+          <span className="text-sm font-medium text-white font-financial">
             {activeCount > 0 ? (
               <>
-                {activeCount} Active {activeCount === 1 ? 'Signal' : 'Signals'} 🔔
+                {activeCount} Active {activeCount === 1 ? 'Signal' : 'Signals'}
               </>
             ) : (
               'Scanning all coins...'
@@ -183,26 +184,25 @@ function SignalCard({
   const minutesAgo = Math.floor(secondsAgo / 60);
   
   let timeText = '';
-  let isNew = false;
+  // NEW badge only for signals less than threshold minutes old
+  const isNew = minutesAgo < NEW_SIGNAL_THRESHOLD_MINUTES;
   
   if (secondsAgo < 60) {
     timeText = `${secondsAgo}sec ago`;
-    isNew = true;
   } else if (minutesAgo < 60) {
     timeText = `${minutesAgo}min ago`;
-    isNew = minutesAgo === 0;
   } else {
     const hoursAgo = Math.floor(minutesAgo / 60);
     timeText = `${hoursAgo}h ago`;
   }
 
-  let confidenceBadge = '';
   let confidenceColor = '';
+  let confidenceLevel = '';
   if (signal.confidence >= 90) {
-    confidenceBadge = '🔥';
+    confidenceLevel = 'HIGH';
     confidenceColor = 'text-orange-400';
   } else if (signal.confidence >= 75) {
-    confidenceBadge = '⚠️';
+    confidenceLevel = 'MED';
     confidenceColor = 'text-yellow-400';
   }
 
@@ -252,8 +252,14 @@ function SignalCard({
         <div className="text-2xl font-bold text-white">
           ${signal.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
         </div>
-        <div className={`text-sm font-semibold ${confidenceColor}`}>
-          Confidence: {signal.confidence}% ({metCount}/{totalCount}) {confidenceBadge}
+        <div className="text-sm font-semibold flex items-center gap-2">
+          <span className={confidenceColor}>Confidence: {signal.confidence}%</span>
+          <span className="text-gray-400">({metCount}/{totalCount})</span>
+          {confidenceLevel && (
+            <span className={`px-2 py-0.5 text-xs font-bold rounded ${confidenceColor} bg-current/10`}>
+              {confidenceLevel}
+            </span>
+          )}
         </div>
       </div>
 

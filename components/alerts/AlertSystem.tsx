@@ -37,11 +37,14 @@ export function AlertSystem() {
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-lg font-bold text-white">Alert System 🔔</h2>
-          <p className="text-xs text-gray-400 mt-1">
-            Get notified about important market events
-          </p>
+        <div className="flex items-center gap-2">
+          <Bell className="w-5 h-5 text-blue-400" />
+          <div>
+            <h2 className="text-lg font-bold text-white">Alert System</h2>
+            <p className="text-xs text-gray-400 mt-1">
+              Get notified about important market events
+            </p>
+          </div>
         </div>
         <button
           onClick={() => setIsCreateModalOpen(true)}
@@ -52,11 +55,20 @@ export function AlertSystem() {
         </button>
       </div>
 
-      {/* Loading State */}
+      {/* Loading State - Skeleton */}
       {loading && (
-        <div className="text-center py-12">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-500 border-r-transparent"></div>
-          <p className="mt-2 text-sm text-gray-400">Loading alerts...</p>
+        <div className="space-y-2">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="bg-gray-900/50 border border-gray-800 rounded-lg p-3">
+              <div className="flex items-start gap-2">
+                <div className="skeleton w-4 h-4 rounded" />
+                <div className="flex-1 space-y-2">
+                  <div className="skeleton h-4 w-3/4 rounded" />
+                  <div className="skeleton h-3 w-1/2 rounded" />
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
