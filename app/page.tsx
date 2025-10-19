@@ -42,7 +42,9 @@ export default function Home() {
             title="Real-Time Prices"
             background={<PricesBackground />}
           >
-            <RealTimePricesWidget />
+            <div className="xl:max-h-[600px]">
+              <RealTimePricesWidget />
+            </div>
           </WidgetContainer>
         </div>
 
