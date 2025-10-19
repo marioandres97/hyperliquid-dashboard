@@ -46,24 +46,6 @@ export function EventCard({ event, onClick }: EventCardProps) {
           </span>
         </div>
       </div>
-
-      {/* Impact Stats */}
-      {event.btcAvgImpact !== undefined && event.volumeSpike !== undefined && (
-        <div className="grid grid-cols-2 gap-2 text-xs">
-          <div className="bg-gray-800/50 rounded px-2 py-1">
-            <span className="text-gray-400">Avg Impact:</span>
-            <span className="text-white ml-1 font-medium">
-              ±{event.btcAvgImpact.toFixed(1)}%
-            </span>
-          </div>
-          <div className="bg-gray-800/50 rounded px-2 py-1">
-            <span className="text-gray-400">Volume:</span>
-            <span className="text-white ml-1 font-medium">
-              +{event.volumeSpike}%
-            </span>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

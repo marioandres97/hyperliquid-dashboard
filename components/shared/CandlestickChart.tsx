@@ -25,6 +25,7 @@ export default function CandlestickChart({ data, height = 200 }: CandlestickChar
         hour: 'numeric',
         minute: '2-digit',
         hour12: true,
+        timeZone: 'UTC',
       }),
     }));
   }, [data]);
@@ -34,7 +35,8 @@ export default function CandlestickChart({ data, height = 200 }: CandlestickChar
     return date.toLocaleTimeString('en-US', {
       hour: 'numeric',
       hour12: true,
-    });
+      timeZone: 'UTC',
+    }) + ' UTC';
   };
 
   const formatPrice = (value: number) => {
@@ -95,8 +97,7 @@ export default function CandlestickChart({ data, height = 200 }: CandlestickChar
               hour: '2-digit',
               minute: '2-digit',
               timeZone: 'UTC',
-              timeZoneName: 'short'
-            });
+            }) + ' UTC';
             
             // Calculate volume in USD (volume * average price)
             const avgPrice = (data.high + data.low) / 2;

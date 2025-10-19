@@ -126,6 +126,8 @@ export function TradeEntryModal({ isOpen, onClose, onCreate }: TradeEntryModalPr
               <option value="BTC">BTC</option>
               <option value="ETH">ETH</option>
               <option value="HYPE">HYPE</option>
+              <option value="USDT">USDT</option>
+              <option value="USDC">USDC</option>
             </select>
           </div>
 
