@@ -5,6 +5,7 @@ import { Signal } from './types';
 import { TrendingUp, TrendingDown, CheckCircle2, XCircle, Wifi, WifiOff, X } from 'lucide-react';
 
 const COINS = ['BTC', 'ETH', 'HYPE'];
+const NEW_SIGNAL_THRESHOLD_MINUTES = 5;
 
 export default function OrderFlowSignalsWidget() {
   const { coinStates, isConnected, dismissSignal } = useSignalDetection();
@@ -183,8 +184,8 @@ function SignalCard({
   const minutesAgo = Math.floor(secondsAgo / 60);
   
   let timeText = '';
-  // NEW badge only for signals less than 5 minutes old
-  const isNew = minutesAgo < 5;
+  // NEW badge only for signals less than threshold minutes old
+  const isNew = minutesAgo < NEW_SIGNAL_THRESHOLD_MINUTES;
   
   if (secondsAgo < 60) {
     timeText = `${secondsAgo}sec ago`;
