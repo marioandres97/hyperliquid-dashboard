@@ -86,15 +86,18 @@ export function useTrades(filters?: TradeFilters) {
 
       if (data.success) {
         await fetchTrades();
+        setError(null);
         return data.data;
       } else {
-        setError(data.error || 'Failed to create trade');
-        return null;
+        const errorMsg = data.error || 'Failed to create trade';
+        setError(errorMsg);
+        throw new Error(errorMsg);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      const errorMsg = err instanceof Error ? err.message : 'Unknown error';
+      setError(errorMsg);
       console.error('Error creating trade:', err);
-      return null;
+      throw err;
     }
   };
 

@@ -72,10 +72,11 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     if (!prisma) {
+      console.error('Database not configured - DATABASE_URL is missing');
       return NextResponse.json(
         {
           success: false,
-          error: 'Database not configured',
+          error: 'Database not configured. Please contact administrator.',
         },
         { status: 503 }
       );
@@ -87,6 +88,7 @@ export async function POST(request: NextRequest) {
     const requiredFields = ['coin', 'side', 'entryPrice', 'exitPrice', 'size', 'entryTime', 'exitTime'];
     for (const field of requiredFields) {
       if (body[field] === undefined || body[field] === null) {
+        console.error(`Missing required field: ${field}`, body);
         return NextResponse.json(
           {
             success: false,
@@ -99,6 +101,7 @@ export async function POST(request: NextRequest) {
 
     // Validate coin
     if (!['BTC', 'ETH', 'HYPE', 'USDT', 'USDC'].includes(body.coin)) {
+      console.error('Invalid coin', { coin: body.coin });
       return NextResponse.json(
         {
           success: false,
@@ -110,6 +113,7 @@ export async function POST(request: NextRequest) {
 
     // Validate side
     if (!['LONG', 'SHORT'].includes(body.side)) {
+      console.error('Invalid side', { side: body.side });
       return NextResponse.json(
         {
           success: false,
@@ -133,6 +137,13 @@ export async function POST(request: NextRequest) {
 
     const pnlPercent = (pnl / (entryPrice * size)) * 100;
 
+    console.log('Creating trade', {
+      coin: body.coin,
+      side: body.side,
+      pnl: pnl.toFixed(2),
+      pnlPercent: pnlPercent.toFixed(2)
+    });
+
     // Create trade
     const trade = await prisma.trade.create({
       data: {
@@ -149,6 +160,8 @@ export async function POST(request: NextRequest) {
         tags: body.tags || [],
       },
     });
+
+    console.log('Trade created successfully', { tradeId: trade.id });
 
     return NextResponse.json({
       success: true,
