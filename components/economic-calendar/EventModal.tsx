@@ -25,13 +25,14 @@ export function EventModal({ event, onClose }: EventModalProps) {
     // Add event listener
     document.addEventListener('keydown', handleEscape);
     
-    // Prevent body scroll when modal is open
+    // Prevent body scroll when modal is open (store original value)
+    const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
 
     // Cleanup
     return () => {
       document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = originalOverflow;
     };
   }, [event, onClose]);
 
