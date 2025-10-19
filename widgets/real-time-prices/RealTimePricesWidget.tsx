@@ -6,45 +6,42 @@ import { PremiumPriceCard } from '@/components/shared/PremiumPriceCard';
 import { MobileCarousel } from '@/components/shared/MobileCarousel';
 
 const COINS = ['BTC', 'ETH', 'HYPE'];
-const SPARKLINE_LENGTH = 20; // Keep last 20 prices for sparkline
+const UPDATE_INTERVAL = 60 * 60 * 1000; // Update every hour
 
 export default function RealTimePricesWidget() {
   const { prices, isConnected } = usePrices();
   const [isMobile, setIsMobile] = useState(false);
   
-  // Store price history for sparklines - using state to trigger re-renders
+  // Store 24-hour historical data for sparklines (hourly updates)
   const [sparklineData, setSparklineData] = useState<Record<string, number[]>>({
     BTC: [],
     ETH: [],
     HYPE: [],
   });
 
-  // Track price updates for sparklines
+  // Fetch historical data on mount and every hour
   useEffect(() => {
-    const hasUpdates = COINS.some(coin => prices[coin] && sparklineData[coin]);
-    
-    if (hasUpdates) {
-      setSparklineData(prev => {
-        const updated = { ...prev };
+    const fetchHistoricalData = async () => {
+      try {
+        const response = await fetch(`/api/historical-prices?coins=${COINS.join(',')}`);
+        const result = await response.json();
         
-        COINS.forEach(coin => {
-          if (prices[coin]) {
-            const currentData = prev[coin] || [];
-            const newData = [...currentData, prices[coin].price];
-            
-            // Keep only last SPARKLINE_LENGTH prices
-            if (newData.length > SPARKLINE_LENGTH) {
-              newData.shift();
-            }
-            
-            updated[coin] = newData;
-          }
-        });
-        
-        return updated;
-      });
-    }
-  }, [prices]);
+        if (result.success && result.data) {
+          setSparklineData(result.data);
+        }
+      } catch (error) {
+        console.error('Error fetching historical data:', error);
+      }
+    };
+
+    // Fetch immediately
+    fetchHistoricalData();
+
+    // Set up interval to fetch every hour
+    const interval = setInterval(fetchHistoricalData, UPDATE_INTERVAL);
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Detect mobile viewport
   useEffect(() => {
@@ -69,7 +66,7 @@ export default function RealTimePricesWidget() {
               coin={coin}
               data={prices[coin]}
               isConnected={isConnected[coin]}
-              sparklineData={sparklineData[coin]}
+              sparklineData={sparklineData[coin] || []}
             />
           ))}
         </MobileCarousel>
@@ -86,7 +83,7 @@ export default function RealTimePricesWidget() {
           coin={coin}
           data={prices[coin]}
           isConnected={isConnected[coin]}
-          sparklineData={sparklineData[coin]}
+          sparklineData={sparklineData[coin] || []}
         />
       ))}
     </div>

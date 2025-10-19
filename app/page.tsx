@@ -30,7 +30,7 @@ export default function Home() {
           </div>
           <Info className="w-3.5 h-3.5 text-blue-400" />
           <span className="text-xs text-gray-400 font-financial">
-            Live prices • 1H charts (24h rolling window)
+            Live prices • 24h charts (hourly intervals)
           </span>
         </div>
       </div>
