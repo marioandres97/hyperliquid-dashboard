@@ -16,12 +16,19 @@ interface PremiumPriceCardProps {
   data: PriceData | undefined;
   isConnected: boolean;
   sparklineData?: number[];
+  instanceId?: string;
 }
 
-export function PremiumPriceCard({ coin, data, isConnected, sparklineData = [] }: PremiumPriceCardProps) {
+export function PremiumPriceCard({ 
+  coin, 
+  data, 
+  isConnected, 
+  sparklineData = [],
+  instanceId = 'default'
+}: PremiumPriceCardProps) {
   const isPositive = data ? data.change24h >= 0 : true;
 
-  // Generate sparkline path
+  // Generate sparkline path - now with sparklineData in dependencies
   const sparklinePath = useMemo(() => {
     if (sparklineData.length < 2) return '';
 
@@ -41,6 +48,9 @@ export function PremiumPriceCard({ coin, data, isConnected, sparklineData = [] }
 
     return `M ${points.join(' L ')}`;
   }, [sparklineData]);
+
+  // Generate unique gradient ID to avoid conflicts
+  const gradientId = useMemo(() => `gradient-${coin}-${instanceId}`, [coin, instanceId]);
 
   const getCoinName = (coin: string) => {
     const names: Record<string, string> = {
@@ -144,7 +154,7 @@ export function PremiumPriceCard({ coin, data, isConnected, sparklineData = [] }
                   preserveAspectRatio="none"
                 >
                   <defs>
-                    <linearGradient id={`gradient-${coin}`} x1="0%" y1="0%" x2="0%" y2="100%">
+                    <linearGradient id={gradientId} x1="0%" y1="0%" x2="0%" y2="100%">
                       <stop offset="0%" stopColor={isPositive ? '#22c55e' : '#ef4444'} stopOpacity="0.3" />
                       <stop offset="100%" stopColor={isPositive ? '#22c55e' : '#ef4444'} stopOpacity="0" />
                     </linearGradient>
@@ -153,7 +163,7 @@ export function PremiumPriceCard({ coin, data, isConnected, sparklineData = [] }
                   {/* Area under the line */}
                   <path
                     d={`${sparklinePath} L 100,30 L 0,30 Z`}
-                    fill={`url(#gradient-${coin})`}
+                    fill={`url(#${gradientId})`}
                   />
                   
                   {/* The line itself */}

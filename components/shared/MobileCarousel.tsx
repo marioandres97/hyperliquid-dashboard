@@ -1,15 +1,13 @@
 'use client';
 
-import { useState, useEffect, useRef, TouchEvent } from 'react';
+import { useState, useRef, TouchEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface MobileCarouselProps {
   children: React.ReactNode[];
-  autoAdvance?: boolean;
-  autoAdvanceInterval?: number;
 }
 
-export function MobileCarousel({ children, autoAdvance = false, autoAdvanceInterval = 5000 }: MobileCarouselProps) {
+export function MobileCarousel({ children }: MobileCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
@@ -41,17 +39,6 @@ export function MobileCarousel({ children, autoAdvance = false, autoAdvanceInter
       setCurrentIndex(prev => prev - 1);
     }
   };
-
-  // Auto-advance functionality
-  useEffect(() => {
-    if (!autoAdvance) return;
-
-    const interval = setInterval(() => {
-      setCurrentIndex(prev => (prev + 1) % children.length);
-    }, autoAdvanceInterval);
-
-    return () => clearInterval(interval);
-  }, [autoAdvance, autoAdvanceInterval, children.length]);
 
   return (
     <div className="relative w-full h-full overflow-hidden">

@@ -12,8 +12,8 @@ export default function RealTimePricesWidget() {
   const { prices, isConnected } = usePrices();
   const [isMobile, setIsMobile] = useState(false);
   
-  // Store price history for sparklines
-  const sparklineData = useRef<Record<string, number[]>>({
+  // Store price history for sparklines - using state to trigger re-renders
+  const [sparklineData, setSparklineData] = useState<Record<string, number[]>>({
     BTC: [],
     ETH: [],
     HYPE: [],
@@ -21,19 +21,29 @@ export default function RealTimePricesWidget() {
 
   // Track price updates for sparklines
   useEffect(() => {
-    COINS.forEach(coin => {
-      if (prices[coin]) {
-        const currentData = sparklineData.current[coin] || [];
-        const newData = [...currentData, prices[coin].price];
+    const hasUpdates = COINS.some(coin => prices[coin] && sparklineData[coin]);
+    
+    if (hasUpdates) {
+      setSparklineData(prev => {
+        const updated = { ...prev };
         
-        // Keep only last SPARKLINE_LENGTH prices
-        if (newData.length > SPARKLINE_LENGTH) {
-          newData.shift();
-        }
+        COINS.forEach(coin => {
+          if (prices[coin]) {
+            const currentData = prev[coin] || [];
+            const newData = [...currentData, prices[coin].price];
+            
+            // Keep only last SPARKLINE_LENGTH prices
+            if (newData.length > SPARKLINE_LENGTH) {
+              newData.shift();
+            }
+            
+            updated[coin] = newData;
+          }
+        });
         
-        sparklineData.current[coin] = newData;
-      }
-    });
+        return updated;
+      });
+    }
   }, [prices]);
 
   // Detect mobile viewport
@@ -59,7 +69,7 @@ export default function RealTimePricesWidget() {
               coin={coin}
               data={prices[coin]}
               isConnected={isConnected[coin]}
-              sparklineData={sparklineData.current[coin]}
+              sparklineData={sparklineData[coin]}
             />
           ))}
         </MobileCarousel>
@@ -76,7 +86,7 @@ export default function RealTimePricesWidget() {
           coin={coin}
           data={prices[coin]}
           isConnected={isConnected[coin]}
-          sparklineData={sparklineData.current[coin]}
+          sparklineData={sparklineData[coin]}
         />
       ))}
     </div>
