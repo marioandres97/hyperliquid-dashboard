@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTrades } from '@/lib/hooks/trades/useTrades';
 import { useToastContext } from '@/lib/hooks/ToastContext';
 import PnLBackground from '@/components/layout/backgrounds/PnLBackground';
@@ -17,7 +17,29 @@ interface PnLTrackerWidgetProps {
 export default function PnLTrackerWidget({ isProfitable }: PnLTrackerWidgetProps) {
   const { trades, loading, error, createTrade, deleteTrade, exportToCSV } = useTrades();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [dbStatus, setDbStatus] = useState<'connected' | 'disconnected' | 'checking'>('checking');
   const toast = useToastContext();
+
+  // Check database connection status on mount
+  useEffect(() => {
+    const checkDbStatus = async () => {
+      try {
+        const response = await fetch('/api/trades?coin=ALL');
+        const result = await response.json();
+        if (response.ok) {
+          setDbStatus('connected');
+        } else if (result.code === 'DB_NOT_CONFIGURED' || result.code === 'DB_CONNECTION_ERROR') {
+          setDbStatus('disconnected');
+        } else {
+          setDbStatus('connected');
+        }
+      } catch (err) {
+        setDbStatus('disconnected');
+      }
+    };
+    
+    checkDbStatus();
+  }, []);
 
   // Calculate stats from trades
   const stats = calculateStatsFromTrades(trades);
@@ -45,19 +67,64 @@ export default function PnLTrackerWidget({ isProfitable }: PnLTrackerWidgetProps
       if (result) {
         toast.success('Trade saved successfully!');
         setIsModalOpen(false);
+        // Refresh DB status after successful save
+        setDbStatus('connected');
       } else {
-        toast.error(error || 'Failed to save trade. Please try again.');
+        // Show detailed error message
+        let errorMsg = error || 'Failed to save trade. Please try again.';
+        
+        // Check if error indicates DB issue
+        if (error && (error.includes('database') || error.includes('Database') || error.includes('DB'))) {
+          errorMsg = 'Database connection issue. Please check your database configuration.';
+          setDbStatus('disconnected');
+        }
+        
+        toast.error(errorMsg);
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to save trade');
+      // Parse error response for detailed message
+      let errorMsg = 'Failed to save trade';
+      
+      if (err instanceof Error) {
+        errorMsg = err.message;
+      } else if (typeof err === 'object' && err !== null) {
+        const apiError = err as any;
+        if (apiError.message) {
+          errorMsg = apiError.message;
+        } else if (apiError.error) {
+          errorMsg = apiError.error;
+        }
+      }
+      
+      // Check if error indicates DB issue
+      if (errorMsg.includes('database') || errorMsg.includes('Database') || errorMsg.includes('DB') || errorMsg.includes('connect')) {
+        setDbStatus('disconnected');
+      }
+      
+      toast.error(errorMsg);
     }
   };
 
   return (
     <div className="h-full flex flex-col space-y-3">
-      {/* Header with Add Trade Button */}
+      {/* Header with Add Trade Button and DB Status */}
       <div className="flex items-center justify-between flex-shrink-0">
-        <h2 className="text-lg font-bold text-white">💰 PnL Tracker</h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-lg font-bold text-white">💰 PnL Tracker</h2>
+          {/* Database connection status indicator */}
+          {dbStatus === 'connected' && (
+            <div className="flex items-center gap-1 px-2 py-0.5 bg-green-500/10 border border-green-500/20 rounded text-xs">
+              <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
+              <span className="text-green-400">DB Connected</span>
+            </div>
+          )}
+          {dbStatus === 'disconnected' && (
+            <div className="flex items-center gap-1 px-2 py-0.5 bg-red-500/10 border border-red-500/20 rounded text-xs">
+              <div className="w-1.5 h-1.5 bg-red-400 rounded-full"></div>
+              <span className="text-red-400">DB Offline</span>
+            </div>
+          )}
+        </div>
         <button
           onClick={() => setIsModalOpen(true)}
           className="flex items-center gap-2 px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors"

@@ -259,8 +259,33 @@ export default function MarketHoursBar() {
     );
   });
 
+  // Desktop (≥1024px): Show static content with all markets visible
+  // Mobile/Tablet (<1024px): Show 2 markets at a time with auto-rotation
+  if (screenSize === 'desktop') {
+    // Desktop: Static display with all 4 markets in a row
+    return (
+      <div 
+        className="z-40 bg-gray-900/85 backdrop-blur-md border-b border-gray-800/30 py-2 sm:py-2.5"
+        style={{ 
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.4)' 
+        }}
+      >
+        <div className="overflow-x-auto">
+          <div className="flex items-center justify-center text-xs sm:text-sm font-medium tracking-wide whitespace-nowrap px-4">
+            {marketElements.map((element, index) => (
+              <span key={index} className="inline-flex items-center">
+                {element}
+                {index < marketElements.length - 1 && <span className="text-gray-600 mx-3">•</span>}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
   // Mobile/Tablet: Show 2 markets at a time with auto-rotation
-  if (screenSize !== 'desktop' && !prefersReducedMotion) {
+  if (!prefersReducedMotion) {
     // Group markets into pairs for mobile carousel
     const marketPairs = [
       [markets[0], markets[1]], // Tokyo, London
@@ -337,7 +362,7 @@ export default function MarketHoursBar() {
     );
   }
 
-  // If reduced motion is preferred, show static content
+  // If reduced motion is preferred, show static content (applies to mobile/tablet)
   if (prefersReducedMotion) {
     return (
       <div 
@@ -360,9 +385,7 @@ export default function MarketHoursBar() {
     );
   }
 
-  // Desktop: Show infinite scrolling animation with all markets
-  const animationDuration = ANIMATION_DURATION_TABLET;
-
+  // Fallback: Should not reach here, but show static content just in case
   return (
     <div 
       className="z-40 bg-gray-900/85 backdrop-blur-md border-b border-gray-800/30 py-2 sm:py-2.5"
@@ -370,52 +393,15 @@ export default function MarketHoursBar() {
         boxShadow: '0 2px 8px rgba(0, 0, 0, 0.4)' 
       }}
     >
-      <div 
-        className="overflow-hidden relative"
-        onMouseEnter={() => setIsPaused(true)}
-        onMouseLeave={() => setIsPaused(false)}
-      >
-        <motion.div
-          className="flex items-center text-xs sm:text-sm font-medium tracking-wide"
-          animate={{
-            x: isPaused ? undefined : [0, '-25%'],
-          }}
-          transition={{
-            x: {
-              repeat: Infinity,
-              repeatType: "loop" as const,
-              duration: animationDuration,
-              ease: "linear" as const,
-            },
-          }}
-        >
-          {/* Render content 4 times for truly seamless infinite scrolling */}
-          {Array.from({ length: 4 }, (_, copyIndex) => (
-            <div key={`copy-${copyIndex}`} className="inline-flex items-center">
-              {markets.map((market, index) => {
-                const status = getMarketStatus(currentTime, market);
-                return (
-                  <span key={`copy-${copyIndex}-${market.name}-${index}`} className="inline-flex items-center gap-1 whitespace-nowrap mx-3">
-                    <span className="text-gray-200">{market.name}:</span>
-                    <span>{status.icon}</span>
-                    <span className={`font-medium ${
-                      status.status === 'OPEN' ? 'text-green-400' :
-                      status.status === 'CLOSED' ? 'text-red-400' :
-                      status.status === 'OPENS SOON' ? 'text-yellow-400' :
-                      'text-orange-400'
-                    }`}>
-                      {status.status}
-                    </span>
-                    {status.message && (
-                      <span className="text-gray-400">({status.message})</span>
-                    )}
-                  </span>
-                );
-              })}
-              <span className="text-gray-600 mx-3">•</span>
-            </div>
+      <div className="overflow-x-auto">
+        <div className="flex items-center justify-center text-xs sm:text-sm font-medium tracking-wide whitespace-nowrap px-4">
+          {marketElements.map((element, index) => (
+            <span key={index} className="inline-flex items-center">
+              {element}
+              {index < marketElements.length - 1 && <span className="text-gray-600 mx-3">•</span>}
+            </span>
           ))}
-        </motion.div>
+        </div>
       </div>
     </div>
   );

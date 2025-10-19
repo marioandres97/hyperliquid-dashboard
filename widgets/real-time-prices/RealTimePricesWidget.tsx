@@ -74,7 +74,7 @@ export default function RealTimePricesWidget() {
         </div>
         <div className="mt-3 text-center">
           <p className="text-xs text-gray-400/60 font-medium">
-            Prices from Hyperliquid exchange • Updates hourly
+            Prices from Hyperliquid exchange
           </p>
         </div>
       </div>
@@ -97,7 +97,7 @@ export default function RealTimePricesWidget() {
       </div>
       <div className="mt-4 text-center">
         <p className="text-xs text-gray-400/60 font-medium">
-          Prices from Hyperliquid exchange • Updates hourly
+          Prices from Hyperliquid exchange
         </p>
       </div>
     </div>

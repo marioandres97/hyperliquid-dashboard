@@ -81,9 +81,9 @@ export function PremiumPriceCard({
       }`} />
 
       {/* Content */}
-      <div className="relative h-full flex flex-col justify-between p-6 md:p-8">
+      <div className="relative h-full flex flex-col justify-between p-5 md:p-6">
         {/* Header */}
-        <div className="flex items-start justify-between mb-4">
+        <div className="flex items-start justify-between mb-3">
           <div>
             <div className="flex items-center gap-2 mb-1">
               <h3 className="text-xl md:text-2xl font-bold text-white tracking-tight">
@@ -108,13 +108,13 @@ export function PremiumPriceCard({
         {/* Price */}
         {data ? (
           <>
-            <div className="mb-6">
+            <div className="mb-4">
               <motion.div
                 key={data.price}
                 initial={{ scale: 1 }}
                 animate={{ scale: [1, 1.02, 1] }}
                 transition={{ duration: 0.3 }}
-                className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-white mb-3 tracking-tight leading-none"
+                className="text-3xl md:text-3xl lg:text-4xl font-extrabold text-white mb-2 tracking-tight leading-none"
                 style={{ fontFeatureSettings: '"tnum"' }}
               >
                 ${data.price.toLocaleString(undefined, {
