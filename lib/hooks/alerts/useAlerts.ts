@@ -23,26 +23,38 @@ export function useAlerts(): UseAlertsResult {
       setLoading(true);
       setError(null);
 
-      const response = await fetch('/api/alerts');
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch alerts');
+      // Import localStorage utilities dynamically (client-side only)
+      const { getAlertsFromStorage, saveAlertsToStorage } = await import('@/lib/alerts/localStorage');
+
+      // Try to fetch from API first
+      try {
+        const response = await fetch('/api/alerts');
+        
+        if (response.ok) {
+          const data = await response.json();
+          
+          if (data.success) {
+            // Parse dates
+            const parsedAlerts = data.data.map((alert: any) => ({
+              ...alert,
+              createdAt: new Date(alert.createdAt),
+              updatedAt: new Date(alert.updatedAt),
+              lastTriggered: alert.lastTriggered ? new Date(alert.lastTriggered) : null,
+            }));
+            
+            // Save to localStorage as backup
+            saveAlertsToStorage(parsedAlerts);
+            setAlerts(parsedAlerts);
+            return;
+          }
+        }
+      } catch (apiError) {
+        console.warn('API not available, using localStorage:', apiError);
       }
 
-      const data = await response.json();
-      
-      if (data.success) {
-        // Parse dates
-        const parsedAlerts = data.data.map((alert: any) => ({
-          ...alert,
-          createdAt: new Date(alert.createdAt),
-          updatedAt: new Date(alert.updatedAt),
-          lastTriggered: alert.lastTriggered ? new Date(alert.lastTriggered) : null,
-        }));
-        setAlerts(parsedAlerts);
-      } else {
-        throw new Error(data.error || 'Failed to fetch alerts');
-      }
+      // Fallback to localStorage
+      const localAlerts = getAlertsFromStorage();
+      setAlerts(localAlerts);
     } catch (err) {
       console.error('Error fetching alerts:', err);
       setError(err instanceof Error ? err.message : 'Unknown error');
@@ -53,28 +65,59 @@ export function useAlerts(): UseAlertsResult {
 
   const createAlert = useCallback(async (input: CreateAlertInput): Promise<Alert | null> => {
     try {
-      const response = await fetch('/api/alerts', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(input),
-      });
+      const { addAlertToStorage } = await import('@/lib/alerts/localStorage');
 
-      const data = await response.json();
+      // Try API first
+      try {
+        const response = await fetch('/api/alerts', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(input),
+        });
 
-      if (data.success) {
-        const newAlert = {
-          ...data.data,
-          createdAt: new Date(data.data.createdAt),
-          updatedAt: new Date(data.data.updatedAt),
-          lastTriggered: data.data.lastTriggered ? new Date(data.data.lastTriggered) : null,
-        };
-        setAlerts((prev) => [newAlert, ...prev]);
-        return newAlert;
-      } else {
-        throw new Error(data.error || 'Failed to create alert');
+        const data = await response.json();
+
+        if (data.success) {
+          const newAlert = {
+            ...data.data,
+            createdAt: new Date(data.data.createdAt),
+            updatedAt: new Date(data.data.updatedAt),
+            lastTriggered: data.data.lastTriggered ? new Date(data.data.lastTriggered) : null,
+          };
+          
+          // Save to localStorage too
+          addAlertToStorage(newAlert);
+          setAlerts((prev) => [newAlert, ...prev]);
+          return newAlert;
+        }
+      } catch (apiError) {
+        console.warn('API not available, saving to localStorage only:', apiError);
       }
+
+      // Fallback: create alert in localStorage only
+      const newAlert: Alert = {
+        id: `local-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        userId: null,
+        type: input.type,
+        coin: input.coin,
+        condition: input.condition || null,
+        value: input.value,
+        side: input.side || null,
+        enabled: true,
+        browserNotif: input.browserNotif ?? true,
+        emailNotif: input.emailNotif ?? false,
+        webhook: input.webhook || null,
+        triggered: 0,
+        lastTriggered: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      addAlertToStorage(newAlert);
+      setAlerts((prev) => [newAlert, ...prev]);
+      return newAlert;
     } catch (err) {
       console.error('Error creating alert:', err);
       setError(err instanceof Error ? err.message : 'Unknown error');
@@ -84,51 +127,86 @@ export function useAlerts(): UseAlertsResult {
 
   const updateAlert = useCallback(async (id: string, input: UpdateAlertInput): Promise<Alert | null> => {
     try {
-      const response = await fetch(`/api/alerts/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(input),
+      const { updateAlertInStorage } = await import('@/lib/alerts/localStorage');
+
+      // Try API first
+      try {
+        const response = await fetch(`/api/alerts/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(input),
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          const updatedAlert = {
+            ...data.data,
+            createdAt: new Date(data.data.createdAt),
+            updatedAt: new Date(data.data.updatedAt),
+            lastTriggered: data.data.lastTriggered ? new Date(data.data.lastTriggered) : null,
+          };
+          
+          // Update localStorage too
+          updateAlertInStorage(id, updatedAlert);
+          setAlerts((prev) =>
+            prev.map((alert) => (alert.id === id ? updatedAlert : alert))
+          );
+          return updatedAlert;
+        }
+      } catch (apiError) {
+        console.warn('API not available, updating localStorage only:', apiError);
+      }
+
+      // Fallback: update in localStorage
+      setAlerts((prev) => {
+        const updated = prev.map((alert) => {
+          if (alert.id === id) {
+            const updatedAlert = { ...alert, ...input, updatedAt: new Date() };
+            updateAlertInStorage(id, updatedAlert);
+            return updatedAlert;
+          }
+          return alert;
+        });
+        return updated;
       });
 
-      const data = await response.json();
-
-      if (data.success) {
-        const updatedAlert = {
-          ...data.data,
-          createdAt: new Date(data.data.createdAt),
-          updatedAt: new Date(data.data.updatedAt),
-          lastTriggered: data.data.lastTriggered ? new Date(data.data.lastTriggered) : null,
-        };
-        setAlerts((prev) =>
-          prev.map((alert) => (alert.id === id ? updatedAlert : alert))
-        );
-        return updatedAlert;
-      } else {
-        throw new Error(data.error || 'Failed to update alert');
-      }
+      const updatedAlert = alerts.find(a => a.id === id);
+      return updatedAlert || null;
     } catch (err) {
       console.error('Error updating alert:', err);
       setError(err instanceof Error ? err.message : 'Unknown error');
       return null;
     }
-  }, []);
+  }, [alerts]);
 
   const deleteAlert = useCallback(async (id: string): Promise<boolean> => {
     try {
-      const response = await fetch(`/api/alerts/${id}`, {
-        method: 'DELETE',
-      });
+      const { deleteAlertFromStorage } = await import('@/lib/alerts/localStorage');
 
-      const data = await response.json();
+      // Try API first
+      try {
+        const response = await fetch(`/api/alerts/${id}`, {
+          method: 'DELETE',
+        });
 
-      if (data.success) {
-        setAlerts((prev) => prev.filter((alert) => alert.id !== id));
-        return true;
-      } else {
-        throw new Error(data.error || 'Failed to delete alert');
+        const data = await response.json();
+
+        if (data.success) {
+          deleteAlertFromStorage(id);
+          setAlerts((prev) => prev.filter((alert) => alert.id !== id));
+          return true;
+        }
+      } catch (apiError) {
+        console.warn('API not available, deleting from localStorage only:', apiError);
       }
+
+      // Fallback: delete from localStorage
+      deleteAlertFromStorage(id);
+      setAlerts((prev) => prev.filter((alert) => alert.id !== id));
+      return true;
     } catch (err) {
       console.error('Error deleting alert:', err);
       setError(err instanceof Error ? err.message : 'Unknown error');
