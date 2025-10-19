@@ -152,7 +152,7 @@ export default function MarketHoursBar() {
   // Return early if not yet hydrated
   if (!currentTime) {
     return (
-      <div className="bg-gray-900/50 border-b border-gray-800 py-2">
+      <div className="sticky top-[73px] z-40 bg-gray-900/50 backdrop-blur-sm border-b border-gray-800 py-2">
         <div className="container mx-auto px-4">
           <div className="flex flex-wrap items-center justify-center gap-3 text-xs sm:text-sm text-gray-400">
             Loading market hours...
@@ -163,7 +163,7 @@ export default function MarketHoursBar() {
   }
 
   return (
-    <div className="bg-gray-900/50 border-b border-gray-800 py-2">
+    <div className="sticky top-[73px] z-40 bg-gray-900/50 backdrop-blur-sm border-b border-gray-800 py-2">
       <div className="container mx-auto px-4">
         <div className="flex flex-wrap items-center justify-center gap-3 text-xs sm:text-sm">
           {markets.map((market, index) => {
