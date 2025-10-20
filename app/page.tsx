@@ -5,6 +5,39 @@ import { Calendar, TrendingUp, Bell, DollarSign } from 'lucide-react';
 import MarketHoursBar from '@/components/MarketHoursBar';
 import RealTimePricesWidget from '@/widgets/real-time-prices/RealTimePricesWidget';
 
+// Shared styles for navigation cards
+const cardStyle = {
+  background: 'var(--venom-glass-bg)',
+  backdropFilter: 'blur(40px)',
+  WebkitBackdropFilter: 'blur(40px)',
+  border: '1px solid var(--venom-glass-border)',
+  minHeight: '240px',
+  display: 'flex',
+  flexDirection: 'column' as const,
+  justifyContent: 'center',
+  transitionDuration: 'var(--transition-premium)',
+};
+
+const iconStyle = {
+  width: '48px',
+  height: '48px',
+  color: 'var(--venom-green-accent)',
+  strokeWidth: '1.5px',
+};
+
+// Card hover handlers
+const handleCardMouseEnter = (e: React.MouseEvent<HTMLDivElement>) => {
+  e.currentTarget.style.transform = 'translateY(-8px)';
+  e.currentTarget.style.boxShadow = '0 20px 60px rgba(16, 185, 129, 0.2)';
+  e.currentTarget.style.borderColor = 'var(--venom-glass-border-hover)';
+};
+
+const handleCardMouseLeave = (e: React.MouseEvent<HTMLDivElement>) => {
+  e.currentTarget.style.transform = 'translateY(0)';
+  e.currentTarget.style.boxShadow = 'none';
+  e.currentTarget.style.borderColor = 'var(--venom-glass-border)';
+};
+
 export default function Landing() {
   return (
     <div className="min-h-screen relative">
@@ -72,37 +105,11 @@ export default function Landing() {
           <Link href="/calendar" className="group block">
             <div 
               className="rounded-3xl p-10 transition-all"
-              style={{
-                background: 'var(--venom-glass-bg)',
-                backdropFilter: 'blur(40px)',
-                WebkitBackdropFilter: 'blur(40px)',
-                border: '1px solid var(--venom-glass-border)',
-                minHeight: '240px',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                transitionDuration: 'var(--transition-premium)',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-8px)';
-                e.currentTarget.style.boxShadow = '0 20px 60px rgba(16, 185, 129, 0.2)';
-                e.currentTarget.style.borderColor = 'var(--venom-glass-border-hover)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = 'none';
-                e.currentTarget.style.borderColor = 'var(--venom-glass-border)';
-              }}
+              style={cardStyle}
+              onMouseEnter={handleCardMouseEnter}
+              onMouseLeave={handleCardMouseLeave}
             >
-              <Calendar 
-                className="mb-6" 
-                style={{ 
-                  width: '48px', 
-                  height: '48px', 
-                  color: 'var(--venom-green-accent)',
-                  strokeWidth: '1.5px',
-                }} 
-              />
+              <Calendar className="mb-6" style={iconStyle} />
               <h2 
                 className="text-2xl font-semibold mb-3 text-white"
                 style={{ letterSpacing: 'var(--letter-spacing-tight)' }}
@@ -119,37 +126,11 @@ export default function Landing() {
           <Link href="/orders" className="group block">
             <div 
               className="rounded-3xl p-10 transition-all"
-              style={{
-                background: 'var(--venom-glass-bg)',
-                backdropFilter: 'blur(40px)',
-                WebkitBackdropFilter: 'blur(40px)',
-                border: '1px solid var(--venom-glass-border)',
-                minHeight: '240px',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                transitionDuration: 'var(--transition-premium)',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-8px)';
-                e.currentTarget.style.boxShadow = '0 20px 60px rgba(16, 185, 129, 0.2)';
-                e.currentTarget.style.borderColor = 'var(--venom-glass-border-hover)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = 'none';
-                e.currentTarget.style.borderColor = 'var(--venom-glass-border)';
-              }}
+              style={cardStyle}
+              onMouseEnter={handleCardMouseEnter}
+              onMouseLeave={handleCardMouseLeave}
             >
-              <TrendingUp 
-                className="mb-6" 
-                style={{ 
-                  width: '48px', 
-                  height: '48px', 
-                  color: 'var(--venom-green-accent)',
-                  strokeWidth: '1.5px',
-                }} 
-              />
+              <TrendingUp className="mb-6" style={iconStyle} />
               <h2 
                 className="text-2xl font-semibold mb-3 text-white"
                 style={{ letterSpacing: 'var(--letter-spacing-tight)' }}
@@ -166,37 +147,11 @@ export default function Landing() {
           <Link href="/alerts" className="group block">
             <div 
               className="rounded-3xl p-10 transition-all"
-              style={{
-                background: 'var(--venom-glass-bg)',
-                backdropFilter: 'blur(40px)',
-                WebkitBackdropFilter: 'blur(40px)',
-                border: '1px solid var(--venom-glass-border)',
-                minHeight: '240px',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                transitionDuration: 'var(--transition-premium)',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-8px)';
-                e.currentTarget.style.boxShadow = '0 20px 60px rgba(16, 185, 129, 0.2)';
-                e.currentTarget.style.borderColor = 'var(--venom-glass-border-hover)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = 'none';
-                e.currentTarget.style.borderColor = 'var(--venom-glass-border)';
-              }}
+              style={cardStyle}
+              onMouseEnter={handleCardMouseEnter}
+              onMouseLeave={handleCardMouseLeave}
             >
-              <Bell 
-                className="mb-6" 
-                style={{ 
-                  width: '48px', 
-                  height: '48px', 
-                  color: 'var(--venom-green-accent)',
-                  strokeWidth: '1.5px',
-                }} 
-              />
+              <Bell className="mb-6" style={iconStyle} />
               <h2 
                 className="text-2xl font-semibold mb-3 text-white"
                 style={{ letterSpacing: 'var(--letter-spacing-tight)' }}
@@ -213,37 +168,11 @@ export default function Landing() {
           <Link href="/pnl" className="group block">
             <div 
               className="rounded-3xl p-10 transition-all"
-              style={{
-                background: 'var(--venom-glass-bg)',
-                backdropFilter: 'blur(40px)',
-                WebkitBackdropFilter: 'blur(40px)',
-                border: '1px solid var(--venom-glass-border)',
-                minHeight: '240px',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                transitionDuration: 'var(--transition-premium)',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-8px)';
-                e.currentTarget.style.boxShadow = '0 20px 60px rgba(16, 185, 129, 0.2)';
-                e.currentTarget.style.borderColor = 'var(--venom-glass-border-hover)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = 'none';
-                e.currentTarget.style.borderColor = 'var(--venom-glass-border)';
-              }}
+              style={cardStyle}
+              onMouseEnter={handleCardMouseEnter}
+              onMouseLeave={handleCardMouseLeave}
             >
-              <DollarSign 
-                className="mb-6" 
-                style={{ 
-                  width: '48px', 
-                  height: '48px', 
-                  color: 'var(--venom-green-accent)',
-                  strokeWidth: '1.5px',
-                }} 
-              />
+              <DollarSign className="mb-6" style={iconStyle} />
               <h2 
                 className="text-2xl font-semibold mb-3 text-white"
                 style={{ letterSpacing: 'var(--letter-spacing-tight)' }}
