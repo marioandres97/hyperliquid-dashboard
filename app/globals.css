@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./styles/theme.css";
 
 :root {
   /* Color System - Enhanced depth levels */
@@ -55,13 +56,13 @@
 
 /* Ensure html and body maintain dark background on all devices */
 html {
-  background: #0a0a0a;
+  background: var(--venom-base-dark);
   min-height: 100vh;
 }
 
 body {
-  /* Pure deep black premium background - NO gradients, NO animations, NO effects */
-  background: #0a0a0a;
+  /* VENOM dark background - premium elite aesthetic */
+  background: var(--venom-base-dark);
   background-attachment: fixed;
   min-height: 100vh;
   color: #ffffff;

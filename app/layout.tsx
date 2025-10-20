@@ -5,8 +5,8 @@ import { ErrorBoundary } from "@/lib/monitoring/errorBoundary";
 import { ToastProvider } from "@/lib/hooks/ToastContext";
 
 export const metadata: Metadata = {
-  title: "Hyperliquid Institutional Analysis Dashboard",
-  description: "Real-time institutional trading analysis for Hyperliquid DEX",
+  title: "VENOM",
+  description: "Premium dark mode trading terminal for elite traders",
 };
 
 export default function RootLayout({
