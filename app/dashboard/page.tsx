@@ -6,7 +6,7 @@ import OrderFlowBackground from '@/components/layout/backgrounds/OrderFlowBackgr
 import PricesBackground from '@/components/layout/backgrounds/PricesBackground';
 import AlertBackground from '@/components/layout/backgrounds/AlertBackground';
 import EconomicCalendarBackground from '@/components/layout/backgrounds/EconomicCalendarBackground';
-import { EconomicCalendar } from '@/components/economic-calendar/EconomicCalendar';
+import { LazyEconomicCalendar } from '@/lib/lazy-components';
 import { LargeOrdersFeed } from '@/components/large-orders/LargeOrdersFeed';
 import { AlertSystem } from '@/components/alerts/AlertSystem';
 import Header from '@/components/Header';
@@ -39,7 +39,7 @@ export default function Home() {
             title=""
             background={<EconomicCalendarBackground />}
           >
-            <EconomicCalendar />
+            <LazyEconomicCalendar />
           </WidgetContainer>
         </div>
 
