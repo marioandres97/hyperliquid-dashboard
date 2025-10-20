@@ -258,8 +258,9 @@ export function checkAndNotify(events: EconomicEvent[]): void {
 
     // Check each configured timing
     settings.timings.forEach((timing) => {
-      // If we're at the right time and haven't notified yet
-      if (minutesUntil === timing && !wasNotified(event.id, timing)) {
+      // Use a range check to avoid missing notifications due to timing precision
+      // Check if we're within the target minute (between timing and timing-1)
+      if (minutesUntil <= timing && minutesUntil > timing - 1 && !wasNotified(event.id, timing)) {
         sendEventNotification(event, timing);
         markAsNotified(event.id, timing);
       }

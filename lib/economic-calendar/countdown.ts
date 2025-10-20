@@ -106,7 +106,8 @@ export function formatEventDateTime(eventDate: Date): string {
 
 /**
  * Get progress percentage for countdown (0-100)
- * Based on 24 hours before event
+ * Calculates progress from 24 hours before event to event time
+ * Returns 100% if more than 24 hours away, 0% when event time is reached
  */
 export function getCountdownProgress(eventDate: Date): number {
   const now = new Date();

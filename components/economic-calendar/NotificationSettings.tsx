@@ -136,12 +136,12 @@ export function NotificationSettings({ isOpen, onClose }: NotificationSettingsPr
                 </div>
                 <button
                   onClick={handleEnableToggle}
-                  disabled={permission === 'denied'}
+                  disabled={permission === 'denied' || !isNotificationSupported()}
                   className={`relative w-14 h-7 rounded-full transition-colors ${
                     settings.enabled
                       ? 'bg-emerald-500'
                       : 'bg-gray-700'
-                  } ${permission === 'denied' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  } ${(permission === 'denied' || !isNotificationSupported()) ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   <motion.div
                     className="absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full"

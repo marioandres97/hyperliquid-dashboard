@@ -43,11 +43,12 @@ export function EconomicCalendar() {
     // Initial check
     checkAndNotify(events);
 
-    // Set up interval
+    // Set up interval (clear any existing interval first)
     const intervalId = setInterval(() => {
       checkAndNotify(events);
     }, 60000); // Check every minute
 
+    // Cleanup: clear interval on unmount or when events change
     return () => clearInterval(intervalId);
   }, [events]);
 
