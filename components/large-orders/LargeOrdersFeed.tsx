@@ -3,8 +3,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useMultiCoinLargeOrders } from '@/lib/hooks/large-orders/useLargeOrders';
-import { formatUsdValue, getRelativeTime, downloadCSV } from '@/lib/large-orders/types';
-import { Download, TrendingUp } from 'lucide-react';
+import { formatUsdValue, getRelativeTime, formatPriceImpact, getPriceImpactColor, downloadCSV } from '@/lib/large-orders/types';
+import { Download, TrendingUp, TrendingDown } from 'lucide-react';
 import { PremiumButton } from '@/components/shared/PremiumButton';
 import { AssetTabs } from './filters/AssetTabs';
 import { AssetStatsGrid } from './stats/AssetStatsGrid';
@@ -12,8 +12,11 @@ import { SizeRangeSlider } from './filters/SizeRangeSlider';
 import { PressureGauge } from './PressureGauge';
 import { OrderCard } from './OrderCard';
 import { ConnectionStatus } from './ConnectionStatus';
+import { AlertSettings } from './AlertSettings';
 import { useHyperliquidWebSocket } from '@/hooks/useHyperliquidWebSocket';
-import { isWhaleOrder, getWhaleStats } from '@/lib/large-orders/whale-detection';
+import { isWhaleOrder, getWhaleStats, playWhaleSound, showWhaleNotification } from '@/lib/large-orders/whale-detection';
+import { detectAllWhalePatterns } from '@/lib/large-orders/whale-patterns';
+import { WhalePatternsSidebar } from './WhalePatternsSidebar';
 import type { CoinFilter, LargeOrder, AssetStats, BuySellPressure } from '@/types/large-orders';
 import type { Trade } from '@/lib/hyperliquid/WebSocketManager';
 import { tradeToLargeOrder } from '@/lib/large-orders/types';
@@ -24,6 +27,58 @@ export function LargeOrdersFeed() {
   const [minSize, setMinSize] = useState(10000);
   const [maxSize, setMaxSize] = useState(10000000);
   const [orders, setOrders] = useState<LargeOrder[]>([]);
+  const [isLoadingHistorical, setIsLoadingHistorical] = useState(true);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+
+  // Load settings from localStorage on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedSoundEnabled = localStorage.getItem('whaleAlertSoundEnabled');
+      const savedNotificationsEnabled = localStorage.getItem('whaleAlertNotificationsEnabled');
+      
+      if (savedSoundEnabled !== null) {
+        setSoundEnabled(savedSoundEnabled === 'true');
+      }
+      if (savedNotificationsEnabled !== null) {
+        setNotificationsEnabled(savedNotificationsEnabled === 'true');
+      }
+    }
+  }, []);
+
+  // Save settings to localStorage when they change
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('whaleAlertSoundEnabled', String(soundEnabled));
+    }
+  }, [soundEnabled]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('whaleAlertNotificationsEnabled', String(notificationsEnabled));
+    }
+  }, [notificationsEnabled]);
+
+  // Load historical orders on mount
+  useEffect(() => {
+    async function loadHistoricalOrders() {
+      try {
+        setIsLoadingHistorical(true);
+        const response = await fetch('/api/orders/recent?limit=100&coins=BTC,ETH,HYPE');
+        const result = await response.json();
+        
+        if (result.success && result.data) {
+          setOrders(result.data);
+        }
+      } catch (error) {
+        console.error('Failed to load historical orders:', error);
+      } finally {
+        setIsLoadingHistorical(false);
+      }
+    }
+    
+    loadHistoricalOrders();
+  }, []);
 
   // WebSocket integration - use useCallback to prevent re-renders
   const handleTrades = useCallback((coin: string, trades: Trade[]) => {
@@ -37,13 +92,31 @@ export function LargeOrdersFeed() {
       };
     });
 
+    // Check for whale orders and trigger alerts
+    const whaleOrders = newOrders.filter(o => o.isWhale);
+    if (whaleOrders.length > 0) {
+      whaleOrders.forEach(order => {
+        if (soundEnabled) {
+          playWhaleSound();
+        }
+        if (notificationsEnabled) {
+          showWhaleNotification(order);
+        }
+      });
+    }
+
     setOrders((prev) => {
-      const combined = [...newOrders, ...prev];
+      // Filter out duplicates based on ID
+      const existingIds = new Set(prev.map(o => o.id));
+      const uniqueNewOrders = newOrders.filter(o => !existingIds.has(o.id));
+      
+      // Add new orders at the beginning
+      const combined = [...uniqueNewOrders, ...prev];
       // Sort by timestamp and keep last 100
       combined.sort((a, b) => b.timestamp - a.timestamp);
       return combined.slice(0, 100);
     });
-  }, []);
+  }, [soundEnabled, notificationsEnabled]);
 
   const { connectionState, reconnect } = useHyperliquidWebSocket(
     ['BTC', 'ETH', 'HYPE'],
@@ -92,6 +165,9 @@ export function LargeOrdersFeed() {
   // Get whale stats
   const whaleStats = getWhaleStats(filteredOrders);
 
+  // Detect whale patterns
+  const whalePatterns = detectAllWhalePatterns(orders);
+
   // Detect mobile view
   useEffect(() => {
     const checkMobile = () => {
@@ -113,12 +189,12 @@ export function LargeOrdersFeed() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header - Premium */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-gradient-to-br from-green-500/20 to-blue-500/20 backdrop-blur-sm">
-            <TrendingUp className="w-5 h-5 text-green-400" />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+        <div className="flex items-center gap-4">
+          <div className="p-3 rounded-2xl bg-gradient-to-br from-green-500/10 to-blue-500/10 backdrop-blur-sm">
+            <TrendingUp className="w-6 h-6 text-green-400" />
           </div>
           <div>
             <div className="flex items-center gap-2">
@@ -128,14 +204,22 @@ export function LargeOrdersFeed() {
             <p className="text-xs text-gray-400 mt-0.5">Institutional-grade order flow monitor</p>
           </div>
         </div>
-        <PremiumButton
-          onClick={handleExport}
-          variant="secondary"
-          size="sm"
-          icon={<Download className="w-4 h-4" />}
-        >
-          Export CSV
-        </PremiumButton>
+        <div className="flex items-center gap-3">
+          <AlertSettings
+            soundEnabled={soundEnabled}
+            notificationsEnabled={notificationsEnabled}
+            onSoundToggle={() => setSoundEnabled(!soundEnabled)}
+            onNotificationsToggle={() => setNotificationsEnabled(!notificationsEnabled)}
+          />
+          <PremiumButton
+            onClick={handleExport}
+            variant="secondary"
+            size="sm"
+            icon={<Download className="w-4 h-4" />}
+          >
+            Export CSV
+          </PremiumButton>
+        </div>
       </div>
 
       {/* Asset Filter Tabs */}
@@ -154,11 +238,11 @@ export function LargeOrdersFeed() {
       <AssetStatsGrid asset={selectedAsset} stats={assetStats} />
 
       {/* Filters and Pressure Gauge Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Size Range Slider - Takes 2 columns */}
         <div className="lg:col-span-2">
-          <div className="backdrop-blur-xl bg-gray-900/30 border border-emerald-500/10 rounded-2xl p-6">
-            <h3 className="text-sm font-semibold text-gray-400 mb-4">Order Size Filter</h3>
+          <div className="backdrop-blur-xl bg-white/5 border border-white/5 rounded-3xl p-8">
+            <h3 className="text-sm font-semibold text-gray-400 mb-6">Order Size Filter</h3>
             <SizeRangeSlider
               minSize={minSize}
               maxSize={maxSize}
@@ -173,24 +257,36 @@ export function LargeOrdersFeed() {
         </div>
       </div>
 
-      {/* Orders Display - Bloomberg-Style Premium Table */}
-      <div className="relative rounded-xl overflow-hidden">
-        {/* Glassmorphism background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-800/40 to-gray-900/40 backdrop-blur-xl" />
-        <div className="absolute inset-0 border border-white/10 rounded-xl" />
+      {/* Main Content: Orders Feed + Whale Patterns Sidebar */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Orders Feed - Takes 2 columns */}
+        <div className="lg:col-span-2">
+          {/* Orders Display - Bloomberg-Style Premium Table */}
+          <div className="relative rounded-3xl overflow-hidden">
+            {/* Glassmorphism background */}
+            <div className="absolute inset-0 bg-white/5 backdrop-blur-xl" />
+            <div className="absolute inset-0 border border-white/5 rounded-3xl" />
 
-        <div className="relative">
-          {filteredOrders.length === 0 ? (
-            <div className="text-center py-16">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-gray-700/40 to-gray-800/40 backdrop-blur-xl mb-4">
-                <TrendingUp className="w-8 h-8 text-gray-500" />
+            <div className="relative">
+          {isLoadingHistorical ? (
+            <div className="text-center py-20">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-gradient-to-br from-emerald-700/20 to-emerald-800/20 backdrop-blur-xl mb-6">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-400"></div>
               </div>
-              <p className="text-base font-medium text-gray-400">Waiting for large orders...</p>
-              <p className="text-sm text-gray-500 mt-1">Monitoring BTC, ETH & HYPE markets</p>
+              <p className="text-base font-medium text-gray-300">Loading recent orders...</p>
+              <p className="text-sm text-gray-500 mt-2">Fetching BTC, ETH & HYPE markets</p>
+            </div>
+          ) : filteredOrders.length === 0 ? (
+            <div className="text-center py-20">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-gradient-to-br from-gray-700/20 to-gray-800/20 backdrop-blur-xl mb-6">
+                <TrendingUp className="w-8 h-8 text-gray-400" />
+              </div>
+              <p className="text-base font-medium text-gray-300">No orders match your filters</p>
+              <p className="text-sm text-gray-500 mt-2">Try adjusting size range or asset filter</p>
             </div>
           ) : isMobile ? (
             /* Mobile Card View - Premium */
-            <div className="max-h-96 overflow-y-auto p-3 space-y-2">
+            <div className="max-h-[500px] overflow-y-auto p-4 space-y-3">
               <AnimatePresence mode="popLayout" initial={false}>
                 {filteredOrders.map((order, index) => (
                   <OrderCard key={`${order.id}-${order.timestamp}`} order={order} index={index} />
@@ -201,28 +297,34 @@ export function LargeOrdersFeed() {
             /* Desktop Bloomberg-Style Table */
             <>
               {/* Table Header */}
-              <div className="grid grid-cols-7 lg:grid-cols-8 gap-4 px-6 py-4 border-b border-white/10">
+              <div className="grid grid-cols-8 lg:grid-cols-9 gap-6 px-8 py-5 border-b border-white/5">
                 <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Time</div>
                 <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Coin</div>
                 <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Side</div>
                 <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider text-right">Price</div>
                 <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider text-right">Size</div>
                 <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider text-right">USD Value</div>
+                <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider text-right">Impact</div>
                 <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Status</div>
                 <div className="hidden lg:block text-xs font-semibold text-gray-400 uppercase tracking-wider">Exchange</div>
               </div>
 
               {/* Table Body - with smooth scroll */}
-              <div className="max-h-96 overflow-y-auto">
+              <div className="max-h-[500px] overflow-y-auto">
                 <AnimatePresence mode="popLayout" initial={false}>
                   {filteredOrders.map((order, index) => (
                     <motion.div
                       key={`${order.id}-${order.timestamp}`}
-                      initial={{ opacity: 0, y: -20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, x: -100 }}
-                      transition={{ duration: 0.3 }}
-                      className="grid grid-cols-7 lg:grid-cols-8 gap-4 px-6 py-3 border-b border-white/5 hover:bg-white/5 transition-colors group"
+                      initial={{ opacity: 0, y: -10, scale: 0.98 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, x: -50, scale: 0.95 }}
+                      transition={{ 
+                        duration: 0.2, 
+                        ease: "easeOut",
+                        layout: { duration: 0.2 }
+                      }}
+                      layout
+                      className="grid grid-cols-8 lg:grid-cols-9 gap-6 px-8 py-4 border-b border-white/5 hover:bg-white/5 transition-all duration-200 group cursor-pointer hover:scale-[1.01]"
                     >
                       <div className="text-xs text-gray-400 font-mono">
                         {getRelativeTime(order.timestamp)}
@@ -247,6 +349,20 @@ export function LargeOrdersFeed() {
                       </div>
                       <div className="text-sm text-right font-bold text-white font-mono">
                         {formatUsdValue(order.usdValue)}
+                      </div>
+                      <div className={`text-xs text-right font-mono ${getPriceImpactColor(order.priceImpact)}`}>
+                        {order.priceImpact !== undefined ? (
+                          <span className="flex items-center justify-end gap-1">
+                            {formatPriceImpact(order.priceImpact)}
+                            {order.priceImpact > 0 ? (
+                              <TrendingUp className="w-3 h-3" />
+                            ) : order.priceImpact < 0 ? (
+                              <TrendingDown className="w-3 h-3" />
+                            ) : null}
+                          </span>
+                        ) : (
+                          <span className="text-gray-500">—</span>
+                        )}
                       </div>
                       <div className="flex items-center">
                         {order.isWhale && <span className="text-lg">🐋</span>}
@@ -275,5 +391,12 @@ export function LargeOrdersFeed() {
         </div>
       )}
     </div>
+
+    {/* Whale Patterns Sidebar - Takes 1 column */}
+    <div className="lg:col-span-1">
+      <WhalePatternsSidebar patterns={whalePatterns} />
+    </div>
+  </div>
+</div>
   );
 }

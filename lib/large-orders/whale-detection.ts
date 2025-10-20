@@ -98,3 +98,33 @@ export function playWhaleSound(): void {
     console.warn('Failed to play whale alert sound:', error);
   }
 }
+
+/**
+ * Show browser notification for whale alert
+ */
+export async function showWhaleNotification(order: LargeOrder): Promise<void> {
+  if (typeof window === 'undefined') return;
+  
+  // Check if notifications are supported
+  if (!('Notification' in window)) {
+    return;
+  }
+  
+  // Request permission if not granted
+  if (Notification.permission === 'default') {
+    await Notification.requestPermission();
+  }
+  
+  // Show notification if permission granted
+  if (Notification.permission === 'granted') {
+    const notification = new Notification('🐋 Whale Alert!', {
+      body: formatWhaleAlert(order),
+      icon: '/favicon.ico',
+      badge: '/favicon.ico',
+      tag: 'whale-alert',
+    });
+    
+    // Auto close after 5 seconds
+    setTimeout(() => notification.close(), 5000);
+  }
+}

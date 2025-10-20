@@ -11,6 +11,9 @@ export interface LargeOrder {
   size: number;
   usdValue: number;
   exchange: string;
+  isWhale?: boolean;
+  marketPrice?: number;
+  priceImpact?: number;
 }
 
 export interface LargeOrderFilters {
@@ -39,6 +42,24 @@ export function formatUsdValue(value: number): string {
 }
 
 /**
+ * Format price impact percentage
+ */
+export function formatPriceImpact(impact?: number): string {
+  if (impact === undefined) return '';
+  const sign = impact >= 0 ? '+' : '';
+  return `${sign}${impact.toFixed(2)}%`;
+}
+
+/**
+ * Get price impact color class
+ */
+export function getPriceImpactColor(impact?: number): string {
+  if (impact === undefined) return 'text-gray-400';
+  if (Math.abs(impact) < 0.1) return 'text-gray-400';
+  return impact > 0 ? 'text-emerald-400' : 'text-red-400';
+}
+
+/**
  * Get relative time string
  */
 export function getRelativeTime(timestamp: number): string {
@@ -59,10 +80,16 @@ export function getRelativeTime(timestamp: number): string {
 /**
  * Convert trade data to large order
  */
-export function tradeToLargeOrder(trade: any, coin: string): LargeOrder {
+export function tradeToLargeOrder(trade: any, coin: string, marketPrice?: number): LargeOrder {
   const price = parseFloat(trade.px);
   const size = parseFloat(trade.sz);
   const usdValue = price * size;
+  
+  // Calculate price impact if market price is available
+  let priceImpact: number | undefined;
+  if (marketPrice && marketPrice > 0) {
+    priceImpact = ((price - marketPrice) / marketPrice) * 100;
+  }
   
   return {
     id: `${trade.tid || Date.now()}-${coin}`,
@@ -73,6 +100,8 @@ export function tradeToLargeOrder(trade: any, coin: string): LargeOrder {
     size,
     usdValue,
     exchange: 'Hyperliquid',
+    marketPrice,
+    priceImpact,
   };
 }
 
