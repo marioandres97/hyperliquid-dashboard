@@ -12,24 +12,24 @@ interface WhalePatternsProps {
 export function WhalePatternsSidebar({ patterns }: WhalePatternsProps) {
   if (patterns.length === 0) {
     return (
-      <div className="backdrop-blur-xl bg-gray-900/30 border border-emerald-500/10 rounded-2xl p-6">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 rounded-xl bg-gradient-to-br from-purple-500/20 to-blue-500/20">
-            <AlertTriangle className="w-5 h-5 text-purple-400" />
+      <div className="backdrop-blur-xl bg-white/5 border border-white/5 rounded-3xl p-8">
+        <div className="flex items-center gap-4 mb-6">
+          <div className="p-3 rounded-2xl bg-gradient-to-br from-purple-500/10 to-blue-500/10">
+            <AlertTriangle className="w-6 h-6 text-purple-400" />
           </div>
           <h3 className="text-lg font-semibold text-white">Whale Patterns</h3>
         </div>
-        <p className="text-sm text-gray-500">No patterns detected yet</p>
+        <p className="text-sm text-gray-400">No patterns detected yet</p>
       </div>
     );
   }
 
   return (
-    <div className="backdrop-blur-xl bg-gray-900/30 border border-emerald-500/10 rounded-2xl p-6">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-gradient-to-br from-purple-500/20 to-blue-500/20">
-            <AlertTriangle className="w-5 h-5 text-purple-400" />
+    <div className="backdrop-blur-xl bg-white/5 border border-white/5 rounded-3xl p-8">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-4">
+          <div className="p-3 rounded-2xl bg-gradient-to-br from-purple-500/10 to-blue-500/10">
+            <AlertTriangle className="w-6 h-6 text-purple-400" />
           </div>
           <div>
             <h3 className="text-lg font-semibold text-white">Whale Patterns</h3>
@@ -38,7 +38,7 @@ export function WhalePatternsSidebar({ patterns }: WhalePatternsProps) {
         </div>
       </div>
 
-      <div className="space-y-3 max-h-96 overflow-y-auto">
+      <div className="space-y-4 max-h-[500px] overflow-y-auto">
         <AnimatePresence mode="popLayout" initial={false}>
           {patterns.map((pattern) => (
             <motion.div
@@ -48,7 +48,7 @@ export function WhalePatternsSidebar({ patterns }: WhalePatternsProps) {
               exit={{ opacity: 0, x: -50, scale: 0.95 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
               layout
-              className={`relative rounded-xl p-4 border ${getSeverityColor(pattern.severity)}`}
+              className={`relative rounded-2xl p-5 border transition-all duration-200 hover:scale-[1.01] ${getSeverityColor(pattern.severity)}`}
             >
               {/* Pattern Header */}
               <div className="flex items-start justify-between mb-2">

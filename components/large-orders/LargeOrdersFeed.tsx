@@ -160,12 +160,12 @@ export function LargeOrdersFeed() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header - Premium */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-gradient-to-br from-green-500/20 to-blue-500/20 backdrop-blur-sm">
-            <TrendingUp className="w-5 h-5 text-green-400" />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+        <div className="flex items-center gap-4">
+          <div className="p-3 rounded-2xl bg-gradient-to-br from-green-500/10 to-blue-500/10 backdrop-blur-sm">
+            <TrendingUp className="w-6 h-6 text-green-400" />
           </div>
           <div>
             <div className="flex items-center gap-2">
@@ -201,11 +201,11 @@ export function LargeOrdersFeed() {
       <AssetStatsGrid asset={selectedAsset} stats={assetStats} />
 
       {/* Filters and Pressure Gauge Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Size Range Slider - Takes 2 columns */}
         <div className="lg:col-span-2">
-          <div className="backdrop-blur-xl bg-gray-900/30 border border-emerald-500/10 rounded-2xl p-6">
-            <h3 className="text-sm font-semibold text-gray-400 mb-4">Order Size Filter</h3>
+          <div className="backdrop-blur-xl bg-white/5 border border-white/5 rounded-3xl p-8">
+            <h3 className="text-sm font-semibold text-gray-400 mb-6">Order Size Filter</h3>
             <SizeRangeSlider
               minSize={minSize}
               maxSize={maxSize}
@@ -221,35 +221,35 @@ export function LargeOrdersFeed() {
       </div>
 
       {/* Main Content: Orders Feed + Whale Patterns Sidebar */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Orders Feed - Takes 2 columns */}
         <div className="lg:col-span-2">
           {/* Orders Display - Bloomberg-Style Premium Table */}
-          <div className="relative rounded-xl overflow-hidden">
+          <div className="relative rounded-3xl overflow-hidden">
             {/* Glassmorphism background */}
-            <div className="absolute inset-0 bg-gradient-to-br from-gray-800/40 to-gray-900/40 backdrop-blur-xl" />
-            <div className="absolute inset-0 border border-white/10 rounded-xl" />
+            <div className="absolute inset-0 bg-white/5 backdrop-blur-xl" />
+            <div className="absolute inset-0 border border-white/5 rounded-3xl" />
 
             <div className="relative">
           {isLoadingHistorical ? (
-            <div className="text-center py-16">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-700/40 to-emerald-800/40 backdrop-blur-xl mb-4">
+            <div className="text-center py-20">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-gradient-to-br from-emerald-700/20 to-emerald-800/20 backdrop-blur-xl mb-6">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-400"></div>
               </div>
-              <p className="text-base font-medium text-gray-400">Loading recent orders...</p>
-              <p className="text-sm text-gray-500 mt-1">Fetching BTC, ETH & HYPE markets</p>
+              <p className="text-base font-medium text-gray-300">Loading recent orders...</p>
+              <p className="text-sm text-gray-500 mt-2">Fetching BTC, ETH & HYPE markets</p>
             </div>
           ) : filteredOrders.length === 0 ? (
-            <div className="text-center py-16">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-gray-700/40 to-gray-800/40 backdrop-blur-xl mb-4">
-                <TrendingUp className="w-8 h-8 text-gray-500" />
+            <div className="text-center py-20">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-gradient-to-br from-gray-700/20 to-gray-800/20 backdrop-blur-xl mb-6">
+                <TrendingUp className="w-8 h-8 text-gray-400" />
               </div>
-              <p className="text-base font-medium text-gray-400">No orders match your filters</p>
-              <p className="text-sm text-gray-500 mt-1">Try adjusting size range or asset filter</p>
+              <p className="text-base font-medium text-gray-300">No orders match your filters</p>
+              <p className="text-sm text-gray-500 mt-2">Try adjusting size range or asset filter</p>
             </div>
           ) : isMobile ? (
             /* Mobile Card View - Premium */
-            <div className="max-h-96 overflow-y-auto p-3 space-y-2">
+            <div className="max-h-[500px] overflow-y-auto p-4 space-y-3">
               <AnimatePresence mode="popLayout" initial={false}>
                 {filteredOrders.map((order, index) => (
                   <OrderCard key={`${order.id}-${order.timestamp}`} order={order} index={index} />
@@ -260,7 +260,7 @@ export function LargeOrdersFeed() {
             /* Desktop Bloomberg-Style Table */
             <>
               {/* Table Header */}
-              <div className="grid grid-cols-8 lg:grid-cols-9 gap-4 px-6 py-4 border-b border-white/10">
+              <div className="grid grid-cols-8 lg:grid-cols-9 gap-6 px-8 py-5 border-b border-white/5">
                 <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Time</div>
                 <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Coin</div>
                 <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Side</div>
@@ -273,7 +273,7 @@ export function LargeOrdersFeed() {
               </div>
 
               {/* Table Body - with smooth scroll */}
-              <div className="max-h-96 overflow-y-auto">
+              <div className="max-h-[500px] overflow-y-auto">
                 <AnimatePresence mode="popLayout" initial={false}>
                   {filteredOrders.map((order, index) => (
                     <motion.div
@@ -287,7 +287,7 @@ export function LargeOrdersFeed() {
                         layout: { duration: 0.2 }
                       }}
                       layout
-                      className="grid grid-cols-8 lg:grid-cols-9 gap-4 px-6 py-3 border-b border-white/5 hover:bg-white/5 transition-colors group"
+                      className="grid grid-cols-8 lg:grid-cols-9 gap-6 px-8 py-4 border-b border-white/5 hover:bg-white/5 transition-all duration-200 group cursor-pointer hover:scale-[1.01]"
                     >
                       <div className="text-xs text-gray-400 font-mono">
                         {getRelativeTime(order.timestamp)}

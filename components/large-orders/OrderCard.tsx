@@ -24,13 +24,13 @@ export function OrderCard({ order, index }: OrderCardProps) {
         layout: { duration: 0.2 }
       }}
       layout
-      className="relative rounded-lg overflow-hidden group"
+      className="relative rounded-2xl overflow-hidden group cursor-pointer hover:scale-[1.01] transition-all duration-200"
     >
       {/* Card background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-800/30 to-gray-900/30 backdrop-blur-sm" />
-      <div className="absolute inset-0 border border-white/5 rounded-lg group-hover:border-white/10 transition-colors" />
+      <div className="absolute inset-0 bg-white/5 backdrop-blur-sm" />
+      <div className="absolute inset-0 border border-white/5 rounded-2xl group-hover:border-white/10 transition-colors" />
       
-      <div className="relative p-3 space-y-2">
+      <div className="relative p-4 space-y-3">
         {/* Top row: Coin + Side badge + Whale indicator */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
