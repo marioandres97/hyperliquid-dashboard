@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { formatInTimeZone } from 'date-fns-tz';
 import { Activity } from 'lucide-react';
+import Link from 'next/link';
 
 export default function Header() {
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
@@ -66,16 +67,21 @@ export default function Header() {
             </div>
             
             <div>
-              {/* Premium minimalist title - single color, NO gradients */}
-              <h1 
-                className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-widest uppercase"
-                style={{
-                  color: '#E5E5E5',
-                  letterSpacing: '0.15em',
-                }}
-              >
-                APEX TERMINAL
-              </h1>
+              {/* Premium gradient title - clickable */}
+              <Link href="/">
+                <h1 
+                  className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-widest uppercase cursor-pointer transition-opacity hover:opacity-80"
+                  style={{
+                    background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                    letterSpacing: '0.15em',
+                  }}
+                >
+                  Venomouz Insightz
+                </h1>
+              </Link>
               <p className="text-xs sm:text-sm text-gray-500 font-light tracking-wide">Institutional-Grade Analytics</p>
             </div>
           </div>
