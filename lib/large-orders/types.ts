@@ -11,6 +11,9 @@ export interface LargeOrder {
   size: number;
   usdValue: number;
   exchange: string;
+  isWhale?: boolean;
+  marketPrice?: number;
+  priceImpact?: number;
 }
 
 export interface LargeOrderFilters {

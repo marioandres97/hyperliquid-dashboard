@@ -13,7 +13,9 @@ import { PressureGauge } from './PressureGauge';
 import { OrderCard } from './OrderCard';
 import { ConnectionStatus } from './ConnectionStatus';
 import { useHyperliquidWebSocket } from '@/hooks/useHyperliquidWebSocket';
-import { isWhaleOrder, getWhaleStats } from '@/lib/large-orders/whale-detection';
+import { isWhaleOrder, getWhaleStats, playWhaleSound, showWhaleNotification } from '@/lib/large-orders/whale-detection';
+import { detectAllWhalePatterns } from '@/lib/large-orders/whale-patterns';
+import { WhalePatternsSidebar } from './WhalePatternsSidebar';
 import type { CoinFilter, LargeOrder, AssetStats, BuySellPressure } from '@/types/large-orders';
 import type { Trade } from '@/lib/hyperliquid/WebSocketManager';
 import { tradeToLargeOrder } from '@/lib/large-orders/types';
@@ -25,6 +27,8 @@ export function LargeOrdersFeed() {
   const [maxSize, setMaxSize] = useState(10000000);
   const [orders, setOrders] = useState<LargeOrder[]>([]);
   const [isLoadingHistorical, setIsLoadingHistorical] = useState(true);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
 
   // Load historical orders on mount
   useEffect(() => {
@@ -59,6 +63,19 @@ export function LargeOrdersFeed() {
       };
     });
 
+    // Check for whale orders and trigger alerts
+    const whaleOrders = newOrders.filter(o => o.isWhale);
+    if (whaleOrders.length > 0) {
+      whaleOrders.forEach(order => {
+        if (soundEnabled) {
+          playWhaleSound();
+        }
+        if (notificationsEnabled) {
+          showWhaleNotification(order);
+        }
+      });
+    }
+
     setOrders((prev) => {
       // Filter out duplicates based on ID
       const existingIds = new Set(prev.map(o => o.id));
@@ -70,7 +87,7 @@ export function LargeOrdersFeed() {
       combined.sort((a, b) => b.timestamp - a.timestamp);
       return combined.slice(0, 100);
     });
-  }, []);
+  }, [soundEnabled, notificationsEnabled]);
 
   const { connectionState, reconnect } = useHyperliquidWebSocket(
     ['BTC', 'ETH', 'HYPE'],
@@ -118,6 +135,9 @@ export function LargeOrdersFeed() {
 
   // Get whale stats
   const whaleStats = getWhaleStats(filteredOrders);
+
+  // Detect whale patterns
+  const whalePatterns = detectAllWhalePatterns(orders);
 
   // Detect mobile view
   useEffect(() => {
@@ -200,13 +220,17 @@ export function LargeOrdersFeed() {
         </div>
       </div>
 
-      {/* Orders Display - Bloomberg-Style Premium Table */}
-      <div className="relative rounded-xl overflow-hidden">
-        {/* Glassmorphism background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-800/40 to-gray-900/40 backdrop-blur-xl" />
-        <div className="absolute inset-0 border border-white/10 rounded-xl" />
+      {/* Main Content: Orders Feed + Whale Patterns Sidebar */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Orders Feed - Takes 2 columns */}
+        <div className="lg:col-span-2">
+          {/* Orders Display - Bloomberg-Style Premium Table */}
+          <div className="relative rounded-xl overflow-hidden">
+            {/* Glassmorphism background */}
+            <div className="absolute inset-0 bg-gradient-to-br from-gray-800/40 to-gray-900/40 backdrop-blur-xl" />
+            <div className="absolute inset-0 border border-white/10 rounded-xl" />
 
-        <div className="relative">
+            <div className="relative">
           {isLoadingHistorical ? (
             <div className="text-center py-16">
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-700/40 to-emerald-800/40 backdrop-blur-xl mb-4">
@@ -330,5 +354,12 @@ export function LargeOrdersFeed() {
         </div>
       )}
     </div>
+
+    {/* Whale Patterns Sidebar - Takes 1 column */}
+    <div className="lg:col-span-1">
+      <WhalePatternsSidebar patterns={whalePatterns} />
+    </div>
+  </div>
+</div>
   );
 }
