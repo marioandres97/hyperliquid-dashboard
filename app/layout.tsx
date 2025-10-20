@@ -5,8 +5,8 @@ import { ErrorBoundary } from "@/lib/monitoring/errorBoundary";
 import { ToastProvider } from "@/lib/hooks/ToastContext";
 
 export const metadata: Metadata = {
-  title: "VENOM",
-  description: "Premium dark mode trading terminal for elite traders",
+  title: "Venomouz Insightz",
+  description: "Elite Trading Terminal for Premium Traders - Real-time market intelligence, institutional-grade analytics, and precision trading tools",
 };
 
 export default function RootLayout({

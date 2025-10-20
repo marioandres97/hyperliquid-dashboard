@@ -223,15 +223,23 @@ export default function MarketHoursBar() {
   if (!currentTime) {
     return (
       <div 
-        className="relative z-40 py-3 sm:py-3.5"
+        className="relative z-40 py-2.5"
         style={{ 
-          background: 'rgba(15, 15, 15, 0.4)',
-          backdropFilter: 'blur(20px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.8)',
+          background: 'rgba(15, 15, 15, 0.35)',
+          backdropFilter: 'blur(30px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(30px) saturate(180%)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+          boxShadow: '0 2px 12px rgba(0, 0, 0, 0.6)',
         }}
       >
+        {/* Subtle overlay - NO gradients */}
+        <div 
+          className="absolute inset-0 opacity-10"
+          style={{
+            background: 'rgba(255, 255, 255, 0.02)',
+          }}
+        />
+        
         <div className="overflow-hidden">
           <div className="text-xs sm:text-sm font-medium tracking-wide text-gray-200 text-center">
             Loading market hours...
@@ -298,13 +306,13 @@ export default function MarketHoursBar() {
     // Desktop: Premium glassmorphism display with all 4 markets in a row
     return (
       <div 
-        className="relative z-40 py-3 sm:py-3.5"
+        className="relative z-40 py-2.5"
         style={{ 
-          background: 'rgba(15, 15, 15, 0.4)',
-          backdropFilter: 'blur(20px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.8)',
+          background: 'rgba(15, 15, 15, 0.35)',
+          backdropFilter: 'blur(30px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(30px) saturate(180%)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+          boxShadow: '0 2px 12px rgba(0, 0, 0, 0.6)',
         }}
       >
         {/* Subtle overlay - NO gradients */}
@@ -321,7 +329,7 @@ export default function MarketHoursBar() {
               <span key={index} className="inline-flex items-center">
                 {element}
                 {index < marketElements.length - 1 && (
-                  <span className="mx-4 text-gray-600">
+                  <span className="mx-3 text-gray-600">
                     •
                   </span>
                 )}
@@ -346,13 +354,13 @@ export default function MarketHoursBar() {
     
     return (
       <div 
-        className="relative z-40 py-3 sm:py-3.5"
+        className="relative z-40 py-2.5"
         style={{ 
-          background: 'rgba(15, 15, 15, 0.4)',
-          backdropFilter: 'blur(20px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.8)',
+          background: 'rgba(15, 15, 15, 0.35)',
+          backdropFilter: 'blur(30px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(30px) saturate(180%)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+          boxShadow: '0 2px 12px rgba(0, 0, 0, 0.6)',
         }}
       >
         {/* Subtle overlay - NO gradients */}
@@ -375,7 +383,7 @@ export default function MarketHoursBar() {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
             className="flex items-center justify-center text-xs sm:text-sm font-medium tracking-wide"
           >
             {currentPair.map((market, index) => {
@@ -474,13 +482,13 @@ export default function MarketHoursBar() {
   if (prefersReducedMotion) {
     return (
       <div 
-        className="relative z-40 py-3 sm:py-3.5"
+        className="relative z-40 py-2.5"
         style={{ 
-          background: 'rgba(15, 15, 15, 0.4)',
-          backdropFilter: 'blur(20px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.8)',
+          background: 'rgba(15, 15, 15, 0.35)',
+          backdropFilter: 'blur(30px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(30px) saturate(180%)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+          boxShadow: '0 2px 12px rgba(0, 0, 0, 0.6)',
         }}
       >
         {/* Subtle overlay - NO gradients */}
@@ -515,13 +523,13 @@ export default function MarketHoursBar() {
   // Fallback: Should not reach here, but show static content just in case
   return (
     <div 
-      className="relative z-40 py-3 sm:py-3.5"
+      className="relative z-40 py-2.5"
       style={{ 
-        background: 'rgba(15, 15, 15, 0.4)',
-        backdropFilter: 'blur(20px) saturate(180%)',
-        WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-        boxShadow: '0 4px 16px rgba(0, 0, 0, 0.8)',
+        background: 'rgba(15, 15, 15, 0.35)',
+        backdropFilter: 'blur(30px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(30px) saturate(180%)',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+        boxShadow: '0 2px 12px rgba(0, 0, 0, 0.6)',
       }}
     >
       {/* Subtle overlay - NO gradients */}
