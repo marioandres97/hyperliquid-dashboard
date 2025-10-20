@@ -4,7 +4,6 @@ import { Hero } from '@/components/landing/Hero';
 import { ValueProps } from '@/components/landing/ValueProps';
 import { ToolsShowcase } from '@/components/landing/ToolsShowcase';
 import { LiveDemo } from '@/components/landing/LiveDemo';
-import { StatsRow } from '@/components/landing/StatsRow';
 import { FinalCTA } from '@/components/landing/FinalCTA';
 
 export default function Landing() {
@@ -12,7 +11,14 @@ export default function Landing() {
     <div 
       className="min-h-screen grain-overlay fade-in"
       style={{ 
-        background: `linear-gradient(to bottom, var(--venom-gradient-start), var(--venom-gradient-mid), var(--venom-gradient-end))`,
+        background: `
+          linear-gradient(to right, rgba(255,255,255,0.02) 1px, transparent 1px),
+          linear-gradient(to bottom, rgba(255,255,255,0.02) 1px, transparent 1px),
+          radial-gradient(circle at center, rgba(16, 185, 129, 0.05) 0%, transparent 70%),
+          rgb(3, 7, 18)
+        `,
+        backgroundSize: '50px 50px, 50px 50px, 100% 100%, 100% 100%',
+        backgroundPosition: '0 0, 0 0, center, center',
         fontFamily: 'var(--apple-font-system)',
         letterSpacing: 'var(--apple-letter-spacing)',
       }}
@@ -21,7 +27,6 @@ export default function Landing() {
       <ValueProps />
       <ToolsShowcase />
       <LiveDemo />
-      <StatsRow />
       <FinalCTA />
 
       {/* Footer */}
