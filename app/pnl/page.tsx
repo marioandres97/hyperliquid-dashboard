@@ -47,8 +47,6 @@ export default function PnLPage() {
             <p className="text-gray-400 text-sm mb-2">Win Rate</p>
             <p className="text-3xl font-semibold text-white">67%</p>
           </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="backdrop-blur-xl bg-gray-900/30 border border-emerald-500/10 rounded-2xl p-6">
             <p className="text-gray-400 text-sm mb-2">Best Trade</p>
             <p className="text-3xl font-semibold text-emerald-500">+$3,200</p>
