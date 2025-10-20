@@ -25,8 +25,10 @@ export function LargeOrdersFeed() {
   const [maxSize, setMaxSize] = useState(10000000);
   const [orders, setOrders] = useState<LargeOrder[]>([]);
 
-  // WebSocket integration
+  // WebSocket integration - use useCallback to prevent re-renders
   const handleTrades = useCallback((coin: string, trades: Trade[]) => {
+    if (!trades || trades.length === 0) return;
+    
     const newOrders: LargeOrder[] = trades.map((trade) => {
       const order = tradeToLargeOrder(trade, coin);
       return {
@@ -62,10 +64,14 @@ export function LargeOrdersFeed() {
   const sellVolume = filteredOrders
     .filter((o) => o.side === 'SELL')
     .reduce((sum, o) => sum + o.usdValue, 0);
-  const ratio = sellVolume > 0 ? buyVolume / sellVolume : 1;
+  
+  // Handle case when there are no orders
+  const totalVolume = buyVolume + sellVolume;
+  const ratio = totalVolume > 0 && sellVolume > 0 ? buyVolume / sellVolume : 1;
+  
   const pressure: BuySellPressure = {
-    buyVolume,
-    sellVolume,
+    buyVolume: buyVolume || 0,
+    sellVolume: sellVolume || 0,
     ratio,
     trend: ratio > 1.2 ? 'bullish' : ratio < 0.8 ? 'bearish' : 'neutral',
   };

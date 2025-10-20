@@ -35,8 +35,9 @@ export function PressureGauge({ pressure }: PressureGaugeProps) {
   };
 
   const trendColor = getTrendColor();
-  const buyPercent = (pressure.buyVolume / (pressure.buyVolume + pressure.sellVolume)) * 100;
-  const sellPercent = 100 - buyPercent;
+  const totalVolume = pressure.buyVolume + pressure.sellVolume;
+  const buyPercent = totalVolume > 0 ? (pressure.buyVolume / totalVolume) * 100 : 0;
+  const sellPercent = totalVolume > 0 ? (pressure.sellVolume / totalVolume) * 100 : 100;
 
   return (
     <div className="backdrop-blur-xl bg-gray-900/30 border border-emerald-500/10 rounded-2xl p-6">
