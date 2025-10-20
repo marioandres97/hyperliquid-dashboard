@@ -223,9 +223,13 @@ export default function MarketHoursBar() {
   if (!currentTime) {
     return (
       <div 
-        className="z-40 bg-gray-900/85 backdrop-blur-md border-b border-gray-800/30 py-2 sm:py-2.5"
+        className="relative z-40 py-3 sm:py-3.5"
         style={{ 
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.4)' 
+          background: 'rgba(15, 20, 25, 0.5)',
+          backdropFilter: 'blur(20px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+          borderBottom: '1px solid rgba(107, 70, 193, 0.15)',
+          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
         }}
       >
         <div className="overflow-hidden">
@@ -237,23 +241,52 @@ export default function MarketHoursBar() {
     );
   }
 
-  // Build market status content for each market
+  // Build market status content for each market with premium indicators
   const marketElements = markets.map((market) => {
     const status = getMarketStatus(currentTime, market);
+    const isOpen = status.status === 'OPEN';
+    const isClosed = status.status === 'CLOSED';
+    const isOpeningSoon = status.status === 'OPENS SOON';
+    
     return (
-      <span key={market.name} className="inline-flex items-center gap-1 whitespace-nowrap mx-3">
-        <span className="text-gray-200">{market.name}:</span>
-        <span>{status.icon}</span>
-        <span className={`font-medium ${
-          status.status === 'OPEN' ? 'text-green-400' :
-          status.status === 'CLOSED' ? 'text-red-400' :
-          status.status === 'OPENS SOON' ? 'text-yellow-400' :
+      <span key={market.name} className="inline-flex items-center gap-2 whitespace-nowrap mx-3">
+        <span className="text-gray-300 font-medium">{market.name}:</span>
+        
+        {/* Premium status indicator with pulse */}
+        <span className="relative inline-flex items-center">
+          {isOpen && (
+            <>
+              <span className="absolute inline-flex h-2 w-2 rounded-full bg-emerald-400 opacity-75 animate-ping" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400 shadow-lg" style={{ boxShadow: '0 0 10px rgba(16, 185, 129, 0.6)' }} />
+            </>
+          )}
+          {isClosed && (
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-red-400/80 shadow-lg" style={{ boxShadow: '0 0 8px rgba(239, 68, 68, 0.4)' }} />
+          )}
+          {isOpeningSoon && (
+            <>
+              <span className="absolute inline-flex h-2 w-2 rounded-full bg-yellow-400 opacity-75 animate-ping" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-yellow-400 shadow-lg" style={{ boxShadow: '0 0 10px rgba(245, 158, 11, 0.6)' }} />
+            </>
+          )}
+          {status.status === 'CLOSES SOON' && (
+            <>
+              <span className="absolute inline-flex h-2 w-2 rounded-full bg-orange-400 opacity-75 animate-ping" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-orange-400 shadow-lg" style={{ boxShadow: '0 0 10px rgba(251, 146, 60, 0.6)' }} />
+            </>
+          )}
+        </span>
+        
+        <span className={`font-semibold tracking-wide ${
+          isOpen ? 'text-emerald-400' :
+          isClosed ? 'text-red-400' :
+          isOpeningSoon ? 'text-yellow-400' :
           'text-orange-400'
         }`}>
           {status.status}
         </span>
         {status.message && (
-          <span className="text-gray-400">({status.message})</span>
+          <span className="text-gray-400 text-xs">({status.message})</span>
         )}
       </span>
     );
@@ -262,20 +295,39 @@ export default function MarketHoursBar() {
   // Desktop (≥1024px): Show static content with all markets visible
   // Mobile/Tablet (<1024px): Show 2 markets at a time with auto-rotation
   if (screenSize === 'desktop') {
-    // Desktop: Static display with all 4 markets in a row
+    // Desktop: Premium glassmorphism display with all 4 markets in a row
     return (
       <div 
-        className="z-40 bg-gray-900/85 backdrop-blur-md border-b border-gray-800/30 py-2 sm:py-2.5"
+        className="relative z-40 py-3 sm:py-3.5"
         style={{ 
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.4)' 
+          background: 'rgba(15, 20, 25, 0.5)',
+          backdropFilter: 'blur(20px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+          borderBottom: '1px solid rgba(107, 70, 193, 0.15)',
+          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
         }}
       >
-        <div className="overflow-x-auto">
-          <div className="flex items-center justify-center text-xs sm:text-sm font-medium tracking-wide whitespace-nowrap px-4">
+        {/* Subtle gradient overlay */}
+        <div 
+          className="absolute inset-0 opacity-30"
+          style={{
+            background: 'linear-gradient(90deg, transparent 0%, rgba(107, 70, 193, 0.1) 50%, transparent 100%)',
+          }}
+        />
+        
+        <div className="relative overflow-x-auto">
+          <div className="flex items-center justify-center text-xs sm:text-sm font-medium tracking-wide whitespace-nowrap px-4 gap-1">
             {marketElements.map((element, index) => (
               <span key={index} className="inline-flex items-center">
                 {element}
-                {index < marketElements.length - 1 && <span className="text-gray-600 mx-3">•</span>}
+                {index < marketElements.length - 1 && (
+                  <span 
+                    className="mx-4 text-gray-600"
+                    style={{ textShadow: '0 0 10px rgba(107, 70, 193, 0.3)' }}
+                  >
+                    •
+                  </span>
+                )}
               </span>
             ))}
           </div>
@@ -297,13 +349,25 @@ export default function MarketHoursBar() {
     
     return (
       <div 
-        className="z-40 bg-gray-900/85 backdrop-blur-md border-b border-gray-800/30 py-2 sm:py-2.5"
+        className="relative z-40 py-3 sm:py-3.5"
         style={{ 
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.4)' 
+          background: 'rgba(15, 20, 25, 0.5)',
+          backdropFilter: 'blur(20px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+          borderBottom: '1px solid rgba(107, 70, 193, 0.15)',
+          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
         }}
       >
+        {/* Subtle gradient overlay */}
         <div 
-          className="overflow-hidden relative"
+          className="absolute inset-0 opacity-30"
+          style={{
+            background: 'linear-gradient(90deg, transparent 0%, rgba(107, 70, 193, 0.1) 50%, transparent 100%)',
+          }}
+        />
+        
+        <div 
+          className="relative overflow-hidden"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
           onTouchStart={() => setIsPaused(true)}
@@ -319,40 +383,84 @@ export default function MarketHoursBar() {
           >
             {currentPair.map((market, index) => {
               const status = getMarketStatus(currentTime, market);
+              const isOpen = status.status === 'OPEN';
+              const isClosed = status.status === 'CLOSED';
+              const isOpeningSoon = status.status === 'OPENS SOON';
+              
               return (
                 <span key={market.name} className="inline-flex items-center">
-                  <span className="inline-flex items-center gap-1 whitespace-nowrap mx-2 sm:mx-3">
-                    <span className="text-gray-200">{market.name}:</span>
-                    <span>{status.icon}</span>
-                    <span className={`font-medium ${
-                      status.status === 'OPEN' ? 'text-green-400' :
-                      status.status === 'CLOSED' ? 'text-red-400' :
-                      status.status === 'OPENS SOON' ? 'text-yellow-400' :
+                  <span className="inline-flex items-center gap-2 whitespace-nowrap mx-2 sm:mx-3">
+                    <span className="text-gray-300 font-medium">{market.name}:</span>
+                    
+                    {/* Premium status indicator with pulse */}
+                    <span className="relative inline-flex items-center">
+                      {isOpen && (
+                        <>
+                          <span className="absolute inline-flex h-2 w-2 rounded-full bg-emerald-400 opacity-75 animate-ping" />
+                          <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400 shadow-lg" style={{ boxShadow: '0 0 10px rgba(16, 185, 129, 0.6)' }} />
+                        </>
+                      )}
+                      {isClosed && (
+                        <span className="relative inline-flex h-2 w-2 rounded-full bg-red-400/80 shadow-lg" style={{ boxShadow: '0 0 8px rgba(239, 68, 68, 0.4)' }} />
+                      )}
+                      {isOpeningSoon && (
+                        <>
+                          <span className="absolute inline-flex h-2 w-2 rounded-full bg-yellow-400 opacity-75 animate-ping" />
+                          <span className="relative inline-flex h-2 w-2 rounded-full bg-yellow-400 shadow-lg" style={{ boxShadow: '0 0 10px rgba(245, 158, 11, 0.6)' }} />
+                        </>
+                      )}
+                      {status.status === 'CLOSES SOON' && (
+                        <>
+                          <span className="absolute inline-flex h-2 w-2 rounded-full bg-orange-400 opacity-75 animate-ping" />
+                          <span className="relative inline-flex h-2 w-2 rounded-full bg-orange-400 shadow-lg" style={{ boxShadow: '0 0 10px rgba(251, 146, 60, 0.6)' }} />
+                        </>
+                      )}
+                    </span>
+                    
+                    <span className={`font-semibold tracking-wide ${
+                      isOpen ? 'text-emerald-400' :
+                      isClosed ? 'text-red-400' :
+                      isOpeningSoon ? 'text-yellow-400' :
                       'text-orange-400'
                     }`}>
                       {status.status}
                     </span>
                     {status.message && (
-                      <span className="text-gray-400 hidden sm:inline">({status.message})</span>
+                      <span className="text-gray-400 text-xs hidden sm:inline">({status.message})</span>
                     )}
                   </span>
-                  {index === 0 && <span className="text-gray-600 mx-2 sm:mx-3">•</span>}
+                  {index === 0 && (
+                    <span 
+                      className="mx-3 text-gray-600"
+                      style={{ textShadow: '0 0 10px rgba(107, 70, 193, 0.3)' }}
+                    >
+                      •
+                    </span>
+                  )}
                 </span>
               );
             })}
           </motion.div>
           
-          {/* Dot indicators */}
-          <div className="flex items-center justify-center gap-2 mt-1">
+          {/* Premium dot indicators with glow */}
+          <div className="flex items-center justify-center gap-2 mt-2">
             {Array.from({ length: totalSlides }, (_, index) => (
               <button
                 key={index}
                 onClick={() => setCurrentSlide(index)}
-                className={`w-1.5 h-1.5 rounded-full transition-all ${
+                className={`rounded-full transition-all duration-300 ${
                   currentSlide === index 
-                    ? 'bg-purple-400 w-4' 
-                    : 'bg-gray-600 hover:bg-gray-500'
+                    ? 'w-6 h-1.5' 
+                    : 'w-1.5 h-1.5 hover:bg-gray-500'
                 }`}
+                style={{
+                  background: currentSlide === index 
+                    ? 'linear-gradient(90deg, rgba(107, 70, 193, 1) 0%, rgba(16, 185, 129, 1) 100%)'
+                    : 'rgba(156, 163, 175, 0.5)',
+                  boxShadow: currentSlide === index 
+                    ? '0 0 10px rgba(107, 70, 193, 0.5)'
+                    : 'none',
+                }}
                 aria-label={`Go to slide ${index + 1}`}
               />
             ))}
@@ -366,17 +474,36 @@ export default function MarketHoursBar() {
   if (prefersReducedMotion) {
     return (
       <div 
-        className="z-40 bg-gray-900/85 backdrop-blur-md border-b border-gray-800/30 py-2 sm:py-2.5"
+        className="relative z-40 py-3 sm:py-3.5"
         style={{ 
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.4)' 
+          background: 'rgba(15, 20, 25, 0.5)',
+          backdropFilter: 'blur(20px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+          borderBottom: '1px solid rgba(107, 70, 193, 0.15)',
+          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
         }}
       >
-        <div className="overflow-x-auto">
-          <div className="flex items-center justify-center text-xs sm:text-sm font-medium tracking-wide whitespace-nowrap px-4">
+        {/* Subtle gradient overlay */}
+        <div 
+          className="absolute inset-0 opacity-30"
+          style={{
+            background: 'linear-gradient(90deg, transparent 0%, rgba(107, 70, 193, 0.1) 50%, transparent 100%)',
+          }}
+        />
+        
+        <div className="relative overflow-x-auto">
+          <div className="flex items-center justify-center text-xs sm:text-sm font-medium tracking-wide whitespace-nowrap px-4 gap-1">
             {marketElements.map((element, index) => (
               <span key={index} className="inline-flex items-center">
                 {element}
-                {index < marketElements.length - 1 && <span className="text-gray-600 mx-3">•</span>}
+                {index < marketElements.length - 1 && (
+                  <span 
+                    className="mx-4 text-gray-600"
+                    style={{ textShadow: '0 0 10px rgba(107, 70, 193, 0.3)' }}
+                  >
+                    •
+                  </span>
+                )}
               </span>
             ))}
           </div>
@@ -388,17 +515,36 @@ export default function MarketHoursBar() {
   // Fallback: Should not reach here, but show static content just in case
   return (
     <div 
-      className="z-40 bg-gray-900/85 backdrop-blur-md border-b border-gray-800/30 py-2 sm:py-2.5"
+      className="relative z-40 py-3 sm:py-3.5"
       style={{ 
-        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.4)' 
+        background: 'rgba(15, 20, 25, 0.5)',
+        backdropFilter: 'blur(20px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+        borderBottom: '1px solid rgba(107, 70, 193, 0.15)',
+        boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
       }}
     >
-      <div className="overflow-x-auto">
-        <div className="flex items-center justify-center text-xs sm:text-sm font-medium tracking-wide whitespace-nowrap px-4">
+      {/* Subtle gradient overlay */}
+      <div 
+        className="absolute inset-0 opacity-30"
+        style={{
+          background: 'linear-gradient(90deg, transparent 0%, rgba(107, 70, 193, 0.1) 50%, transparent 100%)',
+        }}
+      />
+      
+      <div className="relative overflow-x-auto">
+        <div className="flex items-center justify-center text-xs sm:text-sm font-medium tracking-wide whitespace-nowrap px-4 gap-1">
           {marketElements.map((element, index) => (
             <span key={index} className="inline-flex items-center">
               {element}
-              {index < marketElements.length - 1 && <span className="text-gray-600 mx-3">•</span>}
+              {index < marketElements.length - 1 && (
+                <span 
+                  className="mx-4 text-gray-600"
+                  style={{ textShadow: '0 0 10px rgba(107, 70, 193, 0.3)' }}
+                >
+                  •
+                </span>
+              )}
             </span>
           ))}
         </div>

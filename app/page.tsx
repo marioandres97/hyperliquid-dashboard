@@ -11,7 +11,6 @@ import { LargeOrdersFeed } from '@/components/large-orders/LargeOrdersFeed';
 import { AlertSystem } from '@/components/alerts/AlertSystem';
 import Header from '@/components/Header';
 import MarketHoursBar from '@/components/MarketHoursBar';
-import { Info } from 'lucide-react';
 
 export default function Home() {
   return (
@@ -21,19 +20,6 @@ export default function Home() {
       
       {/* Market Hours Bar */}
       <MarketHoursBar />
-      
-      {/* Simplified info banner */}
-      <div className="bg-blue-500/5 border-b border-blue-500/10 py-2">
-        <div className="container mx-auto px-4 flex items-center justify-center gap-2">
-          <div className="relative w-2 h-2">
-            <div className="absolute inset-0 rounded-full bg-green-400 status-pulse" />
-          </div>
-          <Info className="w-3.5 h-3.5 text-blue-400" />
-          <span className="text-xs text-gray-400 font-financial">
-            Live prices • 24h charts (hourly intervals)
-          </span>
-        </div>
-      </div>
 
       <DashboardGrid>
         {/* Row 1: Real-Time Prices (1 col), Economic Calendar (1 col tablet, 2 cols desktop) */}
