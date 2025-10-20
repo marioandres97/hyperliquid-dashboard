@@ -197,28 +197,31 @@ model HealthMetric {
 // Trade model for PnL tracking
 model Trade {
   id          String   @id @default(cuid())
-  userId      String?  // null for now (no auth)
+  userId      String   @default("default-user") // For now, use default
   
-  coin        String   // "BTC" | "ETH" | "HYPE" | "USDT" | "USDC"
-  side        String   // "LONG" | "SHORT"
+  asset       String   // ANY crypto asset
+  baseAsset   String   @default("USDT") // "USDT" | "USDC" | "USD" | "BTC" | "ETH"
+  type        String   // "long" | "short"
   entryPrice  Float
-  exitPrice   Float
-  size        Float    // amount in coin
+  exitPrice   Float?   // Nullable for open positions
+  size        Float    // amount in asset
+  fees        Float    @default(0)
   
-  entryTime   DateTime
-  exitTime    DateTime
+  openedAt    DateTime
+  closedAt    DateTime? // Nullable for open positions
   
-  pnl         Float    // calculated: (exitPrice - entryPrice) * size for LONG
-  pnlPercent  Float    // calculated: (pnl / (entryPrice * size)) * 100
+  pnl         Float?   // calculated: (exitPrice - entryPrice) * size for LONG - fees
+  pnlPercent  Float?   // calculated: (pnl / (entryPrice * size)) * 100
   
   notes       String?
-  tags        String[] // ["#WhaleFollowing", "#Scalping"]
+  status      String   @default("open") // "open" | "closed"
   
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   
   @@index([userId])
-  @@index([coin])
-  @@index([entryTime])
+  @@index([asset])
+  @@index([status])
+  @@index([openedAt])
   @@map("trades")
 }

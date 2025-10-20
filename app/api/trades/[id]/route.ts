@@ -42,36 +42,48 @@ export async function PUT(
     // Recalculate PnL if prices changed
     let pnl = existingTrade.pnl;
     let pnlPercent = existingTrade.pnlPercent;
+    let status = existingTrade.status;
 
     const entryPrice = body.entryPrice !== undefined ? parseFloat(body.entryPrice) : existingTrade.entryPrice;
-    const exitPrice = body.exitPrice !== undefined ? parseFloat(body.exitPrice) : existingTrade.exitPrice;
+    const exitPrice = body.exitPrice !== undefined ? (body.exitPrice ? parseFloat(body.exitPrice) : null) : existingTrade.exitPrice;
     const size = body.size !== undefined ? parseFloat(body.size) : existingTrade.size;
-    const side = body.side || existingTrade.side;
+    const fees = body.fees !== undefined ? parseFloat(body.fees) : existingTrade.fees;
+    const type = body.type || existingTrade.type;
+    const closedAt = body.closedAt !== undefined ? (body.closedAt ? new Date(body.closedAt) : null) : existingTrade.closedAt;
 
-    if (body.entryPrice !== undefined || body.exitPrice !== undefined || body.size !== undefined || body.side !== undefined) {
-      if (side === 'LONG') {
-        pnl = (exitPrice - entryPrice) * size;
+    // Determine status based on whether we have exit price and closed date
+    status = (exitPrice !== null && closedAt !== null) ? 'closed' : 'open';
+
+    // Recalculate PnL if trade is closed
+    if (status === 'closed' && exitPrice !== null) {
+      if (type === 'long') {
+        pnl = (exitPrice - entryPrice) * size - fees;
       } else {
-        pnl = (entryPrice - exitPrice) * size;
+        pnl = (entryPrice - exitPrice) * size - fees;
       }
       pnlPercent = (pnl / (entryPrice * size)) * 100;
+    } else {
+      pnl = null;
+      pnlPercent = null;
     }
 
     // Update trade
     const trade = await prisma.trade.update({
       where: { id },
       data: {
-        ...(body.coin && { coin: body.coin }),
-        ...(body.side && { side: body.side }),
+        ...(body.asset && { asset: body.asset }),
+        ...(body.baseAsset && { baseAsset: body.baseAsset }),
+        ...(body.type && { type: body.type }),
         ...(body.entryPrice !== undefined && { entryPrice }),
         ...(body.exitPrice !== undefined && { exitPrice }),
         ...(body.size !== undefined && { size }),
-        ...(body.entryTime && { entryTime: new Date(body.entryTime) }),
-        ...(body.exitTime && { exitTime: new Date(body.exitTime) }),
+        ...(body.fees !== undefined && { fees }),
+        ...(body.openedAt && { openedAt: new Date(body.openedAt) }),
+        ...(body.closedAt !== undefined && { closedAt }),
         pnl,
         pnlPercent,
+        status,
         ...(body.notes !== undefined && { notes: body.notes }),
-        ...(body.tags !== undefined && { tags: body.tags }),
       },
     });
 
