@@ -66,7 +66,7 @@ export function PremiumPriceCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="relative h-full min-h-[320px] rounded-2xl overflow-hidden group"
+      className="relative h-full min-h-[320px] min-w-[280px] rounded-2xl overflow-hidden group"
     >
       {/* Glassmorphism background */}
       <div className="absolute inset-0 bg-gradient-to-br from-white/[0.08] to-white/[0.02] backdrop-blur-xl" />
@@ -81,12 +81,12 @@ export function PremiumPriceCard({
       }`} />
 
       {/* Content */}
-      <div className="relative h-full flex flex-col justify-between p-5 md:p-6">
+      <div className="relative h-full flex flex-col justify-between p-6">
         {/* Header */}
         <div className="flex items-start justify-between mb-3">
-          <div>
+          <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
-              <h3 className="text-xl md:text-2xl font-bold text-white tracking-tight">
+              <h3 className="text-xl font-bold text-white tracking-tight">
                 {coin}
               </h3>
               {/* Live indicator with pulse */}
@@ -99,7 +99,7 @@ export function PremiumPriceCard({
                 </div>
               )}
             </div>
-            <p className="text-sm text-white/40 font-medium tracking-wide">
+            <p className="text-sm text-gray-400 font-medium tracking-wide">
               {getCoinName(coin)}
             </p>
           </div>
@@ -109,13 +109,17 @@ export function PremiumPriceCard({
         {data ? (
           <>
             <div className="mb-4">
+              {/* Monospace font for price - PREVENTS TRUNCATION */}
               <motion.div
                 key={data.price}
                 initial={{ scale: 1 }}
                 animate={{ scale: [1, 1.02, 1] }}
                 transition={{ duration: 0.3 }}
-                className="text-3xl md:text-3xl lg:text-4xl font-extrabold text-white mb-2 tracking-tight leading-none"
-                style={{ fontFeatureSettings: '"tnum"' }}
+                className="text-3xl md:text-4xl font-bold font-mono text-white mb-3 tracking-tight leading-none whitespace-nowrap overflow-visible"
+                style={{ 
+                  fontFeatureSettings: '"tnum"',
+                  minWidth: 'fit-content'
+                }}
               >
                 ${data.price.toLocaleString(undefined, {
                   minimumFractionDigits: 2,
@@ -124,24 +128,24 @@ export function PremiumPriceCard({
               </motion.div>
 
               {/* 24h Change */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg ${
                   isPositive 
                     ? 'bg-green-500/10 border border-green-500/20' 
                     : 'bg-red-500/10 border border-red-500/20'
                 }`}>
                   {isPositive ? (
-                    <TrendingUp className="w-4 h-4 text-green-400" />
+                    <TrendingUp className="w-4 h-4 text-green-400 flex-shrink-0" />
                   ) : (
-                    <TrendingDown className="w-4 h-4 text-red-400" />
+                    <TrendingDown className="w-4 h-4 text-red-400 flex-shrink-0" />
                   )}
-                  <span className={`text-base font-bold ${
+                  <span className={`text-sm font-medium ${
                     isPositive ? 'text-green-400' : 'text-red-400'
                   }`}>
                     {isPositive ? '+' : ''}{data.change24h.toFixed(2)}%
                   </span>
                 </div>
-                <span className="text-sm text-white/30 font-medium">24h</span>
+                <span className="text-sm text-gray-500 font-medium">24h</span>
               </div>
             </div>
 
@@ -183,11 +187,11 @@ export function PremiumPriceCard({
         ) : (
           <div className="flex-1 flex items-center justify-center">
             {isConnected ? (
-              <div className="text-white/40 text-lg font-medium">Loading...</div>
+              <div className="text-gray-400 text-lg font-medium">Loading...</div>
             ) : (
               <div className="text-center">
-                <div className="text-white/40 mb-2 text-lg font-medium">Reconnecting...</div>
-                <div className="text-sm text-white/20">Please wait...</div>
+                <div className="text-gray-400 mb-2 text-lg font-medium">Reconnecting...</div>
+                <div className="text-sm text-gray-500">Please wait...</div>
               </div>
             )}
           </div>

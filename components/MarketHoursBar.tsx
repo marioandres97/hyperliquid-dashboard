@@ -225,11 +225,11 @@ export default function MarketHoursBar() {
       <div 
         className="relative z-40 py-3 sm:py-3.5"
         style={{ 
-          background: 'rgba(15, 20, 25, 0.5)',
+          background: 'rgba(15, 15, 15, 0.4)',
           backdropFilter: 'blur(20px) saturate(180%)',
           WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-          borderBottom: '1px solid rgba(107, 70, 193, 0.15)',
-          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.8)',
         }}
       >
         <div className="overflow-hidden">
@@ -300,18 +300,18 @@ export default function MarketHoursBar() {
       <div 
         className="relative z-40 py-3 sm:py-3.5"
         style={{ 
-          background: 'rgba(15, 20, 25, 0.5)',
+          background: 'rgba(15, 15, 15, 0.4)',
           backdropFilter: 'blur(20px) saturate(180%)',
           WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-          borderBottom: '1px solid rgba(107, 70, 193, 0.15)',
-          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.8)',
         }}
       >
-        {/* Subtle gradient overlay */}
+        {/* Subtle overlay - NO gradients */}
         <div 
-          className="absolute inset-0 opacity-30"
+          className="absolute inset-0 opacity-10"
           style={{
-            background: 'linear-gradient(90deg, transparent 0%, rgba(107, 70, 193, 0.1) 50%, transparent 100%)',
+            background: 'rgba(255, 255, 255, 0.02)',
           }}
         />
         
@@ -321,10 +321,7 @@ export default function MarketHoursBar() {
               <span key={index} className="inline-flex items-center">
                 {element}
                 {index < marketElements.length - 1 && (
-                  <span 
-                    className="mx-4 text-gray-600"
-                    style={{ textShadow: '0 0 10px rgba(107, 70, 193, 0.3)' }}
-                  >
+                  <span className="mx-4 text-gray-600">
                     •
                   </span>
                 )}
@@ -351,18 +348,18 @@ export default function MarketHoursBar() {
       <div 
         className="relative z-40 py-3 sm:py-3.5"
         style={{ 
-          background: 'rgba(15, 20, 25, 0.5)',
+          background: 'rgba(15, 15, 15, 0.4)',
           backdropFilter: 'blur(20px) saturate(180%)',
           WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-          borderBottom: '1px solid rgba(107, 70, 193, 0.15)',
-          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.8)',
         }}
       >
-        {/* Subtle gradient overlay */}
+        {/* Subtle overlay - NO gradients */}
         <div 
-          className="absolute inset-0 opacity-30"
+          className="absolute inset-0 opacity-10"
           style={{
-            background: 'linear-gradient(90deg, transparent 0%, rgba(107, 70, 193, 0.1) 50%, transparent 100%)',
+            background: 'rgba(255, 255, 255, 0.02)',
           }}
         />
         
@@ -430,10 +427,7 @@ export default function MarketHoursBar() {
                     )}
                   </span>
                   {index === 0 && (
-                    <span 
-                      className="mx-3 text-gray-600"
-                      style={{ textShadow: '0 0 10px rgba(107, 70, 193, 0.3)' }}
-                    >
+                    <span className="mx-3 text-gray-600">
                       •
                     </span>
                   )}
@@ -442,27 +436,33 @@ export default function MarketHoursBar() {
             })}
           </motion.div>
           
-          {/* Premium dot indicators with glow */}
-          <div className="flex items-center justify-center gap-2 mt-2">
+          {/* Premium dot indicators with glow - improved touch targets */}
+          <div className="flex items-center justify-center gap-3 mt-2">
             {Array.from({ length: totalSlides }, (_, index) => (
               <button
                 key={index}
                 onClick={() => setCurrentSlide(index)}
-                className={`rounded-full transition-all duration-300 ${
-                  currentSlide === index 
-                    ? 'w-6 h-1.5' 
-                    : 'w-1.5 h-1.5 hover:bg-gray-500'
+                className={`rounded-full transition-all duration-300 min-h-[44px] min-w-[44px] flex items-center justify-center ${
+                  currentSlide === index ? 'opacity-100' : 'opacity-70 hover:opacity-90'
                 }`}
-                style={{
-                  background: currentSlide === index 
-                    ? 'linear-gradient(90deg, rgba(107, 70, 193, 1) 0%, rgba(16, 185, 129, 1) 100%)'
-                    : 'rgba(156, 163, 175, 0.5)',
-                  boxShadow: currentSlide === index 
-                    ? '0 0 10px rgba(107, 70, 193, 0.5)'
-                    : 'none',
-                }}
                 aria-label={`Go to slide ${index + 1}`}
-              />
+              >
+                <div
+                  className={`rounded-full transition-all duration-300 ${
+                    currentSlide === index 
+                      ? 'w-6 h-2' 
+                      : 'w-2 h-2'
+                  }`}
+                  style={{
+                    background: currentSlide === index 
+                      ? 'linear-gradient(90deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%)'
+                      : 'rgba(255, 255, 255, 0.4)',
+                    boxShadow: currentSlide === index 
+                      ? '0 0 10px rgba(255, 255, 255, 0.3)'
+                      : 'none',
+                  }}
+                />
+              </button>
             ))}
           </div>
         </div>
@@ -476,18 +476,18 @@ export default function MarketHoursBar() {
       <div 
         className="relative z-40 py-3 sm:py-3.5"
         style={{ 
-          background: 'rgba(15, 20, 25, 0.5)',
+          background: 'rgba(15, 15, 15, 0.4)',
           backdropFilter: 'blur(20px) saturate(180%)',
           WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-          borderBottom: '1px solid rgba(107, 70, 193, 0.15)',
-          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.8)',
         }}
       >
-        {/* Subtle gradient overlay */}
+        {/* Subtle overlay - NO gradients */}
         <div 
-          className="absolute inset-0 opacity-30"
+          className="absolute inset-0 opacity-10"
           style={{
-            background: 'linear-gradient(90deg, transparent 0%, rgba(107, 70, 193, 0.1) 50%, transparent 100%)',
+            background: 'rgba(255, 255, 255, 0.02)',
           }}
         />
         
@@ -517,18 +517,18 @@ export default function MarketHoursBar() {
     <div 
       className="relative z-40 py-3 sm:py-3.5"
       style={{ 
-        background: 'rgba(15, 20, 25, 0.5)',
+        background: 'rgba(15, 15, 15, 0.4)',
         backdropFilter: 'blur(20px) saturate(180%)',
         WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-        borderBottom: '1px solid rgba(107, 70, 193, 0.15)',
-        boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+        boxShadow: '0 4px 16px rgba(0, 0, 0, 0.8)',
       }}
     >
-      {/* Subtle gradient overlay */}
+      {/* Subtle overlay - NO gradients */}
       <div 
-        className="absolute inset-0 opacity-30"
+        className="absolute inset-0 opacity-10"
         style={{
-          background: 'linear-gradient(90deg, transparent 0%, rgba(107, 70, 193, 0.1) 50%, transparent 100%)',
+          background: 'rgba(255, 255, 255, 0.02)',
         }}
       />
       
@@ -538,10 +538,7 @@ export default function MarketHoursBar() {
             <span key={index} className="inline-flex items-center">
               {element}
               {index < marketElements.length - 1 && (
-                <span 
-                  className="mx-4 text-gray-600"
-                  style={{ textShadow: '0 0 10px rgba(107, 70, 193, 0.3)' }}
-                >
+                <span className="mx-4 text-gray-600">
                   •
                 </span>
               )}

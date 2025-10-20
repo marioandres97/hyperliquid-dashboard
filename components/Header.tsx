@@ -42,49 +42,41 @@ export default function Header() {
       ref={headerRef}
       className="relative z-50 py-3 sm:py-4 lg:py-5"
       style={{
-        background: 'rgba(15, 20, 25, 0.6)',
+        background: 'rgba(15, 15, 15, 0.4)',
         backdropFilter: 'blur(24px) saturate(180%)',
         WebkitBackdropFilter: 'blur(24px) saturate(180%)',
-        borderBottom: '1px solid rgba(107, 70, 193, 0.2)',
-        boxShadow: '0 4px 24px rgba(0, 0, 0, 0.4), 0 0 40px rgba(107, 70, 193, 0.1)',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+        boxShadow: '0 4px 24px rgba(0, 0, 0, 0.8)',
       }}
     >
-      {/* Gradient border top */}
+      {/* Subtle border top - NO gradients */}
       <div 
         className="absolute top-0 left-0 right-0 h-[1px]"
         style={{
-          background: 'linear-gradient(90deg, transparent 0%, rgba(107, 70, 193, 0.6) 20%, rgba(16, 185, 129, 0.4) 50%, rgba(245, 158, 11, 0.5) 80%, transparent 100%)',
+          background: 'rgba(255, 255, 255, 0.1)',
         }}
       />
       
       <div className="container mx-auto px-3 sm:px-4 md:px-6">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* Logo with pulse animation */}
+            {/* Logo - NO pulse animation */}
             <div className="relative">
-              <div 
-                className="absolute inset-0 rounded-lg bg-purple-500/20 blur-md"
-                style={{
-                  animation: 'logo-pulse 3s ease-in-out infinite',
-                }}
-              />
-              <Activity className="relative w-5 h-5 sm:w-6 sm:h-6 text-purple-400 flex-shrink-0" />
+              <Activity className="relative w-5 h-5 sm:w-6 sm:h-6 text-white/90 flex-shrink-0" />
             </div>
             
             <div>
-              {/* Gradient title */}
+              {/* Premium minimalist title - single color, NO gradients */}
               <h1 
-                className="text-xl sm:text-2xl lg:text-3xl font-bold"
+                className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-widest uppercase"
                 style={{
-                  background: 'linear-gradient(135deg, #8B5CF6 0%, #10b981 50%, #f59e0b 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
+                  color: '#E5E5E5',
+                  letterSpacing: '0.15em',
                 }}
               >
-                Hyperliquid Dashboard
+                APEX TERMINAL
               </h1>
-              <p className="text-xs sm:text-sm text-gray-400 font-light">Advanced signal detection system</p>
+              <p className="text-xs sm:text-sm text-gray-500 font-light tracking-wide">Institutional-Grade Analytics</p>
             </div>
           </div>
           

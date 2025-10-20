@@ -14,7 +14,7 @@ import MarketHoursBar from '@/components/MarketHoursBar';
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-r from-purple-900/20 via-blue-900/20 to-green-900/20">
+    <div className="min-h-screen">
       {/* Header with UTC Clock */}
       <Header />
       
