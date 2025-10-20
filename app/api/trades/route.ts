@@ -17,34 +17,39 @@ export async function GET(request: NextRequest) {
     }
 
     const searchParams = request.nextUrl.searchParams;
-    const coin = searchParams.get('coin');
-    const side = searchParams.get('side');
+    const asset = searchParams.get('asset');
+    const status = searchParams.get('status');
+    const baseAsset = searchParams.get('baseAsset');
     const startDate = searchParams.get('startDate');
     const endDate = searchParams.get('endDate');
 
     // Build where clause
     const where: {
-      coin?: string;
-      side?: string;
-      entryTime?: { gte?: Date; lte?: Date };
+      asset?: string;
+      status?: string;
+      baseAsset?: string;
+      openedAt?: { gte?: Date; lte?: Date };
     } = {};
 
-    if (coin && coin !== 'ALL') {
-      where.coin = coin;
+    if (asset && asset !== 'ALL') {
+      where.asset = asset;
     }
-    if (side && side !== 'ALL') {
-      where.side = side;
+    if (status && status !== 'all') {
+      where.status = status;
+    }
+    if (baseAsset && baseAsset !== 'ALL') {
+      where.baseAsset = baseAsset;
     }
     if (startDate || endDate) {
-      where.entryTime = {};
-      if (startDate) where.entryTime.gte = new Date(startDate);
-      if (endDate) where.entryTime.lte = new Date(endDate);
+      where.openedAt = {};
+      if (startDate) where.openedAt.gte = new Date(startDate);
+      if (endDate) where.openedAt.lte = new Date(endDate);
     }
 
     const trades = await prisma.trade.findMany({
       where,
       orderBy: {
-        entryTime: 'desc',
+        openedAt: 'desc',
       },
     });
 
@@ -87,7 +92,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
 
     // Validate required fields
-    const requiredFields = ['coin', 'side', 'entryPrice', 'exitPrice', 'size', 'entryTime', 'exitTime'];
+    const requiredFields = ['asset', 'type', 'entryPrice', 'size', 'openedAt'];
     for (const field of requiredFields) {
       if (body[field] === undefined || body[field] === null) {
         console.error(`Missing required field: ${field}`, body);
@@ -103,53 +108,63 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Validate coin
-    if (!['BTC', 'ETH', 'HYPE', 'USDT', 'USDC'].includes(body.coin)) {
-      console.error('Invalid coin', { coin: body.coin });
+    // Validate type
+    if (!['long', 'short'].includes(body.type)) {
+      console.error('Invalid type', { type: body.type });
       return NextResponse.json(
         {
           success: false,
-          error: 'Invalid coin',
-          message: 'Coin must be one of: BTC, ETH, HYPE, USDT, or USDC',
+          error: 'Invalid type',
+          message: 'Type must be either long or short',
           code: 'VALIDATION_ERROR',
         },
         { status: 400 }
       );
     }
 
-    // Validate side
-    if (!['LONG', 'SHORT'].includes(body.side)) {
-      console.error('Invalid side', { side: body.side });
+    // Validate baseAsset
+    const validBaseAssets = ['USDT', 'USDC', 'USD', 'BTC', 'ETH'];
+    const baseAsset = body.baseAsset || 'USDT';
+    if (!validBaseAssets.includes(baseAsset)) {
       return NextResponse.json(
         {
           success: false,
-          error: 'Invalid side',
-          message: 'Side must be either LONG or SHORT',
+          error: 'Invalid baseAsset',
+          message: 'Base asset must be one of: USDT, USDC, USD, BTC, ETH',
           code: 'VALIDATION_ERROR',
         },
         { status: 400 }
       );
     }
 
-    // Calculate PnL
+    // Parse numeric values
     const entryPrice = parseFloat(body.entryPrice);
-    const exitPrice = parseFloat(body.exitPrice);
+    const exitPrice = body.exitPrice ? parseFloat(body.exitPrice) : null;
     const size = parseFloat(body.size);
+    const fees = body.fees ? parseFloat(body.fees) : 0;
 
-    let pnl: number;
-    if (body.side === 'LONG') {
-      pnl = (exitPrice - entryPrice) * size;
-    } else {
-      pnl = (entryPrice - exitPrice) * size;
+    // Determine status
+    const status = exitPrice !== null && body.closedAt ? 'closed' : 'open';
+
+    // Calculate PnL if trade is closed
+    let pnl: number | null = null;
+    let pnlPercent: number | null = null;
+
+    if (status === 'closed' && exitPrice !== null) {
+      if (body.type === 'long') {
+        pnl = (exitPrice - entryPrice) * size - fees;
+      } else {
+        pnl = (entryPrice - exitPrice) * size - fees;
+      }
+      pnlPercent = (pnl / (entryPrice * size)) * 100;
     }
-
-    const pnlPercent = (pnl / (entryPrice * size)) * 100;
 
     console.log('Creating trade', {
-      coin: body.coin,
-      side: body.side,
-      pnl: pnl.toFixed(2),
-      pnlPercent: pnlPercent.toFixed(2)
+      asset: body.asset,
+      type: body.type,
+      status,
+      pnl: pnl?.toFixed(2),
+      pnlPercent: pnlPercent?.toFixed(2)
     });
 
     // Create trade with better error handling
@@ -157,17 +172,19 @@ export async function POST(request: NextRequest) {
     try {
       trade = await prisma.trade.create({
         data: {
-          coin: body.coin,
-          side: body.side,
+          asset: body.asset,
+          baseAsset,
+          type: body.type,
           entryPrice,
           exitPrice,
           size,
-          entryTime: new Date(body.entryTime),
-          exitTime: new Date(body.exitTime),
+          fees,
+          openedAt: new Date(body.openedAt),
+          closedAt: body.closedAt ? new Date(body.closedAt) : null,
           pnl,
           pnlPercent,
+          status,
           notes: body.notes || null,
-          tags: body.tags || [],
         },
       });
     } catch (dbError) {

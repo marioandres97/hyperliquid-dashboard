@@ -3,7 +3,7 @@
 import Header from '@/components/Header';
 import MarketHoursBar from '@/components/MarketHoursBar';
 import FeatureNavigation from '@/components/navigation/FeatureNavigation';
-import { LazyPnLTracker } from '@/lib/lazy-components';
+import { PnLTrackerMain } from '@/components/pnl-tracker/PnLTrackerMain';
 
 export default function PnLPage() {
   return (
@@ -34,30 +34,9 @@ export default function PnLPage() {
         {/* Navigation Tabs */}
         <FeatureNavigation />
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="backdrop-blur-xl bg-gray-900/30 border border-emerald-500/10 rounded-2xl p-6 md:col-span-2">
-            <p className="text-gray-400 text-sm mb-2">Total PnL</p>
-            <p className="text-3xl font-semibold text-emerald-500">+$12,450</p>
-            <p className="text-xs text-gray-500 mt-1">+23.5%</p>
-          </div>
-          <div className="backdrop-blur-xl bg-gray-900/30 border border-emerald-500/10 rounded-2xl p-6">
-            <p className="text-gray-400 text-sm mb-2">Open Positions</p>
-            <p className="text-3xl font-semibold text-white">8</p>
-          </div>
-          <div className="backdrop-blur-xl bg-gray-900/30 border border-emerald-500/10 rounded-2xl p-6">
-            <p className="text-gray-400 text-sm mb-2">Win Rate</p>
-            <p className="text-3xl font-semibold text-white">67%</p>
-          </div>
-          <div className="backdrop-blur-xl bg-gray-900/30 border border-emerald-500/10 rounded-2xl p-6">
-            <p className="text-gray-400 text-sm mb-2">Best Trade</p>
-            <p className="text-3xl font-semibold text-emerald-500">+$3,200</p>
-          </div>
-        </div>
-
         {/* Main Content */}
-        <div className="backdrop-blur-xl bg-gray-900/30 border border-emerald-500/10 rounded-3xl p-4 md:p-8">
-          <LazyPnLTracker />
+        <div className="mt-8">
+          <PnLTrackerMain />
         </div>
       </div>
     </div>
