@@ -27,29 +27,12 @@ export default function CalendarPage() {
             Economic Calendar
           </h1>
           <p className="text-gray-400 text-lg" style={{ letterSpacing: '0.02em' }}>
-            Track high-impact market events and economic indicators
+            Track high-impact market events and economic indicators with advanced filters
           </p>
         </div>
 
         {/* Navigation Tabs */}
         <FeatureNavigation />
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="backdrop-blur-xl bg-gray-900/30 border border-emerald-500/10 rounded-2xl p-6">
-            <p className="text-gray-400 text-sm mb-2">High Impact Events</p>
-            <p className="text-3xl font-semibold text-emerald-500">12</p>
-            <p className="text-xs text-gray-500 mt-1">+3 this week</p>
-          </div>
-          <div className="backdrop-blur-xl bg-gray-900/30 border border-emerald-500/10 rounded-2xl p-6">
-            <p className="text-gray-400 text-sm mb-2">Next Event</p>
-            <p className="text-3xl font-semibold text-white">2h 15m</p>
-          </div>
-          <div className="backdrop-blur-xl bg-gray-900/30 border border-emerald-500/10 rounded-2xl p-6">
-            <p className="text-gray-400 text-sm mb-2">Events Today</p>
-            <p className="text-3xl font-semibold text-white">8</p>
-          </div>
-        </div>
 
         {/* Main Content */}
         <div className="backdrop-blur-xl bg-gray-900/30 border border-emerald-500/10 rounded-3xl p-4 md:p-8">

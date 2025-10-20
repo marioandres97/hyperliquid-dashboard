@@ -3,49 +3,89 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useEconomicCalendar } from '@/lib/hooks/economic-calendar/useEconomicCalendar';
-import { EventCard } from './EventCard';
 import { EventModal } from './EventModal';
-import { PremiumButton } from '@/components/shared/PremiumButton';
-import type { EconomicEvent, EconomicEventWithReleases } from '@/lib/economic-calendar/types';
-import { Calendar, BarChart3, ChevronDown, CalendarX } from 'lucide-react';
+import type { EconomicEventWithReleases } from '@/lib/economic-calendar/types';
+import { Calendar, BarChart3, Settings, Bell } from 'lucide-react';
+import { FilterBar } from './filters/FilterBar';
+import { ViewToggle } from './views/ViewToggle';
+import { ListView } from './views/ListView';
+import { CalendarView } from './views/CalendarView';
+import { NotificationSettings } from './NotificationSettings';
+import { applyFilters } from '@/lib/economic-calendar/filters';
+import { checkAndNotify, getSubscribedEventIds, cleanupNotifiedStatus } from '@/lib/economic-calendar/notifications';
+import type { EventFilters, ViewMode } from '@/types/economic-calendar';
 
 type TimeRangeFilter = 'today' | 'week' | 'month';
 
 export function EconomicCalendar() {
   const [timeRange, setTimeRange] = useState<TimeRangeFilter>('week');
   const [selectedEvent, setSelectedEvent] = useState<EconomicEventWithReleases | null>(null);
-  const [showAll, setShowAll] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const [filters, setFilters] = useState<EventFilters>({
+    impacts: [],
+    countries: [],
+  });
+  const [viewMode, setViewMode] = useState<ViewMode>('list');
+  const [showNotificationSettings, setShowNotificationSettings] = useState(false);
+  const [subscribedCount, setSubscribedCount] = useState(0);
 
   const { events, loading, error } = useEconomicCalendar({ timeRange });
 
-  // Detect mobile view
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+  // Apply filters to events
+  const filteredEvents = applyFilters(events, filters);
 
-  // On mobile, show only 3 events by default
-  const displayEvents = isMobile && !showAll ? events.slice(0, 3) : events;
+  // Update subscribed count
+  useEffect(() => {
+    setSubscribedCount(getSubscribedEventIds().length);
+  }, [events]);
+
+  // Check for notifications every minute
+  useEffect(() => {
+    // Initial check
+    checkAndNotify(events);
+
+    // Set up interval
+    const intervalId = setInterval(() => {
+      checkAndNotify(events);
+    }, 60000); // Check every minute
+
+    return () => clearInterval(intervalId);
+  }, [events]);
+
+  // Cleanup notified status for events that have passed
+  useEffect(() => {
+    const activeEventIds = events.map((e) => e.id);
+    cleanupNotifiedStatus(activeEventIds);
+  }, [events]);
 
   return (
     <div className="space-y-5">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 backdrop-blur-sm">
-          <Calendar className="w-5 h-5 text-blue-400" />
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 backdrop-blur-sm">
+            <Calendar className="w-5 h-5 text-blue-400" />
+          </div>
+          <div>
+            <h2 className="text-lg sm:text-xl font-bold text-white">Economic Calendar</h2>
+            <p className="text-xs text-gray-400 mt-0.5">
+              High-impact events affecting crypto markets
+            </p>
+          </div>
         </div>
-        <div>
-          <h2 className="text-lg sm:text-xl font-bold text-white">Economic Calendar</h2>
-          <p className="text-xs text-gray-400 mt-0.5">
-            High-impact events affecting crypto markets
-          </p>
-        </div>
+
+        {/* Notification Settings Button */}
+        <button
+          onClick={() => setShowNotificationSettings(true)}
+          className="relative p-2.5 rounded-xl bg-gray-900/50 backdrop-blur-xl border border-emerald-500/20 hover:bg-gray-900/70 transition-all"
+          title="Notification Settings"
+        >
+          <Settings className="w-5 h-5 text-gray-400" />
+          {subscribedCount > 0 && (
+            <span className="absolute -top-1 -right-1 w-5 h-5 bg-emerald-500 text-white text-xs rounded-full flex items-center justify-center font-semibold">
+              {subscribedCount}
+            </span>
+          )}
+        </button>
       </div>
 
       {/* Time Range Tabs - Premium Design */}
@@ -53,10 +93,7 @@ export function EconomicCalendar() {
         {(['today', 'week', 'month'] as TimeRangeFilter[]).map((range) => (
           <button
             key={range}
-            onClick={() => {
-              setTimeRange(range);
-              setShowAll(false);
-            }}
+            onClick={() => setTimeRange(range)}
             className={`
               flex-1 sm:flex-initial px-4 py-2.5 rounded-lg text-sm font-semibold
               transition-all duration-200 backdrop-blur-sm
@@ -70,6 +107,19 @@ export function EconomicCalendar() {
             {range.charAt(0).toUpperCase() + range.slice(1)}
           </button>
         ))}
+      </div>
+
+      {/* Filters */}
+      <FilterBar filters={filters} onFiltersChange={setFilters} />
+
+      {/* View Toggle */}
+      <div className="flex items-center justify-between">
+        <ViewToggle viewMode={viewMode} onViewModeChange={setViewMode} />
+        
+        {/* Event count */}
+        <div className="text-sm text-gray-400">
+          {filteredEvents.length} {filteredEvents.length === 1 ? 'event' : 'events'}
+        </div>
       </div>
 
       {/* Loading State - Premium Skeleton */}
@@ -104,46 +154,19 @@ export function EconomicCalendar() {
         </div>
       )}
 
-      {/* Events Grid - Premium Layout */}
+      {/* Events View */}
       {!loading && !error && (
         <>
-          {events.length === 0 ? (
-            <div className="text-center py-16">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-gray-800/40 to-gray-900/40 backdrop-blur-xl mb-4">
-                <CalendarX className="w-8 h-8 text-gray-500" />
-              </div>
-              <p className="text-base font-medium text-gray-400">No upcoming events</p>
-              <p className="text-sm text-gray-500 mt-1">Check back later for updates</p>
-            </div>
+          {viewMode === 'list' ? (
+            <ListView 
+              events={filteredEvents} 
+              onEventClick={setSelectedEvent}
+            />
           ) : (
-            <>
-              <div className="grid gap-4 md:grid-cols-2">
-                {displayEvents.map((event, index) => (
-                  <motion.div
-                    key={event.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                  >
-                    <EventCard
-                      event={event}
-                      onClick={() => setSelectedEvent(event as EconomicEventWithReleases)}
-                    />
-                  </motion.div>
-                ))}
-              </div>
-              
-              {/* Show More button on mobile - Premium */}
-              {isMobile && events.length > 3 && (
-                <button
-                  onClick={() => setShowAll(!showAll)}
-                  className="w-full px-4 py-3 bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white rounded-xl text-sm font-medium transition-all backdrop-blur-sm border border-white/10 hover:border-white/20 flex items-center justify-center gap-2"
-                >
-                  <span>{showAll ? 'Show Less' : `Show More (${events.length - 3} more)`}</span>
-                  <ChevronDown className={`w-4 h-4 transition-transform ${showAll ? 'rotate-180' : ''}`} />
-                </button>
-              )}
-            </>
+            <CalendarView 
+              events={filteredEvents} 
+              onEventClick={setSelectedEvent}
+            />
           )}
         </>
       )}
@@ -165,6 +188,12 @@ export function EconomicCalendar() {
       <EventModal
         event={selectedEvent}
         onClose={() => setSelectedEvent(null)}
+      />
+
+      {/* Notification Settings Panel */}
+      <NotificationSettings
+        isOpen={showNotificationSettings}
+        onClose={() => setShowNotificationSettings(false)}
       />
     </div>
   );
