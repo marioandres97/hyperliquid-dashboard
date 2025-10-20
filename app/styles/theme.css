@@ -6,9 +6,10 @@
   --venom-green-medium: #059669;
   --venom-green-dark: #064E3B;
   
-  /* Base Dark Background - Gradient */
+  /* Base Dark Background - Gradient with three transition colors */
   --venom-base-dark: #0A0E14;
   --venom-gradient-start: #064E3B;
+  --venom-gradient-mid: #0D1B17;
   --venom-gradient-end: #0A0E14;
   
   /* Gray Scale */

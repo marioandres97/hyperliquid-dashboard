@@ -65,18 +65,26 @@ export function PremiumPriceCard({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
+      transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
       className="relative h-full min-h-[320px] min-w-[280px] rounded-2xl overflow-hidden group"
     >
-      {/* Glassmorphism background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-white/[0.08] to-white/[0.02] backdrop-blur-xl" />
+      {/* Glassmorphism background with enhanced blur */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white/[0.08] to-white/[0.02]" 
+        style={{ backdropFilter: 'blur(50px)', WebkitBackdropFilter: 'blur(50px)' }} 
+      />
       
-      {/* Subtle gradient border */}
-      <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/20 via-white/5 to-transparent opacity-50" />
+      {/* Subtle gradient border with glow on hover */}
+      <div 
+        className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/20 via-white/5 to-transparent opacity-50 transition-all duration-500 group-hover:opacity-70"
+        style={{ 
+          boxShadow: '0 0 0 1px rgba(16, 185, 129, 0)',
+          transition: 'all 500ms cubic-bezier(0.4, 0, 0.2, 1)'
+        }}
+      />
       <div className="absolute inset-[1px] rounded-2xl bg-gradient-to-br from-gray-900/90 to-gray-900/70" />
 
       {/* Glow effect */}
-      <div className={`absolute -inset-[1px] rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl ${
+      <div className={`absolute -inset-[1px] rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-500 blur-xl ${
         isPositive ? 'bg-green-500/20' : 'bg-red-500/20'
       }`} />
 
