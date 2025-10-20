@@ -65,13 +65,19 @@ export function LargeOrdersFeed() {
     .filter((o) => o.side === 'SELL')
     .reduce((sum, o) => sum + o.usdValue, 0);
   
-  // Handle case when there are no orders
-  const totalVolume = buyVolume + sellVolume;
-  const ratio = totalVolume > 0 && sellVolume > 0 ? buyVolume / sellVolume : 1;
+  // Calculate ratio - handle edge cases properly
+  let ratio = 1;
+  if (buyVolume > 0 && sellVolume > 0) {
+    ratio = buyVolume / sellVolume;
+  } else if (buyVolume > 0 && sellVolume === 0) {
+    ratio = 10; // Very high ratio to indicate extreme bullish pressure
+  } else if (buyVolume === 0 && sellVolume > 0) {
+    ratio = 0.1; // Very low ratio to indicate extreme bearish pressure
+  }
   
   const pressure: BuySellPressure = {
-    buyVolume: buyVolume || 0,
-    sellVolume: sellVolume || 0,
+    buyVolume,
+    sellVolume,
     ratio,
     trend: ratio > 1.2 ? 'bullish' : ratio < 0.8 ? 'bearish' : 'neutral',
   };
