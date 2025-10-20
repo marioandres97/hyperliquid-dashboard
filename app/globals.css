@@ -374,3 +374,145 @@ body {
   scrollbar-width: thin;
   scrollbar-color: var(--color-wealth-purple) rgba(15, 20, 25, 0.3);
 }
+
+/* Shimmer animation for loading skeletons */
+@keyframes shimmer-animation {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.shimmer {
+  animation: shimmer-animation 2s infinite linear;
+  background: linear-gradient(
+    to right,
+    rgba(16, 185, 129, 0.05) 0%,
+    rgba(16, 185, 129, 0.15) 50%,
+    rgba(16, 185, 129, 0.05) 100%
+  );
+  background-size: 1000px 100%;
+}
+
+/* Mobile-specific container padding */
+@media (max-width: 640px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  /* Add padding at the bottom for bottom navigation */
+  body {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  
+  .mobile-safe-area {
+    padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* Responsive breakpoints for all device sizes */
+@media (min-width: 320px) and (max-width: 374px) {
+  /* iPhone SE */
+  .container {
+    max-width: 100%;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+}
+
+@media (min-width: 375px) and (max-width: 429px) {
+  /* iPhone 13, 14 Pro */
+  .container {
+    max-width: 100%;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+@media (min-width: 430px) and (max-width: 743px) {
+  /* iPhone 15 Pro Max */
+  .container {
+    max-width: 100%;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 744px) and (max-width: 833px) {
+  /* iPad mini */
+  .container {
+    max-width: 100%;
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+@media (min-width: 834px) and (max-width: 1023px) {
+  /* iPad Pro 11" */
+  .container {
+    max-width: 100%;
+    padding-left: 2.5rem;
+    padding-right: 2.5rem;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1279px) {
+  /* iPad Pro 12.9" */
+  .container {
+    max-width: 1024px;
+  }
+}
+
+@media (min-width: 1280px) and (max-width: 1919px) {
+  /* Desktop */
+  .container {
+    max-width: 1280px;
+  }
+}
+
+@media (min-width: 1920px) and (max-width: 2559px) {
+  /* Full HD */
+  .container {
+    max-width: 1536px;
+  }
+}
+
+@media (min-width: 2560px) {
+  /* 4K */
+  .container {
+    max-width: 1920px;
+  }
+}
+
+/* Slide up animation for install prompt */
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.slide-up {
+  animation: slideUp 300ms ease-out;
+}
+
+/* Minimum touch target size for mobile */
+.touch-target {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* PWA specific styles */
+@media (display-mode: standalone) {
+  body {
+    /* Additional padding for standalone mode */
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+}

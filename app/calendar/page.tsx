@@ -1,7 +1,9 @@
+'use client';
+
 import Header from '@/components/Header';
 import MarketHoursBar from '@/components/MarketHoursBar';
 import FeatureNavigation from '@/components/navigation/FeatureNavigation';
-import { EconomicCalendar } from '@/components/economic-calendar/EconomicCalendar';
+import { LazyEconomicCalendar } from '@/lib/lazy-components';
 
 export default function CalendarPage() {
   return (
@@ -50,8 +52,8 @@ export default function CalendarPage() {
         </div>
 
         {/* Main Content */}
-        <div className="backdrop-blur-xl bg-gray-900/30 border border-emerald-500/10 rounded-3xl p-8">
-          <EconomicCalendar />
+        <div className="backdrop-blur-xl bg-gray-900/30 border border-emerald-500/10 rounded-3xl p-4 md:p-8">
+          <LazyEconomicCalendar />
         </div>
       </div>
     </div>
