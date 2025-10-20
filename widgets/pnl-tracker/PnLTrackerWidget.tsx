@@ -7,6 +7,8 @@ import PnLBackground from '@/components/layout/backgrounds/PnLBackground';
 import WidgetContainer from '@/components/layout/WidgetContainer';
 import { TradeEntryModal } from '@/components/trades/TradeEntryModal';
 import { TradeHistoryTable } from '@/components/trades/TradeHistoryTable';
+import { StatsCard } from '@/components/trades/StatsCard';
+import { PremiumButton } from '@/components/shared/PremiumButton';
 import { TrendingUp, TrendingDown, DollarSign, Target, Award, ArrowUpRight, ArrowDownRight, Plus } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
@@ -106,224 +108,235 @@ export default function PnLTrackerWidget({ isProfitable }: PnLTrackerWidgetProps
   };
 
   return (
-    <div className="h-full flex flex-col space-y-3">
+    <div className="h-full flex flex-col space-y-5">
       {/* Header with Add Trade Button and DB Status */}
       <div className="flex items-center justify-between flex-shrink-0">
-        <div className="flex items-center gap-2">
-          <h2 className="text-lg font-bold text-white">💰 PnL Tracker</h2>
+        <div className="flex items-center gap-3">
+          <h2 className="text-xl font-bold text-white">💰 PnL Tracker</h2>
           {/* Database connection status indicator */}
           {dbStatus === 'connected' && (
-            <div className="flex items-center gap-1 px-2 py-0.5 bg-green-500/10 border border-green-500/20 rounded text-xs">
-              <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
-              <span className="text-green-400">DB Connected</span>
+            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-green-500/10 border border-green-500/20 rounded-lg text-xs backdrop-blur-sm">
+              <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
+              <span className="text-green-400 font-medium">DB Connected</span>
             </div>
           )}
           {dbStatus === 'disconnected' && (
-            <div className="flex items-center gap-1 px-2 py-0.5 bg-red-500/10 border border-red-500/20 rounded text-xs">
+            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-red-500/10 border border-red-500/20 rounded-lg text-xs backdrop-blur-sm">
               <div className="w-1.5 h-1.5 bg-red-400 rounded-full"></div>
-              <span className="text-red-400">DB Offline</span>
+              <span className="text-red-400 font-medium">DB Offline</span>
             </div>
           )}
         </div>
-        <button
+        <PremiumButton
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors"
+          variant="primary"
+          size="md"
+          icon={<Plus className="w-4 h-4" />}
         >
-          <Plus className="w-4 h-4" />
           Add Trade
-        </button>
+        </PremiumButton>
       </div>
 
-      {/* Total PnL */}
-      <div className={`p-3 rounded-xl border-2 flex-shrink-0 ${
-        currentIsProfitable 
-          ? 'bg-green-500/10 border-green-400' 
-          : 'bg-red-500/10 border-red-400'
-      }`}>
-        <div className="flex items-center gap-2 mb-1.5">
-          <DollarSign className="w-5 h-5 text-white/60" />
-          <span className="text-sm text-white/60">Total PnL</span>
-        </div>
-        <div className={`text-3xl font-bold ${
-          currentIsProfitable ? 'text-green-400' : 'text-red-400'
-        }`}>
-          {currentIsProfitable ? '+' : ''}${stats.totalPnL.toFixed(2)}
-        </div>
+      {/* Stats Cards Grid - Premium Design */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 flex-shrink-0">
+        <StatsCard
+          title="Total PnL"
+          value={`${currentIsProfitable ? '+' : ''}$${stats.totalPnL.toFixed(2)}`}
+          subtitle={`${stats.totalTrades} trades`}
+          icon={DollarSign}
+          variant={currentIsProfitable ? 'profit' : 'loss'}
+        />
+        <StatsCard
+          title="Win Rate"
+          value={`${stats.winRate.toFixed(1)}%`}
+          subtitle={`${stats.winningTrades}W / ${stats.losingTrades}L`}
+          icon={Target}
+          variant="neutral"
+        />
+        <StatsCard
+          title="Avg Win"
+          value={`+$${stats.avgWin.toFixed(2)}`}
+          subtitle={`${stats.winningTrades} winning trades`}
+          icon={TrendingUp}
+          variant="profit"
+        />
+        <StatsCard
+          title="Avg Loss"
+          value={`-$${stats.avgLoss.toFixed(2)}`}
+          subtitle={`${stats.losingTrades} losing trades`}
+          icon={TrendingDown}
+          variant="loss"
+        />
       </div>
 
-      {/* Equity Curve */}
+      {/* Equity Curve - Premium */}
       {chartData.length > 0 && (
-        <div className="bg-white/5 backdrop-blur-sm rounded-xl p-3 border border-white/10 flex-shrink-0">
-          <h3 className="text-sm font-medium text-white/70 mb-2">Equity Curve</h3>
-          <ResponsiveContainer width="100%" height={180}>
-            <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
-              <XAxis 
-                dataKey="time" 
-                stroke="#ffffff40"
-                tick={{ fill: '#ffffff60', fontSize: 10 }}
-                angle={-45}
-                textAnchor="end"
-                height={60}
-              />
-              <YAxis 
-                stroke="#ffffff40"
-                tick={{ fill: '#ffffff60', fontSize: 12 }}
-                domain={['dataMin - 10', 'dataMax + 10']}
-              />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: '#1a1a1a',
-                  border: '1px solid #ffffff20',
-                  borderRadius: '8px',
-                  color: '#fff'
-                }}
-                formatter={(value: number) => [`$${value.toFixed(2)}`, 'Equity']}
-              />
-              <Line 
-                type="monotone" 
-                dataKey="equity" 
-                stroke="#22c55e" 
-                strokeWidth={2}
-                dot={false}
-              />
-            </LineChart>
-          </ResponsiveContainer>
+        <div className="relative rounded-xl overflow-hidden flex-shrink-0">
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-800/40 to-gray-900/40 backdrop-blur-xl" />
+          <div className="absolute inset-0 border border-white/10 rounded-xl" />
+          
+          <div className="relative p-5">
+            <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">Equity Curve</h3>
+            <ResponsiveContainer width="100%" height={180}>
+              <LineChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
+                <XAxis 
+                  dataKey="time" 
+                  stroke="#ffffff40"
+                  tick={{ fill: '#ffffff60', fontSize: 10 }}
+                  angle={-45}
+                  textAnchor="end"
+                  height={60}
+                />
+                <YAxis 
+                  stroke="#ffffff40"
+                  tick={{ fill: '#ffffff60', fontSize: 12 }}
+                  domain={['dataMin - 10', 'dataMax + 10']}
+                />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: '#1a1a1a',
+                    border: '1px solid #ffffff20',
+                    borderRadius: '8px',
+                    color: '#fff'
+                  }}
+                  formatter={(value: number) => [`$${value.toFixed(2)}`, 'Equity']}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="equity" 
+                  stroke="#22c55e" 
+                  strokeWidth={2}
+                  dot={false}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       )}
 
-      {/* LONG/SHORT Win Rates */}
-      <div className="grid grid-cols-2 gap-2.5 flex-shrink-0">
-        <div className="bg-green-500/10 border border-green-400/30 rounded-xl p-2.5 backdrop-blur-sm">
-          <div className="flex items-center gap-2 mb-1">
-            <ArrowUpRight className="w-4 h-4 text-green-400" />
-            <span className="text-xs text-white/60">LONG Win Rate</span>
-          </div>
-          <div className="text-2xl font-bold text-green-400">
-            {stats.bySignalType?.LONG?.winRate?.toFixed(1) ?? '0.0'}%
-          </div>
-          <div className="text-xs text-white/50 mt-0.5">
-            {stats.bySignalType?.LONG?.winningTrades ?? 0}W / {stats.bySignalType?.LONG?.losingTrades ?? 0}L
-          </div>
-          <div className={`text-xs font-medium mt-0.5 ${
-            (stats.bySignalType?.LONG?.totalPnL ?? 0) >= 0 ? 'text-green-400' : 'text-red-400'
-          }`}>
-            PnL: {(stats.bySignalType?.LONG?.totalPnL ?? 0) >= 0 ? '+' : ''}${(stats.bySignalType?.LONG?.totalPnL ?? 0).toFixed(2)}
-          </div>
-        </div>
-
-        <div className="bg-red-500/10 border border-red-400/30 rounded-xl p-2.5 backdrop-blur-sm">
-          <div className="flex items-center gap-2 mb-1">
-            <ArrowDownRight className="w-4 h-4 text-red-400" />
-            <span className="text-xs text-white/60">SHORT Win Rate</span>
-          </div>
-          <div className="text-2xl font-bold text-red-400">
-            {stats.bySignalType?.SHORT?.winRate?.toFixed(1) ?? '0.0'}%
-          </div>
-          <div className="text-xs text-white/50 mt-0.5">
-            {stats.bySignalType?.SHORT?.winningTrades ?? 0}W / {stats.bySignalType?.SHORT?.losingTrades ?? 0}L
-          </div>
-          <div className={`text-xs font-medium mt-0.5 ${
-            (stats.bySignalType?.SHORT?.totalPnL ?? 0) >= 0 ? 'text-green-400' : 'text-red-400'
-          }`}>
-            PnL: {(stats.bySignalType?.SHORT?.totalPnL ?? 0) >= 0 ? '+' : ''}${(stats.bySignalType?.SHORT?.totalPnL ?? 0).toFixed(2)}
-          </div>
-        </div>
-      </div>
-
-      {/* Timeframe PnL */}
-      <div className="grid grid-cols-3 gap-2 flex-shrink-0">
-        <div className="bg-white/5 backdrop-blur-sm rounded-xl p-2.5 border border-white/10">
-          <div className="text-xs text-white/50 mb-1">Today</div>
-          <div className={`text-lg font-bold ${
-            stats.byTimeframe.today >= 0 ? 'text-green-400' : 'text-red-400'
-          }`}>
-            {stats.byTimeframe.today >= 0 ? '+' : ''}${stats.byTimeframe.today.toFixed(2)}
-          </div>
-        </div>
-        <div className="bg-white/5 backdrop-blur-sm rounded-xl p-2.5 border border-white/10">
-          <div className="text-xs text-white/50 mb-1">Week</div>
-          <div className={`text-lg font-bold ${
-            stats.byTimeframe.week >= 0 ? 'text-green-400' : 'text-red-400'
-          }`}>
-            {stats.byTimeframe.week >= 0 ? '+' : ''}${stats.byTimeframe.week.toFixed(2)}
-          </div>
-        </div>
-        <div className="bg-white/5 backdrop-blur-sm rounded-xl p-2.5 border border-white/10">
-          <div className="text-xs text-white/50 mb-1">Month</div>
-          <div className={`text-lg font-bold ${
-            stats.byTimeframe.month >= 0 ? 'text-green-400' : 'text-red-400'
-          }`}>
-            {stats.byTimeframe.month >= 0 ? '+' : ''}${stats.byTimeframe.month.toFixed(2)}
-          </div>
-        </div>
-      </div>
-
-      {/* Win Rate & Stats */}
-      <div className="grid grid-cols-2 gap-2.5 flex-shrink-0">
-        <div className="bg-white/5 backdrop-blur-sm rounded-xl p-2.5 border border-white/10">
-          <div className="flex items-center gap-2 mb-1">
-            <Target className="w-4 h-4 text-white/60" />
-            <span className="text-xs text-white/50">Win Rate</span>
-          </div>
-          <div className="text-2xl font-bold text-white">
-            {stats.winRate.toFixed(1)}%
-          </div>
-          <div className="text-xs text-white/50 mt-0.5">
-            {stats.winningTrades}W / {stats.losingTrades}L
-          </div>
-        </div>
-
-        <div className="bg-white/5 backdrop-blur-sm rounded-xl p-2.5 border border-white/10">
-          <div className="flex items-center gap-2 mb-1">
-            <Award className="w-4 h-4 text-white/60" />
-            <span className="text-xs text-white/50">Profit Factor</span>
-          </div>
-          <div className="text-2xl font-bold text-white">
-            {stats.profitFactor > 100 ? '∞' : stats.profitFactor.toFixed(2)}
-          </div>
-          <div className="text-xs text-white/50 mt-0.5">
-            {stats.totalTrades} trades
-          </div>
-        </div>
-      </div>
-
-      {/* Avg Win/Loss */}
-      <div className="grid grid-cols-2 gap-2.5 flex-shrink-0">
-        <div className="bg-green-500/10 border border-green-400/30 rounded-xl p-2.5 backdrop-blur-sm">
-          <div className="flex items-center gap-2 mb-1">
-            <TrendingUp className="w-4 h-4 text-green-400" />
-            <span className="text-xs text-white/60">Avg Win</span>
-          </div>
-          <div className="text-xl font-bold text-green-400">
-            +${stats.avgWin.toFixed(2)}
-          </div>
-        </div>
-
-        <div className="bg-red-500/10 border border-red-400/30 rounded-xl p-2.5 backdrop-blur-sm">
-          <div className="flex items-center gap-2 mb-1">
-            <TrendingDown className="w-4 h-4 text-red-400" />
-            <span className="text-xs text-white/60">Avg Loss</span>
-          </div>
-          <div className="text-xl font-bold text-red-400">
-            -${stats.avgLoss.toFixed(2)}
-          </div>
-        </div>
-      </div>
-
-      {/* Largest Win/Loss */}
-      <div className="bg-white/5 backdrop-blur-sm rounded-xl p-2.5 border border-white/10 flex-shrink-0">
-        <div className="flex justify-between items-center">
-          <div>
-            <div className="text-xs text-white/50 mb-1">Largest Win</div>
-            <div className="text-lg font-bold text-green-400">
-              +${stats.largestWin.toFixed(2)}
+      {/* LONG/SHORT Win Rates - Premium Cards */}
+      <div className="grid grid-cols-2 gap-4 flex-shrink-0">
+        <div className="relative rounded-xl overflow-hidden">
+          <div className="absolute inset-0 bg-green-500/10 backdrop-blur-xl" />
+          <div className="absolute inset-0 border border-green-500/20 rounded-xl" />
+          <div className="relative p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <ArrowUpRight className="w-4 h-4 text-green-400" />
+              <span className="text-xs text-gray-400 font-medium">LONG Win Rate</span>
+            </div>
+            <div className="text-3xl font-bold text-green-400 mb-1">
+              {stats.bySignalType?.LONG?.winRate?.toFixed(1) ?? '0.0'}%
+            </div>
+            <div className="text-xs text-gray-500">
+              {stats.bySignalType?.LONG?.winningTrades ?? 0}W / {stats.bySignalType?.LONG?.losingTrades ?? 0}L
+            </div>
+            <div className={`text-xs font-semibold mt-1 ${
+              (stats.bySignalType?.LONG?.totalPnL ?? 0) >= 0 ? 'text-green-400' : 'text-red-400'
+            }`}>
+              PnL: {(stats.bySignalType?.LONG?.totalPnL ?? 0) >= 0 ? '+' : ''}${(stats.bySignalType?.LONG?.totalPnL ?? 0).toFixed(2)}
             </div>
           </div>
-          <div className="text-right">
-            <div className="text-xs text-white/50 mb-1">Largest Loss</div>
-            <div className="text-lg font-bold text-red-400">
-              ${stats.largestLoss.toFixed(2)}
+        </div>
+
+        <div className="relative rounded-xl overflow-hidden">
+          <div className="absolute inset-0 bg-red-500/10 backdrop-blur-xl" />
+          <div className="absolute inset-0 border border-red-500/20 rounded-xl" />
+          <div className="relative p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <ArrowDownRight className="w-4 h-4 text-red-400" />
+              <span className="text-xs text-gray-400 font-medium">SHORT Win Rate</span>
+            </div>
+            <div className="text-3xl font-bold text-red-400 mb-1">
+              {stats.bySignalType?.SHORT?.winRate?.toFixed(1) ?? '0.0'}%
+            </div>
+            <div className="text-xs text-gray-500">
+              {stats.bySignalType?.SHORT?.winningTrades ?? 0}W / {stats.bySignalType?.SHORT?.losingTrades ?? 0}L
+            </div>
+            <div className={`text-xs font-semibold mt-1 ${
+              (stats.bySignalType?.SHORT?.totalPnL ?? 0) >= 0 ? 'text-green-400' : 'text-red-400'
+            }`}>
+              PnL: {(stats.bySignalType?.SHORT?.totalPnL ?? 0) >= 0 ? '+' : ''}${(stats.bySignalType?.SHORT?.totalPnL ?? 0).toFixed(2)}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Timeframe PnL - Premium */}
+      <div className="grid grid-cols-3 gap-3 flex-shrink-0">
+        <div className="relative rounded-xl overflow-hidden">
+          <div className="absolute inset-0 bg-white/5 backdrop-blur-xl" />
+          <div className="absolute inset-0 border border-white/10 rounded-xl" />
+          <div className="relative p-3">
+            <div className="text-xs text-gray-400 mb-1 font-medium">Today</div>
+            <div className={`text-lg font-bold font-mono ${
+              stats.byTimeframe.today >= 0 ? 'text-green-400' : 'text-red-400'
+            }`}>
+              {stats.byTimeframe.today >= 0 ? '+' : ''}${stats.byTimeframe.today.toFixed(2)}
+            </div>
+          </div>
+        </div>
+        <div className="relative rounded-xl overflow-hidden">
+          <div className="absolute inset-0 bg-white/5 backdrop-blur-xl" />
+          <div className="absolute inset-0 border border-white/10 rounded-xl" />
+          <div className="relative p-3">
+            <div className="text-xs text-gray-400 mb-1 font-medium">Week</div>
+            <div className={`text-lg font-bold font-mono ${
+              stats.byTimeframe.week >= 0 ? 'text-green-400' : 'text-red-400'
+            }`}>
+              {stats.byTimeframe.week >= 0 ? '+' : ''}${stats.byTimeframe.week.toFixed(2)}
+            </div>
+          </div>
+        </div>
+        <div className="relative rounded-xl overflow-hidden">
+          <div className="absolute inset-0 bg-white/5 backdrop-blur-xl" />
+          <div className="absolute inset-0 border border-white/10 rounded-xl" />
+          <div className="relative p-3">
+            <div className="text-xs text-gray-400 mb-1 font-medium">Month</div>
+            <div className={`text-lg font-bold font-mono ${
+              stats.byTimeframe.month >= 0 ? 'text-green-400' : 'text-red-400'
+            }`}>
+              {stats.byTimeframe.month >= 0 ? '+' : ''}${stats.byTimeframe.month.toFixed(2)}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Additional Stats - Premium */}
+      <div className="grid grid-cols-2 gap-4 flex-shrink-0">
+        <div className="relative rounded-xl overflow-hidden">
+          <div className="absolute inset-0 bg-white/5 backdrop-blur-xl" />
+          <div className="absolute inset-0 border border-white/10 rounded-xl" />
+          <div className="relative p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Award className="w-4 h-4 text-blue-400" />
+              <span className="text-xs text-gray-400 font-medium">Profit Factor</span>
+            </div>
+            <div className="text-3xl font-bold text-white">
+              {stats.profitFactor > 100 ? '∞' : stats.profitFactor.toFixed(2)}
+            </div>
+            <div className="text-xs text-gray-500 mt-1">
+              {stats.totalTrades} trades
+            </div>
+          </div>
+        </div>
+
+        <div className="relative rounded-xl overflow-hidden">
+          <div className="absolute inset-0 bg-white/5 backdrop-blur-xl" />
+          <div className="absolute inset-0 border border-white/10 rounded-xl" />
+          <div className="relative p-4">
+            <div className="text-xs text-gray-400 mb-2 font-medium">Largest Win/Loss</div>
+            <div className="flex justify-between items-center">
+              <div>
+                <div className="text-lg font-bold text-green-400 font-mono">
+                  +${stats.largestWin.toFixed(2)}
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-lg font-bold text-red-400 font-mono">
+                  ${stats.largestLoss.toFixed(2)}
+                </div>
+              </div>
             </div>
           </div>
         </div>
