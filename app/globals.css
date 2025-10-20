@@ -355,7 +355,7 @@ body {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, var(--color-primary-purple) 0%, var(--color-wealth-gold) 100%);
+  background: linear-gradient(135deg, var(--color-wealth-purple) 0%, var(--color-wealth-gold) 100%);
 }
 
 /* Firefox scrollbar */
