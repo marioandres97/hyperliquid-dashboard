@@ -14,6 +14,11 @@ const navItems = [
 
 export default function BottomNav() {
   const pathname = usePathname();
+  
+  // Hide bottom nav on landing page
+  if (pathname === '/') {
+    return null;
+  }
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 backdrop-blur-xl bg-gray-900/30 border-t border-emerald-500/10">
