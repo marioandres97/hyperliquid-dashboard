@@ -8,6 +8,15 @@
 export const designTokens = {
   // Colors - Premium Palette
   colors: {
+    // Wealth-focused colors for psychological impact
+    wealth: {
+      royalPurple: '#6B46C1',      // Status & Exclusivity
+      deepNavy: '#1e3a8a',          // Power & Authority
+      emerald: '#10b981',            // Money & Prosperity
+      gold: '#f59e0b',               // Success & Achievement
+      midnight: '#0f172a',           // Sophistication
+    },
+    
     // Primary gradient colors
     primary: {
       purple: '#8B5CF6',
