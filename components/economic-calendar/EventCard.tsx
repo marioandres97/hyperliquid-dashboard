@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { motion } from 'framer-motion';
 import type { EconomicEvent } from '@/lib/economic-calendar/types';
+import { PremiumBadge } from '@/components/shared/PremiumBadge';
 import { 
   getCategoryIcon, 
   getImpactBadge,
-  getImpactColor 
 } from '@/lib/economic-calendar/events-data';
 import { getCountdown, formatEventDate } from '@/lib/economic-calendar/api';
 
@@ -17,35 +17,71 @@ interface EventCardProps {
 export function EventCard({ event, onClick }: EventCardProps) {
   const icon = getCategoryIcon(event.category);
   const impactBadge = getImpactBadge(event.impact);
-  const impactColor = getImpactColor(event.impact);
   const countdown = getCountdown(event.eventDate);
   const formattedDate = formatEventDate(event.eventDate);
 
+  // Map impact to PremiumBadge variant
+  const impactVariant = event.impact === 'HIGH' ? 'error' : event.impact === 'MEDIUM' ? 'warning' : 'neutral';
+
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
       onClick={onClick}
-      className="bg-gray-900/50 border border-gray-800 rounded-lg p-2 sm:p-3 lg:p-4 hover:border-blue-500/50 cursor-pointer transition-all duration-200 hover:bg-gray-900/70"
+      className="group relative rounded-xl overflow-hidden cursor-pointer"
     >
-      {/* Header */}
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs text-gray-400 mb-1">
-            <span className="truncate">{formattedDate}</span>
-            <span>•</span>
-            <span className="whitespace-nowrap">{countdown}</span>
-          </div>
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <span className="text-base sm:text-lg lg:text-xl flex-shrink-0">{icon}</span>
-            <h3 className="font-medium text-white text-xs sm:text-sm line-clamp-2">{event.name}</h3>
+      {/* Glassmorphism background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-gray-800/40 to-gray-900/40 backdrop-blur-xl" />
+      
+      {/* Subtle gradient border */}
+      <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-white/10 via-white/5 to-transparent" />
+      <div className="absolute inset-[1px] rounded-xl bg-gradient-to-br from-gray-900/50 to-gray-900/30" />
+
+      {/* Hover glow effect */}
+      <div className="absolute -inset-[1px] rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-blue-500/20 to-purple-500/20 blur-xl" />
+
+      {/* Content */}
+      <div className="relative p-4 sm:p-5 lg:p-6 space-y-3">
+        {/* Header - Date and Countdown */}
+        <div className="flex items-center gap-2 text-xs font-mono text-gray-400">
+          <span className="truncate">{formattedDate}</span>
+          <span className="text-gray-600">•</span>
+          <span className="whitespace-nowrap text-blue-400">{countdown}</span>
+        </div>
+
+        {/* Main Content - Icon and Event Name */}
+        <div className="flex items-start gap-3">
+          <span className="text-2xl flex-shrink-0">{icon}</span>
+          <div className="flex-1 min-w-0">
+            <h3 className="text-base sm:text-lg font-bold text-white line-clamp-2 mb-2 group-hover:text-blue-50 transition-colors">
+              {event.name}
+            </h3>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-gray-400">{event.country}</span>
+              {event.category && (
+                <>
+                  <span className="text-gray-600">•</span>
+                  <span className="text-xs text-gray-500 capitalize">{event.category.replace('_', ' ')}</span>
+                </>
+              )}
+            </div>
           </div>
         </div>
-        <div className="flex flex-col items-end gap-0.5 sm:gap-1 flex-shrink-0">
-          <span className="text-base sm:text-lg">{impactBadge}</span>
-          <span className={`text-[10px] sm:text-xs font-semibold ${impactColor}`}>
-            {event.impact}
-          </span>
+
+        {/* Impact Badge */}
+        <div className="flex items-center justify-between">
+          <PremiumBadge variant={impactVariant} size="sm">
+            <span className="flex items-center gap-1.5">
+              <span>{impactBadge}</span>
+              <span>{event.impact}</span>
+            </span>
+          </PremiumBadge>
         </div>
       </div>
-    </div>
+
+      {/* Hover scale effect */}
+      <div className="absolute inset-0 group-hover:scale-[1.02] transition-transform duration-300" />
+    </motion.div>
   );
 }
