@@ -5,6 +5,26 @@ import { Calendar, TrendingUp, Bell, DollarSign } from 'lucide-react';
 import MarketHoursBar from '@/components/MarketHoursBar';
 import RealTimePricesWidget from '@/widgets/real-time-prices/RealTimePricesWidget';
 
+// Shared card styles
+const cardBaseStyle = {
+  height: '240px',
+  background: 'rgba(31, 41, 55, 0.3)',
+  backdropFilter: 'blur(40px)',
+  border: '1px solid rgba(0, 255, 135, 0.15)',
+  borderRadius: '24px',
+};
+
+// Hover effect handlers
+const handleCardMouseEnter = (e: React.MouseEvent<HTMLDivElement>) => {
+  e.currentTarget.style.boxShadow = `0 20px 60px rgba(0, 255, 135, 0.4)`;
+  e.currentTarget.style.borderColor = 'var(--venom-green-primary)';
+};
+
+const handleCardMouseLeave = (e: React.MouseEvent<HTMLDivElement>) => {
+  e.currentTarget.style.boxShadow = 'none';
+  e.currentTarget.style.borderColor = 'rgba(0, 255, 135, 0.15)';
+};
+
 export default function Landing() {
   return (
     <div 
@@ -62,23 +82,9 @@ export default function Landing() {
             <Link href="/calendar" className="group block">
               <div 
                 className="p-6 rounded-3xl transition-all duration-300 hover:-translate-y-2 flex flex-col items-center justify-center text-center"
-                style={{
-                  width: '100%',
-                  height: '240px',
-                  background: 'rgba(31, 41, 55, 0.3)',
-                  backdropFilter: 'blur(40px)',
-                  WebkitBackdropFilter: 'blur(40px)',
-                  border: '1px solid rgba(0, 255, 135, 0.15)',
-                  borderRadius: '24px',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.boxShadow = `0 20px 60px rgba(0, 255, 135, 0.4)`;
-                  e.currentTarget.style.borderColor = 'var(--venom-green-primary)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.boxShadow = 'none';
-                  e.currentTarget.style.borderColor = 'rgba(0, 255, 135, 0.15)';
-                }}
+                style={cardBaseStyle}
+                onMouseEnter={handleCardMouseEnter}
+                onMouseLeave={handleCardMouseLeave}
               >
                 <Calendar 
                   size={48} 
@@ -101,23 +107,9 @@ export default function Landing() {
             <Link href="/orders" className="group block">
               <div 
                 className="p-6 rounded-3xl transition-all duration-300 hover:-translate-y-2 flex flex-col items-center justify-center text-center"
-                style={{
-                  width: '100%',
-                  height: '240px',
-                  background: 'rgba(31, 41, 55, 0.3)',
-                  backdropFilter: 'blur(40px)',
-                  WebkitBackdropFilter: 'blur(40px)',
-                  border: '1px solid rgba(0, 255, 135, 0.15)',
-                  borderRadius: '24px',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.boxShadow = `0 20px 60px rgba(0, 255, 135, 0.4)`;
-                  e.currentTarget.style.borderColor = 'var(--venom-green-primary)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.boxShadow = 'none';
-                  e.currentTarget.style.borderColor = 'rgba(0, 255, 135, 0.15)';
-                }}
+                style={cardBaseStyle}
+                onMouseEnter={handleCardMouseEnter}
+                onMouseLeave={handleCardMouseLeave}
               >
                 <TrendingUp 
                   size={48} 
@@ -140,23 +132,9 @@ export default function Landing() {
             <Link href="/alerts" className="group block">
               <div 
                 className="p-6 rounded-3xl transition-all duration-300 hover:-translate-y-2 flex flex-col items-center justify-center text-center"
-                style={{
-                  width: '100%',
-                  height: '240px',
-                  background: 'rgba(31, 41, 55, 0.3)',
-                  backdropFilter: 'blur(40px)',
-                  WebkitBackdropFilter: 'blur(40px)',
-                  border: '1px solid rgba(0, 255, 135, 0.15)',
-                  borderRadius: '24px',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.boxShadow = `0 20px 60px rgba(0, 255, 135, 0.4)`;
-                  e.currentTarget.style.borderColor = 'var(--venom-green-primary)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.boxShadow = 'none';
-                  e.currentTarget.style.borderColor = 'rgba(0, 255, 135, 0.15)';
-                }}
+                style={cardBaseStyle}
+                onMouseEnter={handleCardMouseEnter}
+                onMouseLeave={handleCardMouseLeave}
               >
                 <Bell 
                   size={48} 
@@ -179,23 +157,9 @@ export default function Landing() {
             <Link href="/pnl" className="group block">
               <div 
                 className="p-6 rounded-3xl transition-all duration-300 hover:-translate-y-2 flex flex-col items-center justify-center text-center"
-                style={{
-                  width: '100%',
-                  height: '240px',
-                  background: 'rgba(31, 41, 55, 0.3)',
-                  backdropFilter: 'blur(40px)',
-                  WebkitBackdropFilter: 'blur(40px)',
-                  border: '1px solid rgba(0, 255, 135, 0.15)',
-                  borderRadius: '24px',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.boxShadow = `0 20px 60px rgba(0, 255, 135, 0.4)`;
-                  e.currentTarget.style.borderColor = 'var(--venom-green-primary)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.boxShadow = 'none';
-                  e.currentTarget.style.borderColor = 'rgba(0, 255, 135, 0.15)';
-                }}
+                style={cardBaseStyle}
+                onMouseEnter={handleCardMouseEnter}
+                onMouseLeave={handleCardMouseLeave}
               >
                 <DollarSign 
                   size={48} 
