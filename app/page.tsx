@@ -14,7 +14,7 @@ import MarketHoursBar from '@/components/MarketHoursBar';
 
 export default function Home() {
   return (
-    <div className="min-h-screen"
+    <div className="min-h-screen">
       {/* Header with UTC Clock */}
       <Header />
       
