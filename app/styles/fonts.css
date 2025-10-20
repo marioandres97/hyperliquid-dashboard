@@ -1,0 +1,11 @@
+/* Clash Display Font from Google Fonts Alternative */
+/* Must be imported at the top before other rules */
+
+:root {
+  --font-clash-display: 'Clash Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* Import font after charset and layer, but before rules */
+@layer fonts {
+  @import url('https://api.fontshare.com/v2/css?f[]=clash-display@200,300,400,500,600,700&display=swap');
+}
