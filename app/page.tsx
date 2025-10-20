@@ -1,149 +1,257 @@
 'use client';
 
 import Link from 'next/link';
+import { Calendar, TrendingUp, Bell, DollarSign } from 'lucide-react';
+import MarketHoursBar from '@/components/MarketHoursBar';
+import RealTimePricesWidget from '@/widgets/real-time-prices/RealTimePricesWidget';
 
 export default function Landing() {
   return (
-    <div className="min-h-screen" style={{ background: 'var(--venom-base-dark)' }}>
+    <div className="min-h-screen relative">
+      {/* Market Banner */}
+      <div 
+        className="sticky top-0 z-50"
+        style={{
+          background: 'rgba(10, 14, 20, 0.8)',
+          backdropFilter: 'blur(40px)',
+          WebkitBackdropFilter: 'blur(40px)',
+          borderBottom: '1px solid rgba(16, 185, 129, 0.1)',
+        }}
+      >
+        <MarketHoursBar />
+      </div>
+
       {/* Hero Section */}
-      <div className="container mx-auto px-4 py-16 sm:py-24">
-        <div className="text-center mb-16 sm:mb-24">
+      <div className="container mx-auto px-4 sm:px-8 md:px-16" style={{ paddingTop: '120px', paddingBottom: '60px' }}>
+        <div className="text-center mb-20">
           <h1 
-            className="text-5xl sm:text-7xl md:text-8xl font-bold mb-6"
-            style={{ color: 'var(--venom-green-primary)' }}
+            className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-semibold mb-6"
+            style={{
+              background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              letterSpacing: 'var(--letter-spacing-tight)',
+              lineHeight: '1.2',
+            }}
           >
             VENOM
           </h1>
-          <p className="text-xl sm:text-2xl text-gray-400 max-w-2xl mx-auto">
-            Elite Trading Terminal for Premium Traders
+          <p 
+            className="text-xl sm:text-2xl md:text-3xl text-gray-400 max-w-3xl mx-auto font-light"
+            style={{ 
+              letterSpacing: 'var(--letter-spacing-tight)',
+              lineHeight: '1.6',
+            }}
+          >
+            Elite Trading Terminal
           </p>
-          <p className="text-base sm:text-lg text-gray-500 mt-4 max-w-xl mx-auto">
-            Real-time market intelligence, institutional-grade analytics, and precision trading tools
+          <p className="text-base sm:text-lg text-gray-500 mt-4 max-w-2xl mx-auto font-light">
+            Institutional-grade analytics and precision trading tools for premium traders
           </p>
         </div>
 
-        {/* Feature Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
-          {/* Dashboard Card */}
-          <Link href="/dashboard" className="group">
+        {/* Real-Time Prices Widget Section */}
+        <div className="max-w-6xl mx-auto mb-20">
+          <div 
+            className="rounded-3xl p-8"
+            style={{
+              background: 'var(--venom-glass-bg)',
+              backdropFilter: 'blur(40px)',
+              WebkitBackdropFilter: 'blur(40px)',
+              border: '1px solid var(--venom-glass-border)',
+            }}
+          >
+            <RealTimePricesWidget />
+          </div>
+        </div>
+
+        {/* Navigation Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+          {/* Economic Calendar Card */}
+          <Link href="/calendar" className="group block">
             <div 
-              className="p-8 rounded-2xl transition-all duration-300 hover:-translate-y-1"
+              className="rounded-3xl p-10 transition-all"
               style={{
-                background: 'rgba(31, 41, 55, 0.4)',
-                backdropFilter: 'blur(12px)',
-                border: '1px solid rgba(0, 255, 135, 0.1)',
+                background: 'var(--venom-glass-bg)',
+                backdropFilter: 'blur(40px)',
+                WebkitBackdropFilter: 'blur(40px)',
+                border: '1px solid var(--venom-glass-border)',
+                minHeight: '240px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                transitionDuration: 'var(--transition-premium)',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.boxShadow = `0 0 30px var(--venom-shadow-green)`;
-                e.currentTarget.style.borderColor = 'var(--venom-green-primary)';
+                e.currentTarget.style.transform = 'translateY(-8px)';
+                e.currentTarget.style.boxShadow = '0 20px 60px rgba(16, 185, 129, 0.2)';
+                e.currentTarget.style.borderColor = 'var(--venom-glass-border-hover)';
               }}
               onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
                 e.currentTarget.style.boxShadow = 'none';
-                e.currentTarget.style.borderColor = 'rgba(0, 255, 135, 0.1)';
+                e.currentTarget.style.borderColor = 'var(--venom-glass-border)';
               }}
             >
-              <div className="text-4xl mb-4">📊</div>
+              <Calendar 
+                className="mb-6" 
+                style={{ 
+                  width: '48px', 
+                  height: '48px', 
+                  color: 'var(--venom-green-accent)',
+                  strokeWidth: '1.5px',
+                }} 
+              />
               <h2 
-                className="text-2xl font-bold mb-3"
-                style={{ color: 'var(--venom-green-primary)' }}
+                className="text-2xl font-semibold mb-3 text-white"
+                style={{ letterSpacing: 'var(--letter-spacing-tight)' }}
               >
-                Dashboard
+                Economic Calendar
               </h2>
-              <p className="text-gray-400">
-                Real-time market data, price tracking, and institutional order flow analysis
+              <p className="text-gray-400 font-light leading-relaxed">
+                High-impact events affecting crypto markets
               </p>
             </div>
           </Link>
 
-          {/* Portfolio Card */}
-          <Link href="/portfolio" className="group">
+          {/* Large Orders Feed Card */}
+          <Link href="/orders" className="group block">
             <div 
-              className="p-8 rounded-2xl transition-all duration-300 hover:-translate-y-1"
+              className="rounded-3xl p-10 transition-all"
               style={{
-                background: 'rgba(31, 41, 55, 0.4)',
-                backdropFilter: 'blur(12px)',
-                border: '1px solid rgba(0, 255, 135, 0.1)',
+                background: 'var(--venom-glass-bg)',
+                backdropFilter: 'blur(40px)',
+                WebkitBackdropFilter: 'blur(40px)',
+                border: '1px solid var(--venom-glass-border)',
+                minHeight: '240px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                transitionDuration: 'var(--transition-premium)',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.boxShadow = `0 0 30px var(--venom-shadow-green)`;
-                e.currentTarget.style.borderColor = 'var(--venom-green-primary)';
+                e.currentTarget.style.transform = 'translateY(-8px)';
+                e.currentTarget.style.boxShadow = '0 20px 60px rgba(16, 185, 129, 0.2)';
+                e.currentTarget.style.borderColor = 'var(--venom-glass-border-hover)';
               }}
               onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
                 e.currentTarget.style.boxShadow = 'none';
-                e.currentTarget.style.borderColor = 'rgba(0, 255, 135, 0.1)';
+                e.currentTarget.style.borderColor = 'var(--venom-glass-border)';
               }}
             >
-              <div className="text-4xl mb-4">💼</div>
+              <TrendingUp 
+                className="mb-6" 
+                style={{ 
+                  width: '48px', 
+                  height: '48px', 
+                  color: 'var(--venom-green-accent)',
+                  strokeWidth: '1.5px',
+                }} 
+              />
               <h2 
-                className="text-2xl font-bold mb-3"
-                style={{ color: 'var(--venom-green-primary)' }}
+                className="text-2xl font-semibold mb-3 text-white"
+                style={{ letterSpacing: 'var(--letter-spacing-tight)' }}
               >
-                Portfolio
+                Large Orders Feed
               </h2>
-              <p className="text-gray-400">
-                Track your holdings, performance metrics, and asset allocation
+              <p className="text-gray-400 font-light leading-relaxed">
+                Real-time institutional order flow tracking
               </p>
             </div>
           </Link>
 
-          {/* Positions Card */}
-          <Link href="/positions" className="group">
+          {/* Alert System Card */}
+          <Link href="/alerts" className="group block">
             <div 
-              className="p-8 rounded-2xl transition-all duration-300 hover:-translate-y-1"
+              className="rounded-3xl p-10 transition-all"
               style={{
-                background: 'rgba(31, 41, 55, 0.4)',
-                backdropFilter: 'blur(12px)',
-                border: '1px solid rgba(0, 255, 135, 0.1)',
+                background: 'var(--venom-glass-bg)',
+                backdropFilter: 'blur(40px)',
+                WebkitBackdropFilter: 'blur(40px)',
+                border: '1px solid var(--venom-glass-border)',
+                minHeight: '240px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                transitionDuration: 'var(--transition-premium)',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.boxShadow = `0 0 30px var(--venom-shadow-green)`;
-                e.currentTarget.style.borderColor = 'var(--venom-green-primary)';
+                e.currentTarget.style.transform = 'translateY(-8px)';
+                e.currentTarget.style.boxShadow = '0 20px 60px rgba(16, 185, 129, 0.2)';
+                e.currentTarget.style.borderColor = 'var(--venom-glass-border-hover)';
               }}
               onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
                 e.currentTarget.style.boxShadow = 'none';
-                e.currentTarget.style.borderColor = 'rgba(0, 255, 135, 0.1)';
+                e.currentTarget.style.borderColor = 'var(--venom-glass-border)';
               }}
             >
-              <div className="text-4xl mb-4">📈</div>
+              <Bell 
+                className="mb-6" 
+                style={{ 
+                  width: '48px', 
+                  height: '48px', 
+                  color: 'var(--venom-green-accent)',
+                  strokeWidth: '1.5px',
+                }} 
+              />
               <h2 
-                className="text-2xl font-bold mb-3"
-                style={{ color: 'var(--venom-green-primary)' }}
+                className="text-2xl font-semibold mb-3 text-white"
+                style={{ letterSpacing: 'var(--letter-spacing-tight)' }}
               >
-                Positions
+                Alert System
               </h2>
-              <p className="text-gray-400">
-                Active positions monitoring with real-time P&L and risk management
+              <p className="text-gray-400 font-light leading-relaxed">
+                Custom price alerts and notifications
               </p>
             </div>
           </Link>
 
-          {/* Analytics Card */}
-          <Link href="/analytics" className="group">
+          {/* PnL Tracker Card */}
+          <Link href="/pnl" className="group block">
             <div 
-              className="p-8 rounded-2xl transition-all duration-300 hover:-translate-y-1"
+              className="rounded-3xl p-10 transition-all"
               style={{
-                background: 'rgba(31, 41, 55, 0.4)',
-                backdropFilter: 'blur(12px)',
-                border: '1px solid rgba(0, 255, 135, 0.1)',
+                background: 'var(--venom-glass-bg)',
+                backdropFilter: 'blur(40px)',
+                WebkitBackdropFilter: 'blur(40px)',
+                border: '1px solid var(--venom-glass-border)',
+                minHeight: '240px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                transitionDuration: 'var(--transition-premium)',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.boxShadow = `0 0 30px var(--venom-shadow-green)`;
-                e.currentTarget.style.borderColor = 'var(--venom-green-primary)';
+                e.currentTarget.style.transform = 'translateY(-8px)';
+                e.currentTarget.style.boxShadow = '0 20px 60px rgba(16, 185, 129, 0.2)';
+                e.currentTarget.style.borderColor = 'var(--venom-glass-border-hover)';
               }}
               onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
                 e.currentTarget.style.boxShadow = 'none';
-                e.currentTarget.style.borderColor = 'rgba(0, 255, 135, 0.1)';
+                e.currentTarget.style.borderColor = 'var(--venom-glass-border)';
               }}
             >
-              <div className="text-4xl mb-4">🔍</div>
+              <DollarSign 
+                className="mb-6" 
+                style={{ 
+                  width: '48px', 
+                  height: '48px', 
+                  color: 'var(--venom-green-accent)',
+                  strokeWidth: '1.5px',
+                }} 
+              />
               <h2 
-                className="text-2xl font-bold mb-3"
-                style={{ color: 'var(--venom-green-primary)' }}
+                className="text-2xl font-semibold mb-3 text-white"
+                style={{ letterSpacing: 'var(--letter-spacing-tight)' }}
               >
-                Analytics
+                PnL Tracker
               </h2>
-              <p className="text-gray-400">
-                Advanced market analytics, signals, and trading insights
+              <p className="text-gray-400 font-light leading-relaxed">
+                Comprehensive profit and loss analytics
               </p>
             </div>
           </Link>
@@ -151,9 +259,12 @@ export default function Landing() {
       </div>
 
       {/* Footer */}
-      <footer className="border-t py-6" style={{ borderColor: 'var(--venom-gray-800)' }}>
+      <footer 
+        className="border-t mt-20 py-8" 
+        style={{ borderColor: 'rgba(16, 185, 129, 0.1)' }}
+      >
         <div className="container mx-auto px-4 text-center">
-          <p className="text-xs text-gray-600">
+          <p className="text-xs text-gray-600 font-light">
             Elite trading platform. Not financial advice. DYOR. Trading involves substantial risk.
           </p>
         </div>

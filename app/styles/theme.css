@@ -1,19 +1,36 @@
-/* VENOM Color Palette */
+/* VENOM Color Palette - Apple Premium Style */
 :root {
-  /* Primary VENOM Green Colors */
-  --venom-green-primary: #00FF87;
-  --venom-green-medium: #059669;
-  --venom-green-dark: #064E3B;
+  /* Sophisticated Green Palette */
+  --venom-green-dark: #064E3B;        /* Base dark green - wealth, depth */
+  --venom-green-medium: #059669;      /* Medium green - actions, trust */
+  --venom-green-accent: #10B981;      /* Accent green - highlights, success */
+  --venom-green-glow: #00FF87;        /* Glow green - subtle hover effects */
   
-  /* Base Dark Background */
-  --venom-base-dark: #0A0E14;
+  /* Base Dark Background with Green Tint */
+  --venom-base-dark: #0A0E14;         /* Deep black with green tint */
+  --venom-gradient-start: #064E3B;    /* Dark green for gradient top */
+  --venom-gradient-end: #0A0E14;      /* Deep black for gradient bottom */
   
-  /* Gray Scale */
+  /* Gray Scale with Green Tint */
+  --venom-gray-warmest: #1A2F2A;      /* Warm gray with green tint */
   --venom-gray-800: #1F2937;
   --venom-gray-700: #374151;
   --venom-gray-600: #4B5563;
   
+  /* Glass Effects */
+  --venom-glass-bg: rgba(16, 185, 129, 0.05);
+  --venom-glass-border: rgba(16, 185, 129, 0.15);
+  --venom-glass-border-hover: rgba(16, 185, 129, 0.3);
+  --venom-glass-shadow: rgba(16, 185, 129, 0.2);
+  
   /* Additional Accent Colors */
-  --venom-shadow-green: rgba(0, 255, 135, 0.3);
-  --venom-glow-green: rgba(0, 255, 135, 0.5);
+  --venom-shadow-green: rgba(16, 185, 129, 0.2);
+  --venom-glow-green: rgba(0, 255, 135, 0.2);
+  
+  /* Typography - Apple Style */
+  --font-apple: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+  --letter-spacing-tight: -0.02em;
+  
+  /* Transitions - Apple Style */
+  --transition-premium: 400ms cubic-bezier(0.4, 0, 0.2, 1);
 }
