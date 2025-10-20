@@ -1,12 +1,15 @@
-/* VENOM Color Palette */
+/* VENOM Color Palette - Apple-inspired Premium Green */
 :root {
-  /* Primary VENOM Green Colors */
+  /* Premium Green Colors */
   --venom-green-primary: #00FF87;
+  --venom-green-emerald: #10B981;
   --venom-green-medium: #059669;
   --venom-green-dark: #064E3B;
   
-  /* Base Dark Background */
+  /* Base Dark Background - Gradient */
   --venom-base-dark: #0A0E14;
+  --venom-gradient-start: #064E3B;
+  --venom-gradient-end: #0A0E14;
   
   /* Gray Scale */
   --venom-gray-800: #1F2937;
@@ -16,4 +19,9 @@
   /* Additional Accent Colors */
   --venom-shadow-green: rgba(0, 255, 135, 0.3);
   --venom-glow-green: rgba(0, 255, 135, 0.5);
+  --venom-glow-neon: rgba(0, 255, 135, 0.8);
+  
+  /* Apple Typography */
+  --apple-font-system: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --apple-letter-spacing: -0.02em;
 }
