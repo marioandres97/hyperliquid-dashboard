@@ -41,39 +41,55 @@ model Session {
 // Alert model for price/funding alerts and new alert types
 model Alert {
   id            String   @id @default(cuid())
-  userId        String?  // nullable for now (no auth yet)
+  userId        String?  @default("default-user") // nullable for now (no auth yet)
   user          User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
   
-  // Alert configuration
-  type          String   // "price" | "large_order" | "volume" | "price_above" | "price_below" | "funding_rate"
-  coin          String   // "BTC" | "ETH" | "HYPE" | "ALL" or specific asset
-  condition     String?  // "above" | "below" | "greater_than"
-  value         Float    // threshold
-  side          String?  // "BUY" | "SELL" | "BOTH" for large order alerts
+  // Alert configuration - ANY asset support
+  asset         String   // ANY crypto: BTC, ETH, SOL, DOGE, AVAX, etc.
+  baseAsset     String   @default("USDT") // USDT, USDC, USD, BTC, ETH
+  type          String   // "price_above" | "price_below" | "volume_spike"
+  targetValue   Float
+  currentValue  Float?
+  
+  // Multi-channel notifications
+  channels      String[] // ["push", "email", "telegram", "whatsapp"]
+  
+  // Optional metadata
+  name          String?
+  notes         String?
   
   // Legacy fields for backwards compatibility
-  asset         String?
+  coin          String?  // "BTC" | "ETH" | "HYPE" | "ALL" or specific asset
+  condition     String?  // "above" | "below" | "greater_than"
+  value         Float?   // threshold
+  side          String?  // "BUY" | "SELL" | "BOTH" for large order alerts
   alertType     String?  // price_above, price_below, funding_rate
   threshold     Float?
   
-  // Status and notifications
+  // Status and notifications (legacy)
   enabled       Boolean  @default(true)
   isActive      Boolean  @default(true)
+  active        Boolean  @default(true)
   browserNotif  Boolean  @default(true)
   emailNotif    Boolean  @default(false)
   webhook       String?
   
   // Tracking
-  triggered     Int      @default(0)
+  triggered     Boolean  @default(false)
+  triggeredCount Int     @default(0)
+  triggeredAt   DateTime?
   lastTriggered DateTime?
+  lastChecked   DateTime?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   
   history       AlertHistory[]
 
   @@index([userId])
-  @@index([coin])
   @@index([asset])
+  @@index([coin])
+  @@index([active])
+  @@index([triggered])
   @@index([enabled])
   @@index([isActive])
   @@map("alerts")
@@ -81,14 +97,24 @@ model Alert {
 
 // Alert history for tracking triggers
 model AlertHistory {
-  id          String   @id @default(cuid())
-  alertId     String
-  alert       Alert    @relation(fields: [alertId], references: [id], onDelete: Cascade)
-  coin        String
-  price       Float?
-  orderSize   Float?
-  volume      Float?
-  triggeredAt DateTime @default(now())
+  id              String   @id @default(cuid())
+  alertId         String
+  alert           Alert    @relation(fields: [alertId], references: [id], onDelete: Cascade)
+  asset           String
+  baseAsset       String
+  type            String
+  targetValue     Float
+  actualValue     Float
+  triggeredAt     DateTime @default(now())
+  channels        String[] // All configured channels
+  sentChannels    String[] // Successfully sent
+  failedChannels  String[] // Failed to send
+  
+  // Legacy fields
+  coin            String?
+  price           Float?
+  orderSize       Float?
+  volume          Float?
   
   @@index([alertId])
   @@index([triggeredAt])
@@ -224,4 +250,21 @@ model Trade {
   @@index([status])
   @@index([openedAt])
   @@map("trades")
+}
+
+// Notification settings for multi-channel alerts
+model NotificationSettings {
+  id              String   @id @default(cuid())
+  userId          String   @unique @default("default-user")
+  email           String?
+  telegramChatId  String?
+  whatsappNumber  String?
+  pushEnabled     Boolean  @default(true)
+  emailEnabled    Boolean  @default(false)
+  telegramEnabled Boolean  @default(false)
+  whatsappEnabled Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@map("notification_settings")
 }
