@@ -26,8 +26,8 @@ export interface CreateTradeInput {
   exitPrice?: number | null;
   size: number;
   fees?: number;
-  openedAt: Date | string;
-  closedAt?: Date | string | null;
+  openedAt: string;
+  closedAt?: string | null;
   notes?: string;
 }
 
@@ -39,8 +39,8 @@ export interface UpdateTradeInput {
   exitPrice?: number | null;
   size?: number;
   fees?: number;
-  openedAt?: Date | string;
-  closedAt?: Date | string | null;
+  openedAt?: string;
+  closedAt?: string | null;
   notes?: string;
 }
 

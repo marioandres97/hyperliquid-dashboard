@@ -67,19 +67,19 @@ export function TradeEntryForm({ isOpen, onClose, onCreate }: TradeEntryFormProp
       setError('Asset is required');
       return;
     }
-    if (formData.entryPrice <= 0) {
+    if (!formData.entryPrice || formData.entryPrice <= 0) {
       setError('Entry price must be greater than 0');
       return;
     }
-    if (formData.exitPrice !== null && formData.exitPrice <= 0) {
+    if (formData.exitPrice !== null && formData.exitPrice !== undefined && formData.exitPrice <= 0) {
       setError('Exit price must be greater than 0');
       return;
     }
-    if (formData.size <= 0) {
+    if (!formData.size || formData.size <= 0) {
       setError('Size must be greater than 0');
       return;
     }
-    if (formData.fees < 0) {
+    if (formData.fees !== undefined && formData.fees < 0) {
       setError('Fees cannot be negative');
       return;
     }

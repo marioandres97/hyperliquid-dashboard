@@ -21,6 +21,16 @@ export function TradeEditModal({ isOpen, onClose, onUpdate, trade }: TradeEditMo
 
   useEffect(() => {
     if (trade) {
+      const openedAtStr = typeof trade.openedAt === 'string' 
+        ? new Date(trade.openedAt).toISOString().slice(0, 16)
+        : trade.openedAt.toISOString().slice(0, 16);
+      
+      const closedAtStr = trade.closedAt 
+        ? (typeof trade.closedAt === 'string' 
+            ? new Date(trade.closedAt).toISOString().slice(0, 16)
+            : trade.closedAt.toISOString().slice(0, 16))
+        : null;
+
       setFormData({
         asset: trade.asset,
         baseAsset: trade.baseAsset,
@@ -29,14 +39,8 @@ export function TradeEditModal({ isOpen, onClose, onUpdate, trade }: TradeEditMo
         exitPrice: trade.exitPrice,
         size: trade.size,
         fees: trade.fees,
-        openedAt: typeof trade.openedAt === 'string' 
-          ? new Date(trade.openedAt).toISOString().slice(0, 16)
-          : trade.openedAt.toISOString().slice(0, 16),
-        closedAt: trade.closedAt 
-          ? (typeof trade.closedAt === 'string' 
-              ? new Date(trade.closedAt).toISOString().slice(0, 16)
-              : trade.closedAt.toISOString().slice(0, 16))
-          : null,
+        openedAt: openedAtStr,
+        closedAt: closedAtStr,
         notes: trade.notes || '',
       });
     }
