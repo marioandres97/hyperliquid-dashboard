@@ -1,0 +1,19 @@
+/* VENOM Color Palette */
+:root {
+  /* Primary VENOM Green Colors */
+  --venom-green-primary: #00FF87;
+  --venom-green-medium: #059669;
+  --venom-green-dark: #064E3B;
+  
+  /* Base Dark Background */
+  --venom-base-dark: #0A0E14;
+  
+  /* Gray Scale */
+  --venom-gray-800: #1F2937;
+  --venom-gray-700: #374151;
+  --venom-gray-600: #4B5563;
+  
+  /* Additional Accent Colors */
+  --venom-shadow-green: rgba(0, 255, 135, 0.3);
+  --venom-glow-green: rgba(0, 255, 135, 0.5);
+}
