@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { ArrowRight, Play } from 'lucide-react';
+import { AnimatedDashboardPreview } from './AnimatedDashboardPreview';
 
 export function Hero() {
   return (
@@ -35,7 +36,7 @@ export function Hero() {
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
                 letterSpacing: '-0.04em',
-                lineHeight: '1.1',
+                lineHeight: '1.2',
               }}
             >
               VENOMOUZ
@@ -119,36 +120,8 @@ export function Hero() {
             </Link>
           </motion.div>
 
-          {/* Animated dashboard mockup placeholder */}
-          <motion.div
-            className="mt-20 relative"
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.8, ease: "easeOut" }}
-          >
-            <div 
-              className="relative rounded-3xl overflow-hidden backdrop-blur-xl"
-              style={{
-                background: 'rgba(31, 41, 55, 0.3)',
-                border: '1px solid rgba(16, 185, 129, 0.2)',
-                boxShadow: '0 20px 60px rgba(16, 185, 129, 0.2)',
-              }}
-            >
-              <div className="aspect-video flex items-center justify-center">
-                <div className="text-center">
-                  <div className="text-6xl mb-4">📊</div>
-                  <p className="text-gray-400">Dashboard Preview</p>
-                </div>
-              </div>
-              {/* Glow effect */}
-              <div 
-                className="absolute inset-0 -z-10 blur-3xl opacity-50"
-                style={{
-                  background: 'radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.3) 0%, transparent 70%)',
-                }}
-              />
-            </div>
-          </motion.div>
+          {/* Animated dashboard preview */}
+          <AnimatedDashboardPreview />
         </div>
       </div>
     </section>
