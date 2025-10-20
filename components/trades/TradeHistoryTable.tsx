@@ -171,41 +171,48 @@ export function TradeHistoryTable({ trades, onDelete, onExport, loading }: Trade
       </div>
 
       {/* Tags and Notes Section */}
-      {trades.slice(0, 5).some(trade => trade.notes || (trade.tags && trade.tags.length > 0)) && (
-        <div className="space-y-2">
-          {trades.slice(0, 5).map((trade) => {
-            if (!trade.notes && (!trade.tags || trade.tags.length === 0)) return null;
-            
-            return (
-              <div key={`details-${trade.id}`} className="relative rounded-lg overflow-hidden">
-                <div className="absolute inset-0 bg-gray-800/30 backdrop-blur-sm" />
-                <div className="relative p-3 border border-white/5 rounded-lg">
-                  <div className="text-xs text-gray-400 mb-1 font-mono">
-                    {trade.coin} - {formatDateTime(trade.entryTime)}
+      {(() => {
+        const tradesWithDetails = trades.slice(0, 5);
+        const hasDetails = tradesWithDetails.some(trade => trade.notes || (trade.tags && trade.tags.length > 0));
+        
+        if (!hasDetails) return null;
+        
+        return (
+          <div className="space-y-2">
+            {tradesWithDetails.map((trade) => {
+              if (!trade.notes && (!trade.tags || trade.tags.length === 0)) return null;
+              
+              return (
+                <div key={`details-${trade.id}`} className="relative rounded-lg overflow-hidden">
+                  <div className="absolute inset-0 bg-gray-800/30 backdrop-blur-sm" />
+                  <div className="relative p-3 border border-white/5 rounded-lg">
+                    <div className="text-xs text-gray-400 mb-1 font-mono">
+                      {trade.coin} - {formatDateTime(trade.entryTime)}
+                    </div>
+                    {trade.notes && (
+                      <div className="text-sm text-gray-300 mb-1">
+                        <span className="text-gray-500">Notes:</span> {trade.notes}
+                      </div>
+                    )}
+                    {trade.tags && trade.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {trade.tags.map((tag) => (
+                          <span
+                            key={tag}
+                            className="px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded text-xs font-medium"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                  {trade.notes && (
-                    <div className="text-sm text-gray-300 mb-1">
-                      <span className="text-gray-500">Notes:</span> {trade.notes}
-                    </div>
-                  )}
-                  {trade.tags && trade.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1">
-                      {trade.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded text-xs font-medium"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
                 </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
+              );
+            })}
+          </div>
+        );
+      })()}
     </div>
   );
 }
