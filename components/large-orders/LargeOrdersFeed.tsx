@@ -191,9 +191,9 @@ export function LargeOrdersFeed() {
           ) : isMobile ? (
             /* Mobile Card View - Premium */
             <div className="max-h-96 overflow-y-auto p-3 space-y-2">
-              <AnimatePresence initial={false}>
+              <AnimatePresence mode="popLayout" initial={false}>
                 {filteredOrders.map((order, index) => (
-                  <OrderCard key={order.id} order={order} index={index} />
+                  <OrderCard key={`${order.id}-${order.timestamp}`} order={order} index={index} />
                 ))}
               </AnimatePresence>
             </div>
@@ -214,14 +214,14 @@ export function LargeOrdersFeed() {
 
               {/* Table Body - with smooth scroll */}
               <div className="max-h-96 overflow-y-auto">
-                <AnimatePresence initial={false}>
+                <AnimatePresence mode="popLayout" initial={false}>
                   {filteredOrders.map((order, index) => (
                     <motion.div
-                      key={order.id}
-                      initial={{ opacity: 0, y: -10 }}
+                      key={`${order.id}-${order.timestamp}`}
+                      initial={{ opacity: 0, y: -20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 10 }}
-                      transition={{ delay: index * 0.02 }}
+                      exit={{ opacity: 0, x: -100 }}
+                      transition={{ duration: 0.3 }}
                       className="grid grid-cols-7 lg:grid-cols-8 gap-4 px-6 py-3 border-b border-white/5 hover:bg-white/5 transition-colors group"
                     >
                       <div className="text-xs text-gray-400 font-mono">

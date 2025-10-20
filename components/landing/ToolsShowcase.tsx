@@ -10,7 +10,7 @@ const tools = [
     title: 'Economic Calendar',
     description: 'Track market-moving events before they happen',
     href: '/calendar',
-    gridClass: 'md:col-span-2 md:row-span-1',
+    gridClass: 'md:col-span-2 lg:col-span-2',
     preview: '📅 Next: Fed Rate Decision in 2h',
   },
   {
@@ -18,7 +18,7 @@ const tools = [
     title: 'Large Orders',
     description: 'Monitor whale movements in real-time',
     href: '/orders',
-    gridClass: 'md:col-span-1 md:row-span-2',
+    gridClass: 'md:col-span-2 lg:col-span-1',
     preview: '🐋 $2.4M BTC Buy',
   },
   {
@@ -26,7 +26,7 @@ const tools = [
     title: 'PnL Tracker',
     description: 'Analyze your trading performance',
     href: '/pnl',
-    gridClass: 'md:col-span-1 md:row-span-1',
+    gridClass: 'md:col-span-2 lg:col-span-2',
     preview: '💰 +$12,450 Today',
   },
   {
@@ -34,7 +34,7 @@ const tools = [
     title: 'Smart Alerts',
     description: 'Never miss critical price movements',
     href: '/alerts',
-    gridClass: 'md:col-span-2 md:row-span-1',
+    gridClass: 'md:col-span-2 lg:col-span-1',
     preview: '🔔 3 Active Alerts',
   },
 ];
@@ -59,6 +59,7 @@ export function ToolsShowcase() {
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
               letterSpacing: '-0.03em',
+              lineHeight: '1.2',
             }}
           >
             Premium Trading Tools
@@ -69,7 +70,7 @@ export function ToolsShowcase() {
         </motion.div>
 
         {/* Bento Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:grid-rows-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 auto-rows-fr gap-6">
           {tools.map((tool, index) => {
             const Icon = tool.icon;
             return (
@@ -83,12 +84,11 @@ export function ToolsShowcase() {
               >
                 <Link href={tool.href} className="block h-full group">
                   <motion.div
-                    className="h-full p-8 rounded-3xl backdrop-blur-xl relative overflow-hidden transition-all duration-500"
+                    className="h-full min-h-[300px] p-8 rounded-3xl backdrop-blur-xl relative overflow-hidden transition-all duration-500"
                     style={{
                       background: 'rgba(31, 41, 55, 0.3)',
                       border: '1px solid rgba(16, 185, 129, 0.1)',
                       boxShadow: '0 4px 24px rgba(0, 0, 0, 0.1)',
-                      minHeight: '200px',
                     }}
                     whileHover={{ 
                       scale: 1.02,

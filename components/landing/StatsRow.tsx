@@ -41,49 +41,33 @@ function Counter({ value, suffix, prefix }: { value: number; suffix: string; pre
 
 export function StatsRow() {
   return (
-    <section className="py-20 px-4">
-      <div className="container mx-auto max-w-7xl">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="rounded-3xl backdrop-blur-xl p-12"
-          style={{
-            background: 'rgba(31, 41, 55, 0.3)',
-            border: '1px solid rgba(16, 185, 129, 0.1)',
-            boxShadow: '0 4px 24px rgba(0, 0, 0, 0.1)',
-          }}
-        >
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.map((stat, index) => (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                className="text-center"
-              >
-                <div 
-                  className="text-4xl md:text-5xl font-bold mb-2"
-                  style={{
-                    fontFamily: 'var(--font-clash-display)',
-                    background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text',
-                  }}
-                >
-                  <Counter value={stat.value} suffix={stat.suffix} prefix={stat.prefix} />
-                </div>
-                <div className="text-sm text-gray-400 font-medium">
-                  {stat.label}
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
+    <section className="border-y border-white/5 bg-white/[0.02]">
+      <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4">
+        {stats.map((stat, index) => (
+          <motion.div
+            key={stat.label}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: index * 0.1 }}
+            className={`text-center py-12 hover:bg-white/[0.02] transition-colors ${
+              index < stats.length - 1 ? 'border-r border-white/5' : ''
+            }`}
+          >
+            <div 
+              className="text-4xl md:text-5xl font-bold mb-2"
+              style={{
+                fontFamily: 'var(--font-clash-display)',
+                color: '#10B981',
+              }}
+            >
+              <Counter value={stat.value} suffix={stat.suffix} prefix={stat.prefix} />
+            </div>
+            <div className="text-sm text-white/50 mt-2">
+              {stat.label}
+            </div>
+          </motion.div>
+        ))}
       </div>
     </section>
   );
