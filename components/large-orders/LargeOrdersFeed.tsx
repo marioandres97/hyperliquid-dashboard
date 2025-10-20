@@ -12,6 +12,7 @@ import { SizeRangeSlider } from './filters/SizeRangeSlider';
 import { PressureGauge } from './PressureGauge';
 import { OrderCard } from './OrderCard';
 import { ConnectionStatus } from './ConnectionStatus';
+import { AlertSettings } from './AlertSettings';
 import { useHyperliquidWebSocket } from '@/hooks/useHyperliquidWebSocket';
 import { isWhaleOrder, getWhaleStats, playWhaleSound, showWhaleNotification } from '@/lib/large-orders/whale-detection';
 import { detectAllWhalePatterns } from '@/lib/large-orders/whale-patterns';
@@ -29,6 +30,34 @@ export function LargeOrdersFeed() {
   const [isLoadingHistorical, setIsLoadingHistorical] = useState(true);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+
+  // Load settings from localStorage on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedSoundEnabled = localStorage.getItem('whaleAlertSoundEnabled');
+      const savedNotificationsEnabled = localStorage.getItem('whaleAlertNotificationsEnabled');
+      
+      if (savedSoundEnabled !== null) {
+        setSoundEnabled(savedSoundEnabled === 'true');
+      }
+      if (savedNotificationsEnabled !== null) {
+        setNotificationsEnabled(savedNotificationsEnabled === 'true');
+      }
+    }
+  }, []);
+
+  // Save settings to localStorage when they change
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('whaleAlertSoundEnabled', String(soundEnabled));
+    }
+  }, [soundEnabled]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('whaleAlertNotificationsEnabled', String(notificationsEnabled));
+    }
+  }, [notificationsEnabled]);
 
   // Load historical orders on mount
   useEffect(() => {
@@ -175,14 +204,22 @@ export function LargeOrdersFeed() {
             <p className="text-xs text-gray-400 mt-0.5">Institutional-grade order flow monitor</p>
           </div>
         </div>
-        <PremiumButton
-          onClick={handleExport}
-          variant="secondary"
-          size="sm"
-          icon={<Download className="w-4 h-4" />}
-        >
-          Export CSV
-        </PremiumButton>
+        <div className="flex items-center gap-3">
+          <AlertSettings
+            soundEnabled={soundEnabled}
+            notificationsEnabled={notificationsEnabled}
+            onSoundToggle={() => setSoundEnabled(!soundEnabled)}
+            onNotificationsToggle={() => setNotificationsEnabled(!notificationsEnabled)}
+          />
+          <PremiumButton
+            onClick={handleExport}
+            variant="secondary"
+            size="sm"
+            icon={<Download className="w-4 h-4" />}
+          >
+            Export CSV
+          </PremiumButton>
+        </div>
       </div>
 
       {/* Asset Filter Tabs */}
