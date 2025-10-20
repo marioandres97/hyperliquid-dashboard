@@ -35,10 +35,14 @@ async function generateIcons() {
       console.log(`Generated ${size}x${size} icon`);
     } catch (error) {
       console.error(`Error generating ${size}x${size} icon:`, error);
+      process.exit(1);
     }
   }
   
   console.log('All icons generated successfully!');
 }
 
-generateIcons();
+generateIcons().catch((error) => {
+  console.error('Icon generation failed:', error);
+  process.exit(1);
+});

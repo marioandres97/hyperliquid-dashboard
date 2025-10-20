@@ -13,6 +13,9 @@ export default function InstallPrompt() {
   const [showPrompt, setShowPrompt] = useState(false);
 
   useEffect(() => {
+    // Check if running in browser
+    if (typeof window === 'undefined') return;
+    
     // Check if user has already dismissed the prompt
     const dismissed = localStorage.getItem('installPromptDismissed');
     if (dismissed) return;

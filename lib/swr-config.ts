@@ -5,7 +5,7 @@ import { SWRConfiguration } from 'swr';
 const defaultFetcher = async (url: string) => {
   const res = await fetch(url);
   if (!res.ok) {
-    const error = new Error('An error occurred while fetching the data.');
+    const error = new Error(`Failed to fetch ${url}: ${res.status} ${res.statusText}`);
     throw error;
   }
   return res.json();

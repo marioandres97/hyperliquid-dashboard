@@ -4,7 +4,6 @@ import Header from '@/components/Header';
 import MarketHoursBar from '@/components/MarketHoursBar';
 import FeatureNavigation from '@/components/navigation/FeatureNavigation';
 import { LazyEconomicCalendar } from '@/lib/lazy-components';
-import { Metadata } from 'next';
 
 export default function CalendarPage() {
   return (
