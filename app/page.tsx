@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { Calendar, TrendingUp, Bell, DollarSign } from 'lucide-react';
 import MarketHoursBar from '@/components/MarketHoursBar';
-import RealTimePricesWidget from '@/widgets/real-time-prices/RealTimePricesWidget';
+import { LazyRealTimePrices } from '@/lib/lazy-components';
 
 // Shared card styles - Premium refinements
 const cardBaseStyle = {
@@ -90,7 +90,7 @@ export default function Landing() {
           >
             Real-Time Prices
           </h2>
-          <RealTimePricesWidget />
+          <LazyRealTimePrices />
         </div>
 
         {/* Feature Navigation Cards - 2x2 Grid */}

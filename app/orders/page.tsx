@@ -1,7 +1,9 @@
+'use client';
+
 import Header from '@/components/Header';
 import MarketHoursBar from '@/components/MarketHoursBar';
 import FeatureNavigation from '@/components/navigation/FeatureNavigation';
-import { LargeOrdersFeed } from '@/components/large-orders/LargeOrdersFeed';
+import { LazyLargeOrdersFeed } from '@/lib/lazy-components';
 
 export default function OrdersPage() {
   return (
@@ -53,8 +55,8 @@ export default function OrdersPage() {
         </div>
 
         {/* Main Content */}
-        <div className="backdrop-blur-xl bg-gray-900/30 border border-emerald-500/10 rounded-3xl p-8">
-          <LargeOrdersFeed />
+        <div className="backdrop-blur-xl bg-gray-900/30 border border-emerald-500/10 rounded-3xl p-4 md:p-8">
+          <LazyLargeOrdersFeed />
         </div>
       </div>
     </div>

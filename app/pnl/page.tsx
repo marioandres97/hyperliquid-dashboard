@@ -1,7 +1,9 @@
+'use client';
+
 import Header from '@/components/Header';
 import MarketHoursBar from '@/components/MarketHoursBar';
 import FeatureNavigation from '@/components/navigation/FeatureNavigation';
-import { PnLTrackerWidgetWithBackground } from '@/widgets/pnl-tracker/PnLTrackerWidget';
+import { LazyPnLTracker } from '@/lib/lazy-components';
 
 export default function PnLPage() {
   return (
@@ -54,8 +56,8 @@ export default function PnLPage() {
         </div>
 
         {/* Main Content */}
-        <div className="backdrop-blur-xl bg-gray-900/30 border border-emerald-500/10 rounded-3xl p-8">
-          <PnLTrackerWidgetWithBackground />
+        <div className="backdrop-blur-xl bg-gray-900/30 border border-emerald-500/10 rounded-3xl p-4 md:p-8">
+          <LazyPnLTracker />
         </div>
       </div>
     </div>

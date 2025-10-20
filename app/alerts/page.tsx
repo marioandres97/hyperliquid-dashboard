@@ -1,7 +1,9 @@
+'use client';
+
 import Header from '@/components/Header';
 import MarketHoursBar from '@/components/MarketHoursBar';
 import FeatureNavigation from '@/components/navigation/FeatureNavigation';
-import { AlertSystem } from '@/components/alerts/AlertSystem';
+import { LazyAlertSystem } from '@/lib/lazy-components';
 
 export default function AlertsPage() {
   return (
@@ -49,8 +51,8 @@ export default function AlertsPage() {
         </div>
 
         {/* Main Content */}
-        <div className="backdrop-blur-xl bg-gray-900/30 border border-emerald-500/10 rounded-3xl p-8">
-          <AlertSystem />
+        <div className="backdrop-blur-xl bg-gray-900/30 border border-emerald-500/10 rounded-3xl p-4 md:p-8">
+          <LazyAlertSystem />
         </div>
       </div>
     </div>
