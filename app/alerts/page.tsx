@@ -3,7 +3,7 @@
 import Header from '@/components/Header';
 import MarketHoursBar from '@/components/MarketHoursBar';
 import FeatureNavigation from '@/components/navigation/FeatureNavigation';
-import { LazyAlertSystem } from '@/lib/lazy-components';
+import { AlertDashboard } from '@/components/alerts/AlertDashboard';
 
 export default function AlertsPage() {
   return (
@@ -27,32 +27,16 @@ export default function AlertsPage() {
             Alert System
           </h1>
           <p className="text-gray-400 text-lg" style={{ letterSpacing: '0.02em' }}>
-            Create custom price alerts and get notified on market movements
+            Create custom alerts for ANY cryptocurrency with multi-channel notifications
           </p>
         </div>
 
         {/* Navigation Tabs */}
         <FeatureNavigation />
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="backdrop-blur-xl bg-gray-900/30 border border-emerald-500/10 rounded-2xl p-6">
-            <p className="text-gray-400 text-sm mb-2">Active Alerts</p>
-            <p className="text-3xl font-semibold text-white">12</p>
-          </div>
-          <div className="backdrop-blur-xl bg-gray-900/30 border border-emerald-500/10 rounded-2xl p-6">
-            <p className="text-gray-400 text-sm mb-2">Triggered Today</p>
-            <p className="text-3xl font-semibold text-emerald-500">3</p>
-          </div>
-          <div className="backdrop-blur-xl bg-gray-900/30 border border-emerald-500/10 rounded-2xl p-6">
-            <p className="text-gray-400 text-sm mb-2">Success Rate</p>
-            <p className="text-3xl font-semibold text-white">89%</p>
-          </div>
-        </div>
-
         {/* Main Content */}
-        <div className="backdrop-blur-xl bg-gray-900/30 border border-emerald-500/10 rounded-3xl p-4 md:p-8">
-          <LazyAlertSystem />
+        <div className="mt-8">
+          <AlertDashboard />
         </div>
       </div>
     </div>
