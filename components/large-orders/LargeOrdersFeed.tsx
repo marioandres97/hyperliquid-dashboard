@@ -3,8 +3,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useMultiCoinLargeOrders } from '@/lib/hooks/large-orders/useLargeOrders';
-import { formatUsdValue, getRelativeTime, downloadCSV } from '@/lib/large-orders/types';
-import { Download, TrendingUp } from 'lucide-react';
+import { formatUsdValue, getRelativeTime, formatPriceImpact, getPriceImpactColor, downloadCSV } from '@/lib/large-orders/types';
+import { Download, TrendingUp, TrendingDown } from 'lucide-react';
 import { PremiumButton } from '@/components/shared/PremiumButton';
 import { AssetTabs } from './filters/AssetTabs';
 import { AssetStatsGrid } from './stats/AssetStatsGrid';
@@ -24,6 +24,28 @@ export function LargeOrdersFeed() {
   const [minSize, setMinSize] = useState(10000);
   const [maxSize, setMaxSize] = useState(10000000);
   const [orders, setOrders] = useState<LargeOrder[]>([]);
+  const [isLoadingHistorical, setIsLoadingHistorical] = useState(true);
+
+  // Load historical orders on mount
+  useEffect(() => {
+    async function loadHistoricalOrders() {
+      try {
+        setIsLoadingHistorical(true);
+        const response = await fetch('/api/orders/recent?limit=100&coins=BTC,ETH,HYPE');
+        const result = await response.json();
+        
+        if (result.success && result.data) {
+          setOrders(result.data);
+        }
+      } catch (error) {
+        console.error('Failed to load historical orders:', error);
+      } finally {
+        setIsLoadingHistorical(false);
+      }
+    }
+    
+    loadHistoricalOrders();
+  }, []);
 
   // WebSocket integration - use useCallback to prevent re-renders
   const handleTrades = useCallback((coin: string, trades: Trade[]) => {
@@ -38,7 +60,12 @@ export function LargeOrdersFeed() {
     });
 
     setOrders((prev) => {
-      const combined = [...newOrders, ...prev];
+      // Filter out duplicates based on ID
+      const existingIds = new Set(prev.map(o => o.id));
+      const uniqueNewOrders = newOrders.filter(o => !existingIds.has(o.id));
+      
+      // Add new orders at the beginning
+      const combined = [...uniqueNewOrders, ...prev];
       // Sort by timestamp and keep last 100
       combined.sort((a, b) => b.timestamp - a.timestamp);
       return combined.slice(0, 100);
@@ -180,13 +207,21 @@ export function LargeOrdersFeed() {
         <div className="absolute inset-0 border border-white/10 rounded-xl" />
 
         <div className="relative">
-          {filteredOrders.length === 0 ? (
+          {isLoadingHistorical ? (
+            <div className="text-center py-16">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-700/40 to-emerald-800/40 backdrop-blur-xl mb-4">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-400"></div>
+              </div>
+              <p className="text-base font-medium text-gray-400">Loading recent orders...</p>
+              <p className="text-sm text-gray-500 mt-1">Fetching BTC, ETH & HYPE markets</p>
+            </div>
+          ) : filteredOrders.length === 0 ? (
             <div className="text-center py-16">
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-gray-700/40 to-gray-800/40 backdrop-blur-xl mb-4">
                 <TrendingUp className="w-8 h-8 text-gray-500" />
               </div>
-              <p className="text-base font-medium text-gray-400">Waiting for large orders...</p>
-              <p className="text-sm text-gray-500 mt-1">Monitoring BTC, ETH & HYPE markets</p>
+              <p className="text-base font-medium text-gray-400">No orders match your filters</p>
+              <p className="text-sm text-gray-500 mt-1">Try adjusting size range or asset filter</p>
             </div>
           ) : isMobile ? (
             /* Mobile Card View - Premium */
@@ -201,13 +236,14 @@ export function LargeOrdersFeed() {
             /* Desktop Bloomberg-Style Table */
             <>
               {/* Table Header */}
-              <div className="grid grid-cols-7 lg:grid-cols-8 gap-4 px-6 py-4 border-b border-white/10">
+              <div className="grid grid-cols-8 lg:grid-cols-9 gap-4 px-6 py-4 border-b border-white/10">
                 <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Time</div>
                 <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Coin</div>
                 <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Side</div>
                 <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider text-right">Price</div>
                 <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider text-right">Size</div>
                 <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider text-right">USD Value</div>
+                <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider text-right">Impact</div>
                 <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Status</div>
                 <div className="hidden lg:block text-xs font-semibold text-gray-400 uppercase tracking-wider">Exchange</div>
               </div>
@@ -218,11 +254,16 @@ export function LargeOrdersFeed() {
                   {filteredOrders.map((order, index) => (
                     <motion.div
                       key={`${order.id}-${order.timestamp}`}
-                      initial={{ opacity: 0, y: -20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, x: -100 }}
-                      transition={{ duration: 0.3 }}
-                      className="grid grid-cols-7 lg:grid-cols-8 gap-4 px-6 py-3 border-b border-white/5 hover:bg-white/5 transition-colors group"
+                      initial={{ opacity: 0, y: -10, scale: 0.98 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, x: -50, scale: 0.95 }}
+                      transition={{ 
+                        duration: 0.2, 
+                        ease: "easeOut",
+                        layout: { duration: 0.2 }
+                      }}
+                      layout
+                      className="grid grid-cols-8 lg:grid-cols-9 gap-4 px-6 py-3 border-b border-white/5 hover:bg-white/5 transition-colors group"
                     >
                       <div className="text-xs text-gray-400 font-mono">
                         {getRelativeTime(order.timestamp)}
@@ -247,6 +288,20 @@ export function LargeOrdersFeed() {
                       </div>
                       <div className="text-sm text-right font-bold text-white font-mono">
                         {formatUsdValue(order.usdValue)}
+                      </div>
+                      <div className={`text-xs text-right font-mono ${getPriceImpactColor(order.priceImpact)}`}>
+                        {order.priceImpact !== undefined ? (
+                          <span className="flex items-center justify-end gap-1">
+                            {formatPriceImpact(order.priceImpact)}
+                            {order.priceImpact > 0 ? (
+                              <TrendingUp className="w-3 h-3" />
+                            ) : order.priceImpact < 0 ? (
+                              <TrendingDown className="w-3 h-3" />
+                            ) : null}
+                          </span>
+                        ) : (
+                          <span className="text-gray-500">—</span>
+                        )}
                       </div>
                       <div className="flex items-center">
                         {order.isWhale && <span className="text-lg">🐋</span>}

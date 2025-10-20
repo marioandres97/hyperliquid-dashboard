@@ -3,7 +3,8 @@
 import { motion } from 'framer-motion';
 import type { LargeOrder } from '@/types/large-orders';
 import { WhaleIndicator } from './WhaleIndicator';
-import { formatUsdValue, getRelativeTime } from '@/lib/large-orders/types';
+import { formatUsdValue, getRelativeTime, formatPriceImpact, getPriceImpactColor } from '@/lib/large-orders/types';
+import { TrendingUp, TrendingDown } from 'lucide-react';
 
 interface OrderCardProps {
   order: LargeOrder;
@@ -13,11 +14,16 @@ interface OrderCardProps {
 export function OrderCard({ order, index }: OrderCardProps) {
   return (
     <motion.div
-      key={order.id}
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: 20 }}
-      transition={{ delay: index * 0.02 }}
+      key={`${order.id}-${order.timestamp}`}
+      initial={{ opacity: 0, y: -10, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, x: -50, scale: 0.95 }}
+      transition={{ 
+        duration: 0.2, 
+        ease: "easeOut",
+        layout: { duration: 0.2 }
+      }}
+      layout
       className="relative rounded-lg overflow-hidden group"
     >
       {/* Card background */}
@@ -61,6 +67,21 @@ export function OrderCard({ order, index }: OrderCardProps) {
             <div className="text-white font-mono font-semibold">{formatUsdValue(order.usdValue)}</div>
           </div>
         </div>
+        
+        {/* Price Context - Market Price & Impact */}
+        {order.priceImpact !== undefined && (
+          <div className="flex items-center gap-2 text-xs pt-1 border-t border-white/5">
+            <span className="text-gray-500">Impact:</span>
+            <span className={`font-mono font-medium ${getPriceImpactColor(order.priceImpact)}`}>
+              {formatPriceImpact(order.priceImpact)}
+              {order.priceImpact > 0 ? (
+                <TrendingUp className="inline w-3 h-3 ml-0.5" />
+              ) : order.priceImpact < 0 ? (
+                <TrendingDown className="inline w-3 h-3 ml-0.5" />
+              ) : null}
+            </span>
+          </div>
+        )}
       </div>
     </motion.div>
   );
