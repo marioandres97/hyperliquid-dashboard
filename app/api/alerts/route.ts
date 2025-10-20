@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/database/client';
-import type { CreateAlertInput } from '@/lib/alerts/types';
-import { validateAlertInput } from '@/lib/alerts/types';
+import { alertSchema } from '@/types/alerts';
+import type { CreateAlertInput } from '@/types/alerts';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,12 +19,16 @@ export async function GET(request: NextRequest) {
     }
 
     const searchParams = request.nextUrl.searchParams;
-    const enabled = searchParams.get('enabled');
+    const active = searchParams.get('active');
+    const triggered = searchParams.get('triggered');
 
     // Build where clause
-    const where: { enabled?: boolean } = {};
-    if (enabled !== null) {
-      where.enabled = enabled === 'true';
+    const where: { active?: boolean; triggered?: boolean } = {};
+    if (active !== null) {
+      where.active = active === 'true';
+    }
+    if (triggered !== null) {
+      where.triggered = triggered === 'true';
     }
 
     const alerts = await prisma.alert.findMany({
@@ -69,42 +73,49 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const body: CreateAlertInput = await request.json();
+    const body = await request.json();
 
-    // Validate input
-    const validationError = validateAlertInput(body);
-    if (validationError) {
+    // Validate input using Zod
+    const validation = alertSchema.safeParse(body);
+    if (!validation.success) {
       return NextResponse.json(
         {
           success: false,
-          error: validationError,
+          error: 'Invalid input',
+          details: validation.error.errors,
           code: 'VALIDATION_ERROR',
         },
         { status: 400 }
       );
     }
 
-    // Create alert with better error handling
+    const data = validation.data;
+
+    // Create alert with new schema
     let alert;
     try {
       alert = await prisma.alert.create({
         data: {
-          type: body.type,
-          coin: body.coin,
-          condition: body.condition || null,
-          value: body.value,
-          side: body.side || null,
+          asset: data.asset.toUpperCase(),
+          baseAsset: data.baseAsset,
+          type: data.type,
+          targetValue: data.targetValue,
+          channels: data.channels,
+          name: data.name || null,
+          notes: data.notes || null,
+          active: true,
+          triggered: false,
+          triggeredCount: 0,
+          // Legacy field compatibility
           enabled: true,
-          browserNotif: body.browserNotif ?? true,
-          emailNotif: body.emailNotif ?? false,
-          webhook: body.webhook || null,
-          triggered: 0,
+          isActive: true,
+          browserNotif: data.channels.includes('push'),
+          emailNotif: data.channels.includes('email'),
         },
       });
     } catch (dbError) {
       console.error('Database error creating alert:', dbError);
       
-      // Check if it's a connection error
       if (dbError instanceof Error) {
         if (dbError.message.includes('connect') || dbError.message.includes('ECONNREFUSED')) {
           return NextResponse.json(
@@ -135,7 +146,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: alert,
-      message: 'Alert created successfully',
+      message: 'Alert created successfully! 🔔',
     });
   } catch (error) {
     console.error('Error creating alert:', error);

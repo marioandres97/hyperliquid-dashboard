@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/database/client';
-import type { UpdateAlertInput } from '@/lib/alerts/types';
+import { updateAlertSchema } from '@/types/alerts';
+import type { UpdateAlertInput } from '@/types/alerts';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,7 +24,20 @@ export async function PUT(
     }
 
     const { id } = await context.params;
-    const body: UpdateAlertInput = await request.json();
+    const body = await request.json();
+
+    // Validate input
+    const validation = updateAlertSchema.safeParse(body);
+    if (!validation.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Invalid input',
+          details: validation.error.errors,
+        },
+        { status: 400 }
+      );
+    }
 
     // Check if alert exists
     const existing = await prisma.alert.findUnique({
@@ -40,21 +54,29 @@ export async function PUT(
       );
     }
 
+    const data = validation.data;
+
     // Update alert
     const alert = await prisma.alert.update({
       where: { id },
       data: {
-        enabled: body.enabled !== undefined ? body.enabled : existing.enabled,
-        value: body.value !== undefined ? body.value : existing.value,
-        browserNotif: body.browserNotif !== undefined ? body.browserNotif : existing.browserNotif,
-        emailNotif: body.emailNotif !== undefined ? body.emailNotif : existing.emailNotif,
-        webhook: body.webhook !== undefined ? body.webhook : existing.webhook,
+        targetValue: data.targetValue !== undefined ? data.targetValue : existing.targetValue,
+        channels: data.channels !== undefined ? data.channels : existing.channels,
+        name: data.name !== undefined ? data.name : existing.name,
+        notes: data.notes !== undefined ? data.notes : existing.notes,
+        active: data.active !== undefined ? data.active : existing.active,
+        // Update legacy fields for compatibility
+        enabled: data.active !== undefined ? data.active : existing.enabled,
+        isActive: data.active !== undefined ? data.active : existing.isActive,
+        browserNotif: data.channels !== undefined ? data.channels.includes('push') : existing.browserNotif,
+        emailNotif: data.channels !== undefined ? data.channels.includes('email') : existing.emailNotif,
       },
     });
 
     return NextResponse.json({
       success: true,
       data: alert,
+      message: 'Alert updated successfully!',
     });
   } catch (error) {
     console.error('Error updating alert:', error);
@@ -110,7 +132,7 @@ export async function DELETE(
 
     return NextResponse.json({
       success: true,
-      message: 'Alert deleted successfully',
+      message: 'Alert deleted successfully!',
     });
   } catch (error) {
     console.error('Error deleting alert:', error);
