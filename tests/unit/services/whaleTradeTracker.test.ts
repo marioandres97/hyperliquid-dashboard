@@ -45,12 +45,12 @@ describe('WhaleTradeTracker', () => {
   describe('getAssetThreshold', () => {
     it('should return BTC threshold for BTC', () => {
       expect(getAssetThreshold('BTC')).toBe(WHALE_THRESHOLDS.BTC);
-      expect(getAssetThreshold('BTC')).toBe(100000);
+      expect(getAssetThreshold('BTC')).toBe(150000);
     });
 
     it('should return ETH threshold for ETH', () => {
       expect(getAssetThreshold('ETH')).toBe(WHALE_THRESHOLDS.ETH);
-      expect(getAssetThreshold('ETH')).toBe(50000);
+      expect(getAssetThreshold('ETH')).toBe(75000);
     });
 
     it('should return SOL threshold for SOL', () => {
@@ -64,8 +64,8 @@ describe('WhaleTradeTracker', () => {
     });
 
     it('should be case insensitive', () => {
-      expect(getAssetThreshold('btc')).toBe(100000);
-      expect(getAssetThreshold('eth')).toBe(50000);
+      expect(getAssetThreshold('btc')).toBe(150000);
+      expect(getAssetThreshold('eth')).toBe(75000);
       expect(getAssetThreshold('sol')).toBe(25000);
     });
   });
@@ -76,46 +76,46 @@ describe('WhaleTradeTracker', () => {
       expect(categorizeWhaleTrace(5000000)).toBe(WhaleTradeCategory.MEGA_WHALE);
     });
 
-    it('should categorize as WHALE for $100k-$1M', () => {
-      expect(categorizeWhaleTrace(100000)).toBe(WhaleTradeCategory.WHALE);
+    it('should categorize as WHALE for $200k-$1M', () => {
+      expect(categorizeWhaleTrace(200000)).toBe(WhaleTradeCategory.WHALE);
       expect(categorizeWhaleTrace(500000)).toBe(WhaleTradeCategory.WHALE);
       expect(categorizeWhaleTrace(999999)).toBe(WhaleTradeCategory.WHALE);
     });
 
-    it('should categorize as INSTITUTION for $50k-$100k', () => {
-      expect(categorizeWhaleTrace(50000)).toBe(WhaleTradeCategory.INSTITUTION);
+    it('should categorize as INSTITUTION for $75k-$200k', () => {
       expect(categorizeWhaleTrace(75000)).toBe(WhaleTradeCategory.INSTITUTION);
-      expect(categorizeWhaleTrace(99999)).toBe(WhaleTradeCategory.INSTITUTION);
+      expect(categorizeWhaleTrace(100000)).toBe(WhaleTradeCategory.INSTITUTION);
+      expect(categorizeWhaleTrace(199999)).toBe(WhaleTradeCategory.INSTITUTION);
     });
 
-    it('should categorize as LARGE for $10k-$50k', () => {
+    it('should categorize as LARGE for $10k-$75k', () => {
       expect(categorizeWhaleTrace(10000)).toBe(WhaleTradeCategory.LARGE);
       expect(categorizeWhaleTrace(25000)).toBe(WhaleTradeCategory.LARGE);
-      expect(categorizeWhaleTrace(49999)).toBe(WhaleTradeCategory.LARGE);
+      expect(categorizeWhaleTrace(74999)).toBe(WhaleTradeCategory.LARGE);
     });
   });
 
   describe('isWhaleTrade', () => {
-    it('should return true for BTC trades >= $100k', () => {
-      expect(isWhaleTrade('BTC', 100000)).toBe(true);
+    it('should return true for BTC trades >= $150k', () => {
       expect(isWhaleTrade('BTC', 150000)).toBe(true);
+      expect(isWhaleTrade('BTC', 200000)).toBe(true);
       expect(isWhaleTrade('BTC', 1000000)).toBe(true);
     });
 
-    it('should return false for BTC trades < $100k', () => {
-      expect(isWhaleTrade('BTC', 99999)).toBe(false);
+    it('should return false for BTC trades < $150k', () => {
+      expect(isWhaleTrade('BTC', 149999)).toBe(false);
+      expect(isWhaleTrade('BTC', 100000)).toBe(false);
       expect(isWhaleTrade('BTC', 50000)).toBe(false);
-      expect(isWhaleTrade('BTC', 10000)).toBe(false);
     });
 
-    it('should return true for ETH trades >= $50k', () => {
-      expect(isWhaleTrade('ETH', 50000)).toBe(true);
+    it('should return true for ETH trades >= $75k', () => {
+      expect(isWhaleTrade('ETH', 75000)).toBe(true);
       expect(isWhaleTrade('ETH', 100000)).toBe(true);
     });
 
-    it('should return false for ETH trades < $50k', () => {
-      expect(isWhaleTrade('ETH', 49999)).toBe(false);
-      expect(isWhaleTrade('ETH', 25000)).toBe(false);
+    it('should return false for ETH trades < $75k', () => {
+      expect(isWhaleTrade('ETH', 74999)).toBe(false);
+      expect(isWhaleTrade('ETH', 50000)).toBe(false);
     });
 
     it('should return true for SOL trades >= $25k', () => {
@@ -148,19 +148,19 @@ describe('WhaleTradeTracker', () => {
       expect(result.isWhaleTrade).toBe(false);
       expect(result.stored).toBe(false);
       expect(result.notionalValue).toBe(50000);
-      expect(result.threshold).toBe(100000);
+      expect(result.threshold).toBe(150000);
       expect(whaleTradeRepository.create).not.toHaveBeenCalled();
     });
 
-    it('should store BTC trades above $100k threshold', async () => {
+    it('should store BTC trades above $150k threshold', async () => {
       const { whaleTradeRepository } = await import('@/lib/database/repositories/whaleTrade.repository');
       const mockTrade = {
         id: 'test-id',
         asset: 'BTC',
         side: 'BUY',
         price: 50000,
-        size: 3,
-        notionalValue: 150000,
+        size: 4,
+        notionalValue: 200000,
         category: WhaleTradeCategory.WHALE,
         exchange: 'Hyperliquid',
         timestamp: new Date(),
@@ -173,21 +173,21 @@ describe('WhaleTradeTracker', () => {
         asset: 'BTC',
         side: 'BUY',
         price: 50000,
-        size: 3,
+        size: 4,
       });
 
       expect(result.isWhaleTrade).toBe(true);
       expect(result.stored).toBe(true);
       expect(result.category).toBe(WhaleTradeCategory.WHALE);
-      expect(result.notionalValue).toBe(150000);
+      expect(result.notionalValue).toBe(200000);
       expect(result.tradeId).toBe('test-id');
       expect(whaleTradeRepository.create).toHaveBeenCalledWith(
         expect.objectContaining({
           asset: 'BTC',
           side: 'BUY',
           price: 50000,
-          size: 3,
-          notionalValue: 150000,
+          size: 4,
+          notionalValue: 200000,
           category: WhaleTradeCategory.WHALE,
         })
       );
@@ -223,15 +223,15 @@ describe('WhaleTradeTracker', () => {
       expect(result.notionalValue).toBe(1250000);
     });
 
-    it('should handle ETH trades with $50k threshold', async () => {
+    it('should handle ETH trades with $75k threshold', async () => {
       const { whaleTradeRepository } = await import('@/lib/database/repositories/whaleTrade.repository');
       const mockTrade = {
         id: 'eth-id',
         asset: 'ETH',
         side: 'SELL',
         price: 2500,
-        size: 25,
-        notionalValue: 62500,
+        size: 35,
+        notionalValue: 87500,
         category: WhaleTradeCategory.INSTITUTION,
         exchange: 'Hyperliquid',
         timestamp: new Date(),
@@ -244,13 +244,13 @@ describe('WhaleTradeTracker', () => {
         asset: 'ETH',
         side: 'SELL',
         price: 2500,
-        size: 25,
+        size: 35,
       });
 
       expect(result.isWhaleTrade).toBe(true);
       expect(result.stored).toBe(true);
       expect(result.category).toBe(WhaleTradeCategory.INSTITUTION);
-      expect(result.threshold).toBe(50000);
+      expect(result.threshold).toBe(75000);
     });
 
     it('should include optional metadata', async () => {
@@ -299,9 +299,9 @@ describe('WhaleTradeTracker', () => {
       const { whaleTradeRepository } = await import('@/lib/database/repositories/whaleTrade.repository');
       
       const trades = [
-        { asset: 'BTC', side: 'BUY' as const, price: 50000, size: 3 },
-        { asset: 'ETH', side: 'SELL' as const, price: 2500, size: 25 },
-        { asset: 'BTC', side: 'BUY' as const, price: 50000, size: 1 }, // Below threshold
+        { asset: 'BTC', side: 'BUY' as const, price: 50000, size: 4 },  // 200k - WHALE
+        { asset: 'ETH', side: 'SELL' as const, price: 2500, size: 35 }, // 87.5k - INSTITUTION
+        { asset: 'BTC', side: 'BUY' as const, price: 50000, size: 1 }, // 50k - Below threshold
       ];
 
       (whaleTradeRepository.create as any).mockResolvedValue({
@@ -309,8 +309,8 @@ describe('WhaleTradeTracker', () => {
         asset: 'BTC',
         side: 'BUY',
         price: 50000,
-        size: 3,
-        notionalValue: 150000,
+        size: 4,
+        notionalValue: 200000,
         category: WhaleTradeCategory.WHALE,
         exchange: 'Hyperliquid',
         timestamp: new Date(),

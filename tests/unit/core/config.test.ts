@@ -117,6 +117,13 @@ describe('Config', () => {
           rateLimitEnabled: 'true',
           analyticsEnabled: 'true',
         },
+        whaleTracking: {
+          enabled: 'true',
+          autoStart: 'true',
+          monitoredAssets: ['BTC', 'ETH'],
+          batchInterval: '10000',
+          retentionDays: '30',
+        },
         sentry: {
           dsn: 'https://example.com',
           environment: 'test',
@@ -141,6 +148,7 @@ describe('Config', () => {
         rateLimit: {},
         logging: {},
         features: {},
+        whaleTracking: {},
         sentry: {},
       };
 
