@@ -223,7 +223,7 @@ model HealthMetric {
 // Trade model for PnL tracking
 model Trade {
   id          String   @id @default(cuid())
-  userId      String   @default("default-user") // For now, use default
+  userId      String   @default("default-user") // For now, use default  
   
   asset       String   // ANY crypto asset
   baseAsset   String   @default("USDT") // "USDT" | "USDC" | "USD" | "BTC" | "ETH"
@@ -267,4 +267,32 @@ model NotificationSettings {
   updatedAt       DateTime @updatedAt
   
   @@map("notification_settings")
+}
+
+// Whale Trade tracking - Monitor large institutional trades
+model WhaleTrade {
+  id          String   @id @default(cuid())
+  
+  // Trade data from Hyperliquid
+  coin        String   // BTC, ETH, SOL, etc.
+  side        String   // BUY or SELL
+  price       Decimal  @db.Decimal(20, 8)
+  size        Decimal  @db.Decimal(20, 8)
+  usdValue    Decimal  @db.Decimal(20, 2)
+  
+  // Metadata
+  timestamp   BigInt   // Hyperliquid timestamp
+  tradeId     BigInt   @unique
+  
+  // Classification
+  isWhale     Boolean  @default(true)
+  category    String   // MEGA_WHALE | WHALE | INSTITUTION | LARGE
+  
+  createdAt   DateTime @default(now())
+  
+  @@index([coin, timestamp])
+  @@index([usdValue])
+  @@index([category])
+  @@index([createdAt])
+  @@map("whale_trades")
 }
