@@ -268,3 +268,27 @@ model NotificationSettings {
   
   @@map("notification_settings")
 }
+
+// Whale trade tracking for large trades above thresholds
+model WhaleTrade {
+  id            String   @id @default(cuid())
+  asset         String   // BTC, ETH, SOL, etc.
+  side          String   // BUY or SELL
+  price         Float
+  size          Float    // Amount in asset
+  notionalValue Float    // USD value of trade
+  category      String   // MEGA_WHALE, WHALE, INSTITUTION, LARGE
+  exchange      String   @default("Hyperliquid")
+  tradeId       String?  // External trade ID if available
+  timestamp     DateTime @default(now())
+  priceImpact   Float?   // Price impact percentage
+  metadata      Json?    // Additional metadata
+  
+  createdAt     DateTime @default(now())
+  
+  @@index([asset])
+  @@index([category])
+  @@index([timestamp])
+  @@index([notionalValue])
+  @@map("whale_trades")
+}

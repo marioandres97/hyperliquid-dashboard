@@ -5,6 +5,7 @@ import { useOptimizedTrades } from '@/lib/hooks/shared/useOptimizedWebSocket';
 import type { Trade } from '@/lib/hyperliquid/WebSocketManager';
 import type { LargeOrder, LargeOrderFilters, SizeFilter } from '@/lib/large-orders/types';
 import { tradeToLargeOrder, isLargeOrder, filterLargeOrders } from '@/lib/large-orders/types';
+import { whaleTradeTracker } from '@/lib/services/whaleTradeTracker';
 
 const MAX_ORDERS = 100;
 const DEFAULT_MIN_SIZE: SizeFilter = 100000;
@@ -26,6 +27,19 @@ export function useLargeOrders(
         // Only add if it's a large order
         if (isLargeOrder(order.usdValue, minSize)) {
           newLargeOrders.push(order);
+          
+          // Track whale trades in database (async, no await)
+          whaleTradeTracker.trackTrade({
+            asset: order.coin,
+            side: order.side,
+            price: order.price,
+            size: order.size,
+            timestamp: new Date(order.timestamp),
+            tradeId: order.id,
+            priceImpact: order.priceImpact,
+          }).catch(error => {
+            console.error('Failed to track whale trade:', error);
+          });
         }
       });
 
@@ -79,6 +93,19 @@ export function useMultiCoinLargeOrders(
           
           if (isLargeOrder(order.usdValue, minSize)) {
             newLargeOrders.push(order);
+            
+            // Track whale trades in database (async, no await)
+            whaleTradeTracker.trackTrade({
+              asset: order.coin,
+              side: order.side,
+              price: order.price,
+              size: order.size,
+              timestamp: new Date(order.timestamp),
+              tradeId: order.id,
+              priceImpact: order.priceImpact,
+            }).catch(error => {
+              console.error('Failed to track whale trade:', error);
+            });
           }
         });
 
