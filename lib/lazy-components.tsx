@@ -17,7 +17,7 @@ export const LazyEconomicCalendar = dynamic(
 );
 
 export const LazyLargeOrdersFeed = dynamic(
-  () => import('@/components/large-orders/LargeOrdersFeed').then(mod => ({ default: mod.LargeOrdersFeed })),
+  () => import('@/components/large-orders/MinimalLargeOrdersFeed').then(mod => ({ default: mod.MinimalLargeOrdersFeed })),
   {
     loading: () => <OrdersFeedSkeleton />,
     ssr: false,
