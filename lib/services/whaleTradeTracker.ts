@@ -5,22 +5,11 @@
  */
 import { whaleTradeRepository, WhaleTradeCategory, CreateWhaleTradeInput } from '@/lib/database/repositories/whaleTrade.repository';
 import { log } from '@/lib/core/logger';
+import { WHALE_THRESHOLDS, CATEGORY_THRESHOLDS, TRACKER_CONFIG } from '@/config/whale-trades.config';
+import { incrementTrackedCount, incrementErrorCount, getTrackerState } from '@/lib/services/whaleTracker.state';
 
-// Asset-specific thresholds (USD)
-export const WHALE_THRESHOLDS = {
-  BTC: 100000,  // $100k
-  ETH: 50000,   // $50k
-  SOL: 25000,   // $25k
-  DEFAULT: 10000, // $10k for all other assets
-} as const;
-
-// Category thresholds (USD)
-export const CATEGORY_THRESHOLDS = {
-  MEGA_WHALE: 1000000,   // $1M+
-  WHALE: 100000,         // $100k+
-  INSTITUTION: 50000,    // $50k+
-  LARGE: 10000,          // $10k+
-} as const;
+// Export thresholds from config
+export { WHALE_THRESHOLDS, CATEGORY_THRESHOLDS } from '@/config/whale-trades.config';
 
 export interface TradeData {
   asset: string;
@@ -77,6 +66,17 @@ export function isWhaleTrade(asset: string, notionalValue: number): boolean {
  * Process and track a trade
  */
 export async function trackTrade(tradeData: TradeData): Promise<WhaleTradeResult> {
+  // Check if tracker is running
+  const state = getTrackerState();
+  if (!state.enabled || !state.running) {
+    return {
+      isWhaleTrade: false,
+      notionalValue: tradeData.price * tradeData.size,
+      threshold: getAssetThreshold(tradeData.asset),
+      stored: false,
+    };
+  }
+
   const notionalValue = tradeData.price * tradeData.size;
   const threshold = getAssetThreshold(tradeData.asset);
   
@@ -111,6 +111,9 @@ export async function trackTrade(tradeData: TradeData): Promise<WhaleTradeResult
     // Store whale trade in database
     const storedTrade = await whaleTradeRepository.create(whaleTradeData);
     
+    // Increment tracked count
+    incrementTrackedCount();
+    
     log.info('Whale trade tracked', {
       asset: tradeData.asset,
       category,
@@ -128,6 +131,8 @@ export async function trackTrade(tradeData: TradeData): Promise<WhaleTradeResult
       tradeId: storedTrade.id,
     };
   } catch (error) {
+    // Increment error count
+    incrementErrorCount();
     log.error('Failed to store whale trade', error);
     
     return {
