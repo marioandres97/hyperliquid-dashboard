@@ -61,6 +61,14 @@ const configSchema = z.object({
     analyticsEnabled: z.coerce.boolean().default(true),
   }),
   
+  whaleTracking: z.object({
+    enabled: z.coerce.boolean().default(true),
+    autoStart: z.coerce.boolean().default(true),
+    monitoredAssets: z.array(z.string()).default(['BTC', 'ETH']),
+    batchInterval: z.coerce.number().int().positive().default(10000), // 10 seconds
+    retentionDays: z.coerce.number().int().positive().default(30),
+  }),
+  
   sentry: z.object({
     dsn: z.string().optional(),
     environment: z.string().optional(),
@@ -127,6 +135,14 @@ function parseConfig(): Config {
     features: {
       rateLimitEnabled: process.env.RATE_LIMIT_ENABLED || 'true',
       analyticsEnabled: process.env.ANALYTICS_ENABLED || 'true',
+    },
+    
+    whaleTracking: {
+      enabled: process.env.WHALE_TRACKING_ENABLED || 'true',
+      autoStart: process.env.WHALE_TRACKING_AUTO_START || 'true',
+      monitoredAssets: process.env.WHALE_TRACKING_ASSETS?.split(',') || ['BTC', 'ETH'],
+      batchInterval: process.env.WHALE_TRACKING_BATCH_INTERVAL || '10000',
+      retentionDays: process.env.WHALE_TRACKING_RETENTION_DAYS || '30',
     },
     
     sentry: {

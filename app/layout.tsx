@@ -7,6 +7,7 @@ import BottomNav from "@/components/mobile/BottomNav";
 import InstallPrompt from "@/components/mobile/InstallPrompt";
 import StructuredData from "@/components/StructuredData";
 import SWRProvider from "@/components/SWRProvider";
+import { WhaleTrackerMonitor } from "@/components/whale-tracking/WhaleTrackerMonitor";
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://venomouz-insightz.com'),
@@ -116,6 +117,7 @@ export default function RootLayout({
           <SWRProvider>
             <QueryProvider>
               <ToastProvider>
+                <WhaleTrackerMonitor />
                 {children}
                 <BottomNav />
                 <InstallPrompt />

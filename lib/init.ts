@@ -14,6 +14,7 @@ import {
   retryDatabaseConnection,
   verifyDatabaseConfig 
 } from '@/lib/database/healthCheck';
+import { whaleTrackerService } from '@/lib/services/whale-tracker.service';
 
 /**
  * Initialize application services
@@ -61,6 +62,20 @@ export async function initializeApp(): Promise<void> {
       log.info('Cache warming disabled');
     }
 
+    // Start whale tracker if enabled and auto-start is configured
+    if (config.whaleTracking?.enabled && config.whaleTracking?.autoStart) {
+      log.info('Whale tracking enabled, starting whale tracker service');
+      try {
+        await whaleTrackerService.start();
+        log.info('Whale tracker service started successfully');
+      } catch (error) {
+        log.error('Failed to start whale tracker service', error);
+        log.warn('Application will continue but whale tracking will be unavailable');
+      }
+    } else {
+      log.info('Whale tracking auto-start disabled');
+    }
+
     log.info('Application services initialized successfully');
   } catch (error) {
     log.error('Failed to initialize application services', error);
@@ -76,6 +91,12 @@ export async function cleanupApp(): Promise<void> {
   log.info('Cleaning up application services');
 
   try {
+    // Stop whale tracker service
+    if (whaleTrackerService.isServiceRunning()) {
+      log.info('Stopping whale tracker service');
+      await whaleTrackerService.stop();
+    }
+
     // Stop cache warming
     cacheWarmer.stopScheduling();
 

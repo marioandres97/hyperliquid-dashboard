@@ -10,8 +10,8 @@ import { WhaleThresholds, CategoryThresholds, WhaleTradeTrackerConfig } from '@/
  * Asset-specific thresholds (minimum USD value to qualify as whale trade)
  */
 export const WHALE_THRESHOLDS: WhaleThresholds = {
-  BTC: 100000,  // $100k minimum for Bitcoin
-  ETH: 50000,   // $50k minimum for Ethereum
+  BTC: 150000,  // $150k minimum for Bitcoin
+  ETH: 75000,   // $75k minimum for Ethereum
   SOL: 25000,   // $25k minimum for Solana
   DEFAULT: 10000, // $10k minimum for all other assets
 };
@@ -21,9 +21,9 @@ export const WHALE_THRESHOLDS: WhaleThresholds = {
  */
 export const CATEGORY_THRESHOLDS: CategoryThresholds = {
   MEGA_WHALE: 1000000,   // $1M+ trades
-  WHALE: 100000,         // $100k+ trades
-  INSTITUTION: 50000,    // $50k+ trades
-  LARGE: 10000,          // $10k+ trades
+  WHALE: 200000,         // $200k+ trades
+  INSTITUTION: 75000,    // $75k+ trades
+  LARGE: 10000,          // $10k+ trades (falls back to asset threshold)
 };
 
 /**
@@ -33,7 +33,7 @@ export const TRACKER_CONFIG: WhaleTradeTrackerConfig = {
   enabled: true,         // Enable whale trade tracking
   autoStart: true,       // Auto-start tracking on initialization
   batchSize: 10,         // Number of trades to batch before database write
-  flushInterval: 5000,   // Flush interval in milliseconds (5 seconds)
+  flushInterval: 10000,  // Flush interval in milliseconds (10 seconds)
   retentionDays: 30,     // Number of days to retain whale trades
 };
 

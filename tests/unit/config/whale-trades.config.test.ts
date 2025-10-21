@@ -12,8 +12,8 @@ import {
 describe('Whale Trades Config', () => {
   describe('WHALE_THRESHOLDS', () => {
     it('should have correct threshold values', () => {
-      expect(WHALE_THRESHOLDS.BTC).toBe(100000);
-      expect(WHALE_THRESHOLDS.ETH).toBe(50000);
+      expect(WHALE_THRESHOLDS.BTC).toBe(150000);
+      expect(WHALE_THRESHOLDS.ETH).toBe(75000);
       expect(WHALE_THRESHOLDS.SOL).toBe(25000);
       expect(WHALE_THRESHOLDS.DEFAULT).toBe(10000);
     });
@@ -29,8 +29,8 @@ describe('Whale Trades Config', () => {
   describe('CATEGORY_THRESHOLDS', () => {
     it('should have correct category threshold values', () => {
       expect(CATEGORY_THRESHOLDS.MEGA_WHALE).toBe(1000000);
-      expect(CATEGORY_THRESHOLDS.WHALE).toBe(100000);
-      expect(CATEGORY_THRESHOLDS.INSTITUTION).toBe(50000);
+      expect(CATEGORY_THRESHOLDS.WHALE).toBe(200000);
+      expect(CATEGORY_THRESHOLDS.INSTITUTION).toBe(75000);
       expect(CATEGORY_THRESHOLDS.LARGE).toBe(10000);
     });
 
@@ -53,7 +53,7 @@ describe('Whale Trades Config', () => {
       expect(TRACKER_CONFIG.enabled).toBe(true);
       expect(TRACKER_CONFIG.autoStart).toBe(true);
       expect(TRACKER_CONFIG.batchSize).toBe(10);
-      expect(TRACKER_CONFIG.flushInterval).toBe(5000);
+      expect(TRACKER_CONFIG.flushInterval).toBe(10000);
       expect(TRACKER_CONFIG.retentionDays).toBe(30);
     });
 
@@ -93,13 +93,13 @@ describe('Whale Trades Config', () => {
 
   describe('getAssetThreshold', () => {
     it('should return correct threshold for BTC', () => {
-      expect(getAssetThreshold('BTC')).toBe(100000);
-      expect(getAssetThreshold('btc')).toBe(100000);
+      expect(getAssetThreshold('BTC')).toBe(150000);
+      expect(getAssetThreshold('btc')).toBe(150000);
     });
 
     it('should return correct threshold for ETH', () => {
-      expect(getAssetThreshold('ETH')).toBe(50000);
-      expect(getAssetThreshold('eth')).toBe(50000);
+      expect(getAssetThreshold('ETH')).toBe(75000);
+      expect(getAssetThreshold('eth')).toBe(75000);
     });
 
     it('should return correct threshold for SOL', () => {
@@ -188,8 +188,9 @@ describe('Whale Trades Config', () => {
       expect(CATEGORY_THRESHOLDS.LARGE).toBe(WHALE_THRESHOLDS.DEFAULT);
     });
 
-    it('should have WHALE category threshold equal to BTC asset threshold', () => {
-      expect(CATEGORY_THRESHOLDS.WHALE).toBe(WHALE_THRESHOLDS.BTC);
+    it('should have WHALE category threshold greater than or equal to BTC asset threshold', () => {
+      // With new thresholds: BTC=$150k, WHALE=$200k, this is expected
+      expect(CATEGORY_THRESHOLDS.WHALE).toBeGreaterThanOrEqual(WHALE_THRESHOLDS.BTC);
     });
   });
 });
